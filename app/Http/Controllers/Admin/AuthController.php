@@ -42,13 +42,23 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Đăng xuất thành công'
-        ]);
+        try {
+            Auth::logout();
+            
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đăng xuất thành công',
+                'redirect' => route('admin.login')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi đăng xuất',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 } 

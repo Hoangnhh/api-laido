@@ -1,0 +1,177 @@
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Header styles */
+.admin-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 280px;
+    height: 70px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+    z-index: 100;
+}
+
+.admin-header.collapsed {
+    left: 80px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 30px;
+}
+
+.toggle-menu {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    color: #666;
+    font-size: 20px;
+}
+
+.header-title {
+    margin-left: 20px;
+    font-size: 20px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Sidebar styles */
+.admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    background: #2c3e50;
+    transition: all 0.3s;
+    z-index: 101;
+}
+
+.admin-sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.menu-item.active {
+    background: rgba(255,255,255,0.15);
+}
+
+.menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #3498db;
+}
+
+.menu-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.menu-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sidebar-logo svg {
+    width: 24px;
+    height: 24px;
+    color: #2c3e50;
+}
+
+.menu-text {
+    font-size: 15px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: all 0.3s;
+}
+
+.collapsed .menu-text {
+    opacity: 0;
+    width: 0;
+}
+
+/* Main content area */
+.admin-main {
+    flex: 1;
+    margin-left: 280px;
+    margin-top: 70px;
+    padding: 30px;
+    background: #f5f6fa;
+    transition: all 0.3s;
+}
+
+.admin-main.collapsed {
+    margin-left: 80px;
+}
+
+/* Divider */
+.menu-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 15px 0;
+}
+
+/* Thêm hiệu ứng hover cho icon */
+.menu-item:hover .menu-icon {
+    transform: translateX(3px);
+    transition: transform 0.3s ease;
+}
+
+/* Icon trong menu item active */
+.menu-item.active .menu-icon {
+    color: #3498db;
+}

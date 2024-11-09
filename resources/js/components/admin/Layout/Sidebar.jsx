@@ -1,148 +1,94 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    Drawer,
-    List,
-    Divider,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Avatar,
-    Box,
-} from '@mui/material';
-import {
-    Dashboard as DashboardIcon,
-    People as PeopleIcon,
-    BarChart as BarChartIcon,
-    Settings as SettingsIcon,
-    ExitToApp as LogoutIcon,
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+    faGauge,
+    faUsers,
+    faChartLine,
+    faGear,
+    faRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
-const drawerWidth = 280;
-
-const DrawerStyled = styled(Drawer, {
-    shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-        position: 'relative',
-        whiteSpace: 'nowrap',
-        width: drawerWidth,
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-        boxSizing: 'border-box',
-        ...(!open && {
-            overflowX: 'hidden',
-            transition: theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-            }),
-            width: theme.spacing(7),
-            [theme.breakpoints.up('sm')]: {
-                width: theme.spacing(9),
-            },
-        }),
-    },
-}));
-
-const MenuItemStyled = styled(ListItem)(({ theme, active }) => ({
-    margin: '8px 16px',
-    borderRadius: theme.shape.borderRadius,
-    '&:hover': {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    ...(active && {
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    }),
-}));
-
-const Sidebar = ({ open }) => {
+const Sidebar = ({ collapsed }) => {
     const location = window.location.pathname;
     
     const menuItems = [
         { 
             text: 'Dashboard', 
-            icon: <DashboardIcon />, 
-            path: '/admin/dashboard',
-            color: '#fff'
+            icon: faGauge,
+            path: '/admin/dashboard'
         },
         { 
             text: 'Users', 
-            icon: <PeopleIcon />, 
-            path: '/admin/users',
-            color: '#fff'
+            icon: faUsers,
+            path: '/admin/users'
         },
         { 
             text: 'Reports', 
-            icon: <BarChartIcon />, 
-            path: '/admin/reports',
-            color: '#fff'
+            icon: faChartLine,
+            path: '/admin/reports'
         },
         { 
             text: 'Settings', 
-            icon: <SettingsIcon />, 
-            path: '/admin/settings',
-            color: '#fff'
+            icon: faGear,
+            path: '/admin/settings'
         },
     ];
 
-    const handleLogout = async () => {
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        
         try {
-            const response = await fetch('/admin/logout', {
-                method: 'POST',
+            const response = await axios.post('/admin/logout', {}, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                credentials: 'include',
+                    'Accept': 'application/json'
+                }
             });
 
-            if (response.ok) {
-                window.location.href = '/admin/login';
+            if (response.data.status === 'success') {
+                localStorage.clear();
+                window.location.replace(response.data.redirect);
             }
         } catch (error) {
             console.error('Logout error:', error);
+            alert('Có lỗi xảy ra khi đăng xuất');
         }
     };
 
     return (
-        <DrawerStyled variant="permanent" open={open}>
-            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Avatar 
-                    sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        bgcolor: 'primary.light',
-                        mb: 1
-                    }}
-                >
-                    A
-                </Avatar>
-            </Box>
-            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
-            <List sx={{ pt: 2 }}>
+        <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+            <div className="sidebar-header">
+                <div className="sidebar-logo">
+                    <FontAwesomeIcon icon={faGauge} />
+                </div>
+            </div>
+            <nav className="sidebar-menu">
                 {menuItems.map((item) => (
-                    <MenuItemStyled
-                        button
+                    <a
                         key={item.text}
-                        active={location === item.path}
-                        onClick={() => {
-                            window.location.href = item.path;
-                        }}
+                        href={item.path}
+                        className={`menu-item ${location === item.path ? 'active' : ''}`}
                     >
-                        <ListItemIcon sx={{ color: item.color, minWidth: 40 }}>
-                            {item.icon}
-                        </ListItemIcon>
-                        <ListItemText 
-                            primary={item.text} 
-                        />
-                    </MenuItemStyled>
+                        <span className="menu-icon">
+                            <FontAwesomeIcon icon={item.icon} />
+                        </span>
+                        <span className="menu-text">{item.text}</span>
+                    </a>
                 ))}
-            </List>
-        </DrawerStyled>
+                <div className="menu-divider"></div>
+                <a 
+                    href="#" 
+                    className="menu-item" 
+                    onClick={handleLogout}
+                >
+                    <span className="menu-icon">
+                        <FontAwesomeIcon icon={faRightFromBracket} />
+                    </span>
+                    <span className="menu-text">Logout</span>
+                </a>
+            </nav>
+        </aside>
     );
 };
 

@@ -1,35 +1,23 @@
 import React from 'react';
-import { Box } from '@mui/material';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import '../../../../css/admin.css';
 
 const AdminLayout = ({ children }) => {
-    const [open, setOpen] = React.useState(true);
+    const [collapsed, setCollapsed] = React.useState(false);
 
-    const toggleDrawer = () => {
-        setOpen(!open);
+    const toggleSidebar = () => {
+        setCollapsed(!collapsed);
     };
 
     return (
-        <Box sx={{ display: 'flex' }}>
-            <Header open={open} toggleDrawer={toggleDrawer} />
-            <Sidebar open={open} />
-            <Box
-                component="main"
-                sx={{
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'light'
-                            ? theme.palette.grey[100]
-                            : theme.palette.grey[900],
-                    flexGrow: 1,
-                    height: '100vh',
-                    overflow: 'auto',
-                    pt: 8
-                }}
-            >
+        <div className="admin-layout">
+            <Header collapsed={collapsed} toggleSidebar={toggleSidebar} />
+            <Sidebar collapsed={collapsed} />
+            <main className={`admin-main ${collapsed ? 'collapsed' : ''}`}>
                 {children}
-            </Box>
-        </Box>
+            </main>
+        </div>
     );
 };
 

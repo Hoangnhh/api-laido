@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\AuthController;
 use Illuminate\Support\Facades\Auth;
 
 Route::prefix('admin')->group(function () {
-    Route::get('/login', function () {
+    Route::get('/', function () {
         if (Auth::check()) {
             return redirect()->route('admin.dashboard');
         }
