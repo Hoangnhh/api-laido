@@ -18,13 +18,17 @@ import {
     AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import '../../../css/login-bg.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',
         password: ''
     });
+    const [error, setError] = useState('');
 
     useEffect(() => {
         // Tạo animation cho background
@@ -47,9 +51,33 @@ const Login = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        setError('');
+        
+        try {
+            const response = await fetch('/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                window.location.href = data.redirect;
+            } else {
+                setError(typeof data.message === 'string' ? data.message : 'Có lỗi xảy ra khi đăng nhập');
+            }
+        } catch (error) {
+            setError('Có lỗi xảy ra khi đăng nhập');
+            console.error('Login error:', error);
+        }
     };
 
     return (
@@ -113,16 +141,21 @@ const Login = () => {
                         </Box>
                         
                         <Box component="form" onSubmit={handleSubmit}>
+                            {error && (
+                                <Typography color="error" sx={{ mb: 2, textAlign: 'center' }}>
+                                    {error}
+                                </Typography>
+                            )}
                             <TextField
                                 margin="normal"
                                 required
                                 fullWidth
-                                id="email"
-                                label="Email"
-                                name="email"
-                                autoComplete="email"
+                                id="username"
+                                label="Tên đăng nhập"
+                                name="username"
+                                autoComplete="username"
                                 autoFocus
-                                value={formData.email}
+                                value={formData.username}
                                 onChange={handleChange}
                                 InputProps={{
                                     startAdornment: (
