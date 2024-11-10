@@ -1,29 +1,48 @@
 .add-shift-container {
-    padding: 20px;
+    padding: 24px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 64px);
 }
 
 .shift-header {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.shift-header h1 {
+    font-size: 24px;
+    color: #1a1a1a;
+    margin: 0;
 }
 
 .shift-content {
     display: flex;
-    gap: 20px;
+    gap: 24px;
 }
 
 .staff-selection {
     flex: 2;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
 }
 
 .search-section {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
     margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
 }
 
-.search-section input {
-    flex: 1;
+.search-section .group-select {
+    width: 200px;
+}
+
+.search-section .search-input {
+    width: 240px;
 }
 
 .filter-buttons {
@@ -45,54 +64,76 @@
 
 .staff-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
 }
 
 .staff-card {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.staff-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
 }
 
 .staff-info {
     display: flex;
     flex-direction: column;
+    gap: 4px;
 }
 
 .staff-name {
-    font-weight: bold;
+    font-weight: 500;
+    color: #2c3e50;
 }
 
 .staff-code {
+    font-size: 13px;
     color: #666;
-    font-size: 0.9em;
 }
 
 .assignment-section {
     flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
 }
 
 .selected-staff {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
-.selected-staff select,
-.selected-staff input,
-.selected-staff textarea {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.selected-staff h3 {
+    font-size: 16px;
+    color: #1a1a1a;
+    margin: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
 }
 
 .note-input {
     min-height: 100px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     resize: vertical;
+    font-family: inherit;
+}
+
+.note-input:focus {
+    outline: none;
+    border-color: #2196f3;
 }
 
 .group-select {
@@ -102,4 +143,120 @@
     border-radius: 4px;
     margin-bottom: 10px;
     margin-left: 10px;
-} 
+}
+
+.staff-list-container {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 16px;
+    height: calc(100vh - 280px);
+    overflow-y: auto;
+}
+
+.staff-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.staff-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.staff-list-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.staff-list-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.staff-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2196f3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.staff-card input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #2196f3;
+}
+
+.MuiFormControl-root {
+    margin: 0 !important;
+}
+
+.MuiInputBase-root {
+    background-color: white !important;
+}
+
+.select-all-btn {
+    padding: 8px 16px;
+    border: 1px solid #2196f3;
+    border-radius: 4px;
+    background: white;
+    color: #2196f3;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.select-all-btn:hover {
+    background: #f5f9ff;
+}
+
+.select-all-btn.active {
+    background: #2196f3;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .search-section {
+        gap: 10px;
+    }
+    
+    .select-all-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Style cho multiple select */
+.MuiSelect-multiple {
+    min-height: 40px !important;
+}
+
+.MuiMenuItem-root {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.MuiMenuItem-root input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Điều chỉnh khoảng cách giữa các fields */
+.selected-staff .MuiFormControl-root {
+    margin-bottom: 16px !important;
+}

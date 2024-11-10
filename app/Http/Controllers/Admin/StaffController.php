@@ -162,4 +162,24 @@ class StaffController extends Controller
             ], 500);
         }
     }
+
+    public function getStaffsByGroup($groupId)
+    {
+        try {
+            $staffs = Staff::where('group_id', $groupId)->where('status', 'ACTIVE')
+                          ->select('id', 'name', 'code', 'group_id')
+                          ->orderBy('id')
+                          ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $staffs
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy danh sách nhân viên'
+            ], 500);
+        }
+    }
 } 

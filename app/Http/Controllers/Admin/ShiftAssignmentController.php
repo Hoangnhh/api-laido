@@ -11,9 +11,10 @@ class ShiftAssignmentController extends Controller
 {
     public function getData()
     {
-        $gates = Gate::select('id', 'name')->orderBy('id')->get();
+        $gates = Gate::select('id', 'name')->where('status', 'ACTIVE')->orderBy('id')->get();
         $staffGroups = StaffGroup::select('id', 'name')
                                 ->withCount('staffs')
+                                ->where('status', 'ACTIVE')
                                 ->orderBy('name')
                                 ->get();
 

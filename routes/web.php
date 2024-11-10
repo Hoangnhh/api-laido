@@ -84,4 +84,5 @@ Route::prefix('api/admin')->group(function () {
     Route::apiResource('staff-groups', StaffGroupController::class);
     Route::apiResource('gates', GateController::class);
     Route::get('/shift-assignments-data', [ShiftAssignmentController::class, 'getData']);
+    Route::get('/staffs-by-group/{groupId}', [StaffController::class, 'getStaffsByGroup']);
 });
