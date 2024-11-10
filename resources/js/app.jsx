@@ -13,6 +13,7 @@ import ShiftAssignments from './components/admin/ShiftAssignments';
 import Tickets from './components/admin/Tickets';
 import Settings from './components/admin/Settings';
 import PaymentReport from './components/admin/reports/PaymentReport';
+import AddShiftGate from './components/admin/AddShiftGate';
 const theme = createTheme({
     palette: {
         primary: {
@@ -43,6 +44,8 @@ const App = () => {
                 return <StaffGroup />;
             case '/admin/shift-assignments':
                 return <ShiftAssignments />;
+            case '/admin/add-shift-gate':
+                return <AddShiftGate />;
             case '/admin/tickets':
                 return <Tickets />;
             case '/admin/settings':
@@ -65,8 +68,8 @@ const App = () => {
 
 if (document.getElementById('app')) {
     ReactDOM.createRoot(document.getElementById('app')).render(
-        <React.StrictMode>
+        // <React.StrictMode>
             <App />
-        </React.StrictMode>
+        // </React.StrictMode>
     );
 }

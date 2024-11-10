@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffGroupController;
 use App\Http\Controllers\Admin\GateController;
+use App\Http\Controllers\Admin\ShiftAssignmentController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -43,6 +44,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.shift-assignments');
         })->name('admin.shift-assignments');
 
+        Route::get('/add-shift-gate', function () {
+            return view('admin.add-shift-gate');
+        })->name('admin.add-shift-gate');
+
         Route::get('/tickets', function () {
             return view('admin.tickets');
         })->name('admin.tickets');
@@ -78,4 +83,5 @@ Route::prefix('api/admin')->group(function () {
     Route::apiResource('staffs', StaffController::class);
     Route::apiResource('staff-groups', StaffGroupController::class);
     Route::apiResource('gates', GateController::class);
+    Route::get('/shift-assignments-data', [ShiftAssignmentController::class, 'getData']);
 });

@@ -14,7 +14,7 @@ class StaffGroup extends Model
         'status'
     ];
 
-    public function staff(): HasMany
+    public function staffs(): HasMany
     {
         return $this->hasMany(Staff::class, 'group_id');
     }

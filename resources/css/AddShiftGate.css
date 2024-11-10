@@ -1,0 +1,105 @@
+.add-shift-container {
+    padding: 20px;
+}
+
+.shift-header {
+    margin-bottom: 20px;
+}
+
+.shift-content {
+    display: flex;
+    gap: 20px;
+}
+
+.staff-selection {
+    flex: 2;
+}
+
+.search-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-section input {
+    flex: 1;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+.filter-btn.chon {
+    background: #f0f0f0;
+}
+
+.staff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.staff-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.staff-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.staff-name {
+    font-weight: bold;
+}
+
+.staff-code {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.assignment-section {
+    flex: 1;
+}
+
+.selected-staff {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.selected-staff select,
+.selected-staff input,
+.selected-staff textarea {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.note-input {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.group-select {
+    width: 200px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+} 

@@ -171,6 +171,21 @@ const Sidebar = () => {
         }));
     };
 
+    // Thêm hàm tạo stars
+    const renderStars = () => {
+        const stars = [];
+        for (let i = 0; i < 20; i++) {
+            const style = {
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                '--duration': `${1 + Math.random() * 3}s`,
+                '--delay': `${Math.random() * 2}s`
+            };
+            stars.push(<div key={i} className="star" style={style} />);
+        }
+        return stars;
+    };
+
     return (
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-header">
