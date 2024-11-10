@@ -6,6 +6,7 @@ import Dashboard from './components/admin/Dashboard';
 import Login from './components/auth/Login';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import UserManager from './components/admin/UserManager';
+import StaffManager from './components/admin/StaffManager';
 
 const theme = createTheme({
     palette: {
@@ -29,6 +30,8 @@ const App = () => {
                 return <Dashboard />;
             case '/admin/users':
                 return <UserManager />;
+            case '/admin/staff':
+                return <StaffManager />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

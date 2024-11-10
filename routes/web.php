@@ -23,6 +23,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/users', function () {
             return view('admin.user-manager');
         })->name('admin.user-manager');
+
+        Route::get('/staff', function () {
+            return view('admin.staff-manager');
+        })->name('admin.staff-manager');
         
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
     });
