@@ -3,6 +3,7 @@ CREATE TABLE `admin-laido`.`staff` (
   `type` VARCHAR(45) NOT NULL DEFAULT 'DRIVER',
   `group_id` INT NOT NULL,
   `code` VARCHAR(45) NOT NULL,
+  `phone` VARCHAR(45) NULL,
   `name` VARCHAR(200) NOT NULL,
   `username` VARCHAR(45) NOT NULL,
   `password` TEXT NOT NULL,

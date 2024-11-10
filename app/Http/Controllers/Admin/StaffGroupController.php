@@ -17,7 +17,7 @@ class StaffGroupController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|unique:staff_groups',
+            'name' => 'required|unique:staff_group',
             'status' => 'required|in:ACTIVE,INACTIVE'
         ]);
 
@@ -28,7 +28,7 @@ class StaffGroupController extends Controller
     public function update(Request $request, StaffGroup $staffGroup)
     {
         $validated = $request->validate([
-            'name' => 'required|unique:staff_groups,name,' . $staffGroup->id,
+            'name' => 'required|unique:staff_group,name,' . $staffGroup->id,
             'status' => 'required|in:ACTIVE,INACTIVE'
         ]);
 

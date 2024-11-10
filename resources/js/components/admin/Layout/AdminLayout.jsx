@@ -1,6 +1,5 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-import Header from './Header';
 import '../../../../css/admin.css';
 
 const AdminLayout = ({ children }) => {
@@ -12,8 +11,7 @@ const AdminLayout = ({ children }) => {
 
     return (
         <div className="admin-layout">
-            <Header collapsed={collapsed} toggleSidebar={toggleSidebar} />
-            <Sidebar collapsed={collapsed} />
+            <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} />
             <main className={`admin-main ${collapsed ? 'collapsed' : ''}`}>
                 {children}
             </main>

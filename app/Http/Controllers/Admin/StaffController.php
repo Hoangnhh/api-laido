@@ -21,11 +21,16 @@ class StaffController extends Controller
         $perPage = $request->input('per_page', 10);
         $search = $request->input('search');
         $groupId = $request->input('group_id');
+        $status = $request->input('status');
         
         $query = Staff::with('group');
 
         if ($groupId) {
             $query->where('group_id', $groupId);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
         }
 
         if ($search) {
@@ -46,47 +51,115 @@ class StaffController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|unique:staff',
-            'name' => 'required',
-            'username' => 'required|unique:staff',
-            'password' => 'required|min:6',
-            'group_id' => 'required|exists:staff_groups,id',
-            'card_id' => 'required|unique:staff',
-            'birthdate' => 'required|date',
-            'address' => 'required',
-        ]);
+        try {
+            // Kiểm tra username và code trước
+            $existingStaff = Staff::where('username', $request->username)
+                ->orWhere('code', $request->code)
+                ->first();
 
-        $staff = $this->staffService->createOrUpdate($validated);
-        return response()->json($staff, 201);
+            if ($existingStaff) {
+                $errors = [];
+                if ($existingStaff->username === $request->username) {
+                    $errors['username'] = 'Username đã được sử dụng';
+                }
+                if ($existingStaff->code === $request->code) {
+                    $errors['code'] = 'Mã nhân viên đã tồn tại';
+                }
+                return response()->json(['errors' => $errors], 422);
+            }
+
+            $validated = $request->validate([
+                'code' => 'required|unique:staff',
+                'name' => 'required',
+                'username' => 'required|unique:staff',
+                'password' => 'required|min:6',
+                'group_id' => 'required|exists:staff_group,id',
+                'card_id' => 'required|unique:staff',
+                'birthdate' => 'required|date',
+                'address' => 'required',
+                'avatar' => 'nullable|image|max:2048',
+                'vehical_size' => 'required|integer|min:0',
+                'phone' => 'required|size:10|unique:staff'
+            ]);
+
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $validated['avatar_url'] = '/storage/' . $path;
+            }
+
+            $staff = $this->staffService->createOrUpdate($validated);
+            return response()->json($staff, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Có lỗi xảy ra khi tạo nhân viên'], 500);
+        }
     }
 
     public function update(Request $request, Staff $staff)
     {
-        $validated = $request->validate([
-            'code' => 'required|unique:staff,code,'.$staff->id,
-            'name' => 'required',
-            'username' => 'required|unique:staff,username,'.$staff->id,
-            'password' => 'nullable|min:6',
-            'group_id' => 'required|exists:staff_groups,id',
-            'card_id' => 'required|unique:staff,card_id,'.$staff->id,
-            'birthdate' => 'required|date',
-            'address' => 'required',
-        ]);
+        try {
+            // Kiểm tra username và code trùng, ngoại trừ bản ghi hiện tại
+            $existingStaff = Staff::where(function($query) use ($request) {
+                    $query->where('username', $request->username)
+                          ->orWhere('code', $request->code);
+                })
+                ->where('id', '!=', $staff->id)
+                ->first();
 
-        $staff = $this->staffService->createOrUpdate($validated, $staff);
-        return response()->json($staff);
-    }
+            if ($existingStaff) {
+                $errors = [];
+                if ($existingStaff->username === $request->username) {
+                    $errors['username'] = 'Username đã được sử dụng';
+                }
+                if ($existingStaff->code === $request->code) {
+                    $errors['code'] = 'Mã nhân viên đã tồn tại';
+                }
+                return response()->json(['errors' => $errors], 422);
+            }
 
-    public function destroy(Staff $staff)
-    {
-        $staff->delete();
-        return response()->json(['message' => 'Xóa nhân viên thành công']);
+            $rules = [
+                'code' => 'required|unique:staff,code,'.$staff->id,
+                'name' => 'required',
+                'username' => 'required|unique:staff,username,'.$staff->id,
+                'group_id' => 'required|exists:staff_group,id',
+                'card_id' => 'required|unique:staff,card_id,'.$staff->id,
+                'birthdate' => 'required|date',
+                'address' => 'required',
+                'phone' => 'required|size:10|unique:staff,phone,'.$staff->id,
+                'avatar' => 'nullable|image|max:2048'
+            ];
+
+            if ($request->filled('password')) {
+                $rules['password'] = 'min:6';
+            }
+
+            $validated = $request->validate($rules);
+
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $validated['avatar_url'] = '/storage/' . $path;
+            }
+
+            $staff = $this->staffService->createOrUpdate($validated, $staff);
+            return response()->json($staff);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Có lỗi xảy ra khi cập nhật nhân viên'], 500);
+        }
     }
 
     public function toggleStatus(Staff $staff)
     {
-        $staff = $this->staffService->toggleStatus($staff);
-        return response()->json($staff);
+        try {
+            $staff->status = $staff->status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            $staff->save();
+            
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công',
+                'staff' => $staff
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật trạng thái'
+            ], 500);
+        }
     }
 } 

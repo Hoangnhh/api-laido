@@ -51,6 +51,16 @@ Route::prefix('admin')->group(function () {
         })->name('admin.settings');
         
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
+        // Thêm route toggle status cho staff
+        Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
+            ->name('admin.staffs.toggle-status');
+
+        // Thêm route cho staff
+        Route::post('/staffs', [StaffController::class, 'store'])
+            ->name('admin.staffs.store');
+        Route::put('/staffs/{staff}', [StaffController::class, 'update'])
+            ->name('admin.staffs.update');
     });
 });
 

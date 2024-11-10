@@ -17,16 +17,17 @@ class Staff extends Model
         'name',
         'username',
         'password',
-        'birtdate',
+        'birthdate',
         'address',
         'avatar_url',
         'card_id',
         'status',
-        'vehical_size'
+        'vehical_size',
+        'phone'
     ];
 
     protected $casts = [
-        'birtdate' => 'date',
+        'birthdate' => 'date',
         'vehical_size' => 'integer'
     ];
 

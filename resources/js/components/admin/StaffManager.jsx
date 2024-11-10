@@ -29,7 +29,8 @@ import {
     Edit as EditIcon,
     Delete as DeleteIcon,
     Search as SearchIcon,
-    Block as BlockIcon
+    Block as BlockIcon,
+    CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -52,7 +53,8 @@ const StaffManager = () => {
         address: '',
         card_id: '',
         status: 'ACTIVE',
-        vehical_size: 0
+        vehical_size: 0,
+        phone: ''
     });
     const [alert, setAlert] = useState({
         open: false,
@@ -62,6 +64,8 @@ const StaffManager = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
     const [filterGroupId, setFilterGroupId] = useState(''); // Thêm state cho filter nhóm
+    const [filterStatus, setFilterStatus] = useState('ACTIVE'); // Mặc định là ACTIVE
+    const [avatarPreview, setAvatarPreview] = useState(null);
 
     // Cập nhật hàm format ngày
     const formatDate = (dateString) => {
@@ -81,19 +85,22 @@ const StaffManager = () => {
         }
     };
 
-    // Cập nhật hàm format ngày cho input
+    // Thêm hàm format ngày từ dd/mm/yyyy sang yyyy-mm-dd cho input
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
         try {
+            // Nếu là định dạng dd/mm/yyyy
+            if (dateString.includes('/')) {
+                const [day, month, year] = dateString.split('/');
+                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            // Nếu là định dạng ISO hoặc yyyy-mm-dd
             const date = new Date(dateString);
-            if (isNaN(date.getTime())) return '';
-            
-            // Format YYYY-MM-DD
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            
-            return `${year}-${month}-${day}`;
+            console.log(date.toISOString().split('T')[0]);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString().split('T')[0];
+            }
+            return '';
         } catch (error) {
             return '';
         }
@@ -105,10 +112,11 @@ const StaffManager = () => {
             setLoading(true);
             const response = await axios.get('/api/admin/staffs', {
                 params: {
-                    page: page + 1, // +1 vì MUI Pagination bắt đầu từ 0
+                    page: page + 1,
                     per_page: rowsPerPage,
                     search: searchTerm,
-                    group_id: filterGroupId // Thêm param filter theo nhóm
+                    group_id: filterGroupId,
+                    status: filterStatus || null
                 }
             });
             setStaffs(response.data.data);
@@ -131,9 +139,24 @@ const StaffManager = () => {
     };
 
     useEffect(() => {
-        fetchStaffs();
+        // Chỉ gọi fetchGroups một lần khi component mount
         fetchGroups();
-    }, []);
+    }, []); // Empty dependency array
+
+    // Tạo một effect duy nhất để xử lý tất cả các thay đổi liên quan đến fetch staffs
+    useEffect(() => {
+        // Reset page về 0 khi thay đổi filter hoặc search
+        if (searchTerm || filterGroupId || filterStatus !== 'ACTIVE') {
+            setPage(0);
+        }
+        
+        // Debounce cho search và filter
+        const timeoutId = setTimeout(() => {
+            fetchStaffs();
+        }, 300); // Giảm thời gian debounce xuống
+
+        return () => clearTimeout(timeoutId);
+    }, [page, rowsPerPage, searchTerm, filterGroupId, filterStatus]); // Thêm filterStatus vào dependencies
 
     // Handle dialog
     const handleOpenDialog = (staff = null) => {
@@ -141,7 +164,7 @@ const StaffManager = () => {
             setSelectedStaff(staff);
             setFormData({
                 ...staff,
-                birthdate: formatDateForInput(staff.birthdate), // Format ngày cho input
+                birthdate: formatDateForInput(staff.birthdate), // Format ngày sinh cho input
                 password: '' // Reset password khi edit
             });
         } else {
@@ -157,28 +180,55 @@ const StaffManager = () => {
                 address: '',
                 card_id: '',
                 status: 'ACTIVE',
-                vehical_size: 0
+                vehical_size: 0,
+                phone: ''
             });
         }
         setOpenDialog(true);
     };
     
     // Xử lý submit form
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         try {
+            const formDataToSend = new FormData();
+            
+            Object.keys(formData).forEach(key => {
+                if (key === 'avatar' && formData[key]) {
+                    formDataToSend.append('avatar', formData[key]);
+                } else if (key === 'birthdate' && formData[key]) {
+                    // Đảm bảo ngày sinh đúng định dạng Y-m-d
+                    formDataToSend.append('birthdate', formData[key]); // Gửi trực tiếp định dạng yyyy-mm-dd
+                } else {
+                    formDataToSend.append(key, formData[key]);
+                }
+            });
+
             if (selectedStaff) {
-                await axios.put(`/api/admin/staffs/${selectedStaff.id}`, formData);
+                formDataToSend.append('_method', 'PUT');
+                await axios.post(`/admin/staffs/${selectedStaff.id}`, formDataToSend, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
                 showAlert('Cập nhật nhân viên thành công');
             } else {
-                await axios.post('/api/admin/staffs', formData);
-                showAlert('Thêm nhân viên mới thành công');
+                await axios.post('/admin/staffs', formDataToSend, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                showAlert('Thêm nhân viên thành công');
             }
-            fetchStaffs();
+            
             setOpenDialog(false);
+            fetchStaffs();
         } catch (error) {
-            const message = error.response?.data?.message || 'Có lỗi xảy ra';
-            showAlert(message, 'error');
+            if (error.response?.data?.errors) {
+                const errorMessages = Object.values(error.response.data.errors).join('\n');
+                showAlert(errorMessages, 'error');
+            } else {
+                showAlert(error.response?.data?.message || 'Có lỗi xảy ra', 'error');
+            }
         }
     };
 
@@ -236,10 +286,69 @@ const StaffManager = () => {
         setPage(0); // Reset về trang đầu khi đổi filter
     };
 
-    // Cập nhật useEffect để theo dõi filterGroupId
-    useEffect(() => {
-        fetchStaffs();
-    }, [page, rowsPerPage, filterGroupId]);
+    // Thêm handler cho việc thay đổi filter status
+    const handleFilterStatusChange = (event) => {
+        setFilterStatus(event.target.value);
+    };
+
+    // Thêm hàm showAlert
+    const showAlert = (message, severity = 'success') => {
+        setAlert({
+            open: true,
+            message,
+            severity
+        });
+    };
+
+    // Thay đổi hàm handleDelete với message rõ ràng hơn
+    const handleDelete = async (staffId) => {
+        const staff = staffs.find(s => s.id === staffId);
+        const isActive = staff?.status === 'ACTIVE';
+        const confirmMessage = isActive 
+            ? 'Bạn có chắc chắn muốn vô hiệu hóa nhân viên này?' 
+            : 'Bạn có chắc chắn muốn kích hoạt lại nhân viên này?';
+
+        if (window.confirm(confirmMessage)) {
+            try {
+                await axios.put(`/admin/staffs/${staffId}/toggle-status`);
+                showAlert(
+                    isActive 
+                        ? 'Vô hiệu hóa nhân viên thành công'
+                        : 'Kích hoạt nhân viên thành công'
+                );
+                fetchStaffs();
+            } catch (error) {
+                showAlert('Lỗi khi vô hiệu hóa nhân viên', 'error');
+            }
+        }
+    };
+
+    // Cập nhật hàm xử lý ngày sinh
+    const handleDateChange = (e) => {
+        const inputDate = e.target.value; // yyyy-mm-dd
+        if (!inputDate) {
+            setFormData({ ...formData, birthdate: '' });
+            return;
+        }
+        setFormData({ ...formData, birthdate: inputDate }); // Lưu trực tiếp định dạng yyyy-mm-dd
+    };
+
+    const handleAvatarChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setFormData({ ...formData, avatar: file });
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const phoneNumber = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            phone: phoneNumber,
+            username: phoneNumber
+        }));
+    };
 
     return (
         <AdminLayout>
@@ -267,6 +376,31 @@ const StaffManager = () => {
                         gap: 2,
                         alignItems: 'center' 
                     }}>
+                        {/* Status Filter */}
+                        <TextField
+                            select
+                            size="small"
+                            label="Trạng thái"
+                            placeholder="Tất cả trạng thái"
+                            value={filterStatus}
+                            onChange={handleFilterStatusChange}
+                            sx={{ 
+                                width: '150px',
+                                '& .MuiOutlinedInput-root': {
+                                    '&:hover fieldset': {
+                                        borderColor: '#2c3e50',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#2c3e50',
+                                    },
+                                }
+                            }}
+                        >
+                            <MenuItem value="ACTIVE">Hoạt động</MenuItem>
+                            <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
+                            <MenuItem value="">Tất cả</MenuItem>
+                        </TextField>
+
                         {/* Group Filter */}
                         <TextField
                             select
@@ -351,6 +485,7 @@ const StaffManager = () => {
                                 <TableCell sx={{ color: 'white' }}>Nhóm</TableCell>
                                 <TableCell sx={{ color: 'white' }}>Ngày sinh</TableCell>
                                 <TableCell sx={{ color: 'white' }}>CMND/CCCD</TableCell>
+                                <TableCell sx={{ color: 'white' }}>Tải trọng</TableCell>
                                 <TableCell sx={{ color: 'white' }}>Trạng thái</TableCell>
                                 <TableCell sx={{ color: 'white' }} align="right">Thao tác</TableCell>
                             </TableRow>
@@ -404,6 +539,7 @@ const StaffManager = () => {
                                             {formatDate(staff.birthdate)}
                                         </TableCell>
                                         <TableCell>{staff.card_id}</TableCell>
+                                        <TableCell>{staff.vehical_size}</TableCell>
                                         <TableCell>
                                             <Chip
                                                 label={staff.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
@@ -422,8 +558,9 @@ const StaffManager = () => {
                                             <IconButton
                                                 color="error"
                                                 onClick={() => handleDelete(staff.id)}
+                                                title={staff.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
                                             >
-                                                <DeleteIcon />
+                                                {staff.status === 'ACTIVE' ? <BlockIcon /> : <CheckCircleIcon />}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -461,6 +598,39 @@ const StaffManager = () => {
                     </DialogTitle>
                     <DialogContent>
                         <Box component="form" sx={{ pt: 2, display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)' }}>
+                            <Box sx={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 2 }}>
+                                <Avatar
+                                    src={avatarPreview || formData.avatar_url}
+                                    sx={{ 
+                                        width: 150, 
+                                        height: 150,
+                                        border: '2px solid #2c3e50',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    }}
+                                />
+                                <Button
+                                    variant="outlined"
+                                    component="label"
+                                    startIcon={<AddIcon />}
+                                    sx={{ 
+                                        color: '#2c3e50',
+                                        borderColor: '#2c3e50',
+                                        '&:hover': {
+                                            borderColor: '#1a252f',
+                                            bgcolor: 'rgba(44, 62, 80, 0.1)',
+                                        }
+                                    }}
+                                >
+                                    Chọn ảnh đại diện
+                                    <input
+                                        type="file"
+                                        hidden
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                    />
+                                </Button>
+                            </Box>
+
                             <TextField
                                 label="Mã nhân viên"
                                 value={formData.code}
@@ -490,9 +660,21 @@ const StaffManager = () => {
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             />
                             <TextField
+                                label="Số điện thoại"
+                                value={formData.phone}
+                                onChange={handlePhoneChange}
+                                inputProps={{
+                                    maxLength: 10,
+                                    pattern: '[0-9]*'
+                                }}
+                                helperText="Số điện thoại sẽ được sử dụng làm tên đăng nhập"
+                            />
+                            <TextField
                                 label="Username"
                                 value={formData.username}
                                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                disabled={!!formData.phone}
+                                helperText={formData.phone ? "Username tự động theo số điện thoại" : ""}
                             />
                             <TextField
                                 label="Mật khẩu"
@@ -508,16 +690,25 @@ const StaffManager = () => {
                             <TextField
                                 label="Ngày sinh"
                                 type="date"
-                                value={formData.birthdate}
-                                onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                                value={formData.birthdate ? formatDateForInput(formData.birthdate) : ''}
+                                onChange={handleDateChange}
                                 InputLabelProps={{ shrink: true }}
-                                helperText="DD/MM/YYYY"
                                 fullWidth
                             />
                             <TextField
                                 label="Địa chỉ"
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            />
+                            <TextField
+                                label="Tải trọng phương tiện (Người)"
+                                type="number"
+                                value={formData.vehical_size}
+                                onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
+                                InputProps={{
+                                    inputProps: { min: 0 }
+                                }}
+                                helperText="Nhập 0 nếu không có phương tiện"
                             />
                         </Box>
                     </DialogContent>

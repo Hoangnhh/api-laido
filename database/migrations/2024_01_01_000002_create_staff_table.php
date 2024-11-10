@@ -11,9 +11,10 @@ return new class extends Migration
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
             $table->string('type', 45)->default('DRIVER');
-            $table->foreignId('group_id')->constrained('staff_groups');
+            $table->foreignId('group_id')->constrained('staff_group');
             $table->string('code', 45);
             $table->string('name', 200);
+            $table->string('phone', 45)->nullable();
             $table->string('username', 45);
             $table->text('password');
             $table->date('birthdate')->nullable();

@@ -28,6 +28,7 @@ class StaffSeeder extends Seeder
                     'code' => $code,
                     'name' => $name,
                     'username' => strtolower(str_replace(' ', '', "tx{$group->name}{$i}")),
+                    'phone' => $faker->numerify('##########'),
                     'password' => md5('123456'),
                     'birthdate' => $faker->dateTimeBetween('-50 years', '-20 years'),
                     'address' => $faker->address(),
