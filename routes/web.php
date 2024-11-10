@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffGroupController;
+use App\Http\Controllers\Admin\GateController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -68,4 +69,5 @@ Route::prefix('api/admin')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('staffs', StaffController::class);
     Route::apiResource('staff-groups', StaffGroupController::class);
+    Route::apiResource('gates', GateController::class);
 });
