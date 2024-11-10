@@ -76,3 +76,19 @@ CREATE TABLE `admin-laido`.`extra_shift` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`));
+
+CREATE TABLE `admin-laido`.`gate_staff_shift` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `date` datetime DEFAULT NULL,
+  `gate_shift_id` int NOT NULL,
+  `index` int NOT NULL,
+  `gate_id` varchar(45) NOT NULL,
+  `staff_id` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL DEFAULT 'WAITING',
+  `checkin_at` datetime DEFAULT NULL,
+  `checkout_at` datetime DEFAULT NULL,
+  `checked_ticket_num` int NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ca lam viec theo cong'

@@ -14,12 +14,15 @@ import {
     faFileInvoiceDollar,
     faChevronDown,
     faChevronRight,
+    faBars,
+    faAngleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
 
-const Sidebar = ({ collapsed }) => {
+const Sidebar = () => {
     const location = window.location.pathname;
+    const [collapsed, setCollapsed] = useState(false);
     
     const menuItems = [
         { 
@@ -32,6 +35,34 @@ const Sidebar = ({ collapsed }) => {
             icon: faCalendarAlt,
             path: '/admin/shift-assignments'
         },
+        { 
+            text: 'Quản lý vị trí', 
+            icon: faDesktop,
+            path: '/admin/gate'
+        },
+        { 
+            text: 'Quản lý người dùng', 
+            icon: faUserCircle,
+            path: '/admin/users'
+        },
+        
+        {
+            text: 'Quản lý nhân viên',
+            icon: faUsers,
+            path: '#',
+            children: [
+                { 
+                    text: 'Quản lý nhóm nhân viên', 
+                    icon: faUsers,
+                    path: '/admin/staff-group'
+                },
+                { 
+                    text: 'Quản lý nhân viên', 
+                    icon: faUser,
+                    path: '/admin/staff'
+                },
+            ]
+        },
         {
             text: 'Báo cáo',
             icon: faChartLine,
@@ -42,37 +73,12 @@ const Sidebar = ({ collapsed }) => {
                     icon: faFileInvoiceDollar,
                     path: '/admin/payment-report'
                 },
-                {
-                    text: 'Danh sách sử dụng vé',
-                    icon: faTicket,
-                    path: '/admin/reports/tickets-usage'
-                },
                 { 
                     text: 'Danh sách vé sử dụng', 
                     icon: faTicket,
                     path: '/admin/tickets'
                 }
             ]
-        },
-        { 
-            text: 'Quản lý nhân viên', 
-            icon: faUser,
-            path: '/admin/staff'
-        },
-        { 
-            text: 'Quản lý nhóm nhân viên', 
-            icon: faUsers,
-            path: '/admin/staff-group'
-        },
-        { 
-            text: 'Quản lý vị trí', 
-            icon: faDesktop,
-            path: '/admin/gate'
-        },
-        { 
-            text: 'Quản lý người dùng', 
-            icon: faUserCircle,
-            path: '/admin/users'
         },
         { 
             text: 'Cấu hình hệ thống', 
@@ -106,6 +112,14 @@ const Sidebar = ({ collapsed }) => {
         }
     }, [location]);
 
+    // Thêm useEffect để lưu trạng thái collapsed vào localStorage
+    useEffect(() => {
+        const savedCollapsed = localStorage.getItem('sidebarCollapsed');
+        if (savedCollapsed) {
+            setCollapsed(JSON.parse(savedCollapsed));
+        }
+    }, []);
+
     const handleLogout = async (e) => {
         e.preventDefault();
         
@@ -131,6 +145,12 @@ const Sidebar = ({ collapsed }) => {
         setOpenSubmenu(openSubmenu === text ? null : text);
     };
 
+    const toggleSidebar = () => {
+        const newCollapsed = !collapsed;
+        setCollapsed(newCollapsed);
+        localStorage.setItem('sidebarCollapsed', JSON.stringify(newCollapsed));
+    };
+
     return (
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-header">
@@ -138,6 +158,13 @@ const Sidebar = ({ collapsed }) => {
                     <FontAwesomeIcon icon={faHome} />
                     {!collapsed && <span className="logo-text">Admin Panel</span>}
                 </div>
+                <button 
+                    className="toggle-button"
+                    onClick={toggleSidebar}
+                    title={collapsed ? "Mở rộng" : "Thu gọn"}
+                >
+                    <FontAwesomeIcon icon={collapsed ? faBars : faAngleLeft} />
+                </button>
             </div>
             <nav className="sidebar-menu">
                 {menuItems.map((item) => (
