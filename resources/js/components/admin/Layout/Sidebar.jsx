@@ -19,10 +19,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
+import logoImage from '../../../assets/logo.png';
 
 const Sidebar = () => {
     const location = window.location.pathname;
     const [collapsed, setCollapsed] = useState(false);
+    const [user, setUser] = useState(null);
     
     const menuItems = [
         { 
@@ -120,6 +122,19 @@ const Sidebar = () => {
         }
     }, []);
 
+    // Thêm useEffect để lấy thông tin user
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get('/admin/current-user');
+                setUser(response.data);
+            } catch (error) {
+                console.error('Error fetching user:', error);
+            }
+        };
+        fetchUser();
+    }, []);
+
     const handleLogout = async (e) => {
         e.preventDefault();
         
@@ -149,14 +164,24 @@ const Sidebar = () => {
         const newCollapsed = !collapsed;
         setCollapsed(newCollapsed);
         localStorage.setItem('sidebarCollapsed', JSON.stringify(newCollapsed));
+        
+        // Dispatch custom event để thông báo cho AdminLayout
+        window.dispatchEvent(new CustomEvent('sidebarToggle', {
+            detail: { collapsed: newCollapsed }
+        }));
     };
 
     return (
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-header">
                 <div className="sidebar-logo">
-                    <FontAwesomeIcon icon={faHome} />
-                    {!collapsed && <span className="logo-text">Admin Panel</span>}
+                    <img src={logoImage} alt="Logo" className="logo-image" />
+                    {!collapsed && (
+                        <div className="logo-content">
+                            <span className="logo-text">Admin Panel</span>
+                            {user && <span className="user-name">{user.name}</span>}
+                        </div>
+                    )}
                 </div>
                 <button 
                     className="toggle-button"
@@ -214,17 +239,19 @@ const Sidebar = () => {
                         </a>
                     )
                 ))}
-                <div className="menu-divider"></div>
-                <a 
-                    href="#" 
-                    className="menu-item" 
-                    onClick={handleLogout}
-                >
-                    <span className="menu-icon">
-                        <FontAwesomeIcon icon={faRightFromBracket} />
-                    </span>
-                    <span className="menu-text">Logout</span>
-                </a>
+                <div className="sidebar-bottom">
+                    <div className="menu-divider"></div>
+                    <a 
+                        href="#" 
+                        className="menu-item logout-item" 
+                        onClick={handleLogout}
+                    >
+                        <span className="menu-icon">
+                            <FontAwesomeIcon icon={faRightFromBracket} />
+                        </span>
+                        <span className="menu-text">Đăng xuất</span>
+                    </a>
+                </div>
             </nav>
         </aside>
     );

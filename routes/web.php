@@ -66,6 +66,10 @@ Route::prefix('admin')->group(function () {
             ->name('admin.staffs.store');
         Route::put('/staffs/{staff}', [StaffController::class, 'update'])
             ->name('admin.staffs.update');
+
+        Route::get('/current-user', function () {
+            return response()->json(auth()->user());
+        });
     });
 });
 
