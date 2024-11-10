@@ -7,7 +7,11 @@ import Login from './components/auth/Login';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import UserManager from './components/admin/UserManager';
 import StaffManager from './components/admin/StaffManager';
-
+import GateManager from './components/admin/GateManager';
+import ShiftManager from './components/admin/ShiftManager';
+import ShiftAssignments from './components/admin/ShiftAssignments';
+import Tickets from './components/admin/Tickets';
+import Settings from './components/admin/Settings';
 const theme = createTheme({
     palette: {
         primary: {
@@ -32,6 +36,16 @@ const App = () => {
                 return <UserManager />;
             case '/admin/staff':
                 return <StaffManager />;
+            case '/admin/gate':
+                return <GateManager />;
+            case '/admin/shifts':
+                return <ShiftManager />;
+            case '/admin/shift-assignments':
+                return <ShiftAssignments />;
+            case '/admin/tickets':
+                return <Tickets />;
+            case '/admin/settings':
+                return <Settings />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

@@ -27,6 +27,26 @@ Route::prefix('admin')->group(function () {
         Route::get('/staff', function () {
             return view('admin.staff-manager');
         })->name('admin.staff-manager');
+
+        Route::get('/gate', function () {
+            return view('admin.gate');
+        })->name('admin.gate');
+
+        Route::get('/shifts', function () {
+            return view('admin.shift-manager');
+        })->name('admin.shift-manager');
+
+        Route::get('/shift-assignments', function () {
+            return view('admin.shift-assignments');
+        })->name('admin.shift-assignments');
+
+        Route::get('/tickets', function () {
+            return view('admin.tickets');
+        })->name('admin.tickets');
+
+        Route::get('/settings', function () {
+            return view('admin.settings');
+        })->name('admin.settings');
         
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
     });

@@ -8,6 +8,7 @@ import {
     faGear,
     faTicket,
     faRightFromBracket,
+    faDesktop,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
@@ -24,6 +25,11 @@ const Sidebar = ({ collapsed }) => {
             text: 'Quản lý nhân viên', 
             icon: faUsers,
             path: '/admin/staff'
+        },
+        { 
+            text: 'Quản lý vị trí', 
+            icon: faDesktop,
+            path: '/admin/gate'
         },
         { 
             text: 'Quản lý Ca', 
