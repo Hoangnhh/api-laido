@@ -1,10 +1,12 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faGauge,
+    faHome,
     faUsers,
-    faChartLine,
+    faClock,
+    faCalendarAlt,
     faGear,
+    faTicket,
     faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
@@ -14,22 +16,37 @@ const Sidebar = ({ collapsed }) => {
     
     const menuItems = [
         { 
-            text: 'Dashboard', 
-            icon: faGauge,
+            text: 'Trang chủ', 
+            icon: faHome,
             path: '/admin/dashboard'
         },
         { 
-            text: 'Users', 
+            text: 'Quản lý nhân viên', 
+            icon: faUsers,
+            path: '/admin/staff'
+        },
+        { 
+            text: 'Quản lý Ca', 
+            icon: faClock,
+            path: '/admin/shifts'
+        },
+        { 
+            text: 'Phân ca', 
+            icon: faCalendarAlt,
+            path: '/admin/shift-assignments'
+        },
+        { 
+            text: 'Danh sách vé sử dụng', 
+            icon: faTicket,
+            path: '/admin/tickets'
+        },
+        { 
+            text: 'Quản lý người dùng', 
             icon: faUsers,
             path: '/admin/users'
         },
         { 
-            text: 'Reports', 
-            icon: faChartLine,
-            path: '/admin/reports'
-        },
-        { 
-            text: 'Settings', 
+            text: 'Cấu hình hệ thống', 
             icon: faGear,
             path: '/admin/settings'
         },
@@ -60,7 +77,8 @@ const Sidebar = ({ collapsed }) => {
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-header">
                 <div className="sidebar-logo">
-                    <FontAwesomeIcon icon={faGauge} />
+                    <FontAwesomeIcon icon={faHome} />
+                    {!collapsed && <span className="logo-text">Admin Panel</span>}
                 </div>
             </div>
             <nav className="sidebar-menu">
