@@ -50,6 +50,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/settings', function () {
             return view('admin.settings');
         })->name('admin.settings');
+
+        Route::get('/payment-report', function () {
+            return view('admin.payment-report');
+        })->name('admin.payment-report');
         
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 

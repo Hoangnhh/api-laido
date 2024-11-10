@@ -12,6 +12,7 @@ import StaffGroup from './components/admin/StaffGroup';
 import ShiftAssignments from './components/admin/ShiftAssignments';
 import Tickets from './components/admin/Tickets';
 import Settings from './components/admin/Settings';
+import PaymentReport from './components/admin/reports/PaymentReport';
 const theme = createTheme({
     palette: {
         primary: {
@@ -46,6 +47,8 @@ const App = () => {
                 return <Tickets />;
             case '/admin/settings':
                 return <Settings />;
+            case '/admin/payment-report':
+                return <PaymentReport />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }
