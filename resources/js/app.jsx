@@ -8,7 +8,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import UserManager from './components/admin/UserManager';
 import StaffManager from './components/admin/StaffManager';
 import GateManager from './components/admin/GateManager';
-import ShiftManager from './components/admin/ShiftManager';
+import StaffGroup from './components/admin/StaffGroup';
 import ShiftAssignments from './components/admin/ShiftAssignments';
 import Tickets from './components/admin/Tickets';
 import Settings from './components/admin/Settings';
@@ -38,8 +38,8 @@ const App = () => {
                 return <StaffManager />;
             case '/admin/gate':
                 return <GateManager />;
-            case '/admin/shifts':
-                return <ShiftManager />;
+            case '/admin/staff-group':
+                return <StaffGroup />;
             case '/admin/shift-assignments':
                 return <ShiftAssignments />;
             case '/admin/tickets':

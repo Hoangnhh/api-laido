@@ -35,9 +35,9 @@ Route::prefix('admin')->group(function () {
             return view('admin.gate');
         })->name('admin.gate');
 
-        Route::get('/shifts', function () {
-            return view('admin.shift-manager');
-        })->name('admin.shift-manager');
+        Route::get('/staff-group', function () {
+            return view('admin.staff-group');
+        })->name('admin.staff-group');
 
         Route::get('/shift-assignments', function () {
             return view('admin.shift-assignments');

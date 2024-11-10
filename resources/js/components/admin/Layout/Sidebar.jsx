@@ -3,12 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faHome,
     faUsers,
-    faClock,
     faCalendarAlt,
     faGear,
     faTicket,
     faRightFromBracket,
     faDesktop,
+    faUser,
+    faUserCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
@@ -22,21 +23,6 @@ const Sidebar = ({ collapsed }) => {
             path: '/admin/dashboard'
         },
         { 
-            text: 'Quản lý nhân viên', 
-            icon: faUsers,
-            path: '/admin/staff'
-        },
-        { 
-            text: 'Quản lý vị trí', 
-            icon: faDesktop,
-            path: '/admin/gate'
-        },
-        { 
-            text: 'Quản lý Ca', 
-            icon: faClock,
-            path: '/admin/shifts'
-        },
-        { 
             text: 'Phân ca', 
             icon: faCalendarAlt,
             path: '/admin/shift-assignments'
@@ -47,8 +33,23 @@ const Sidebar = ({ collapsed }) => {
             path: '/admin/tickets'
         },
         { 
-            text: 'Quản lý người dùng', 
+            text: 'Quản lý nhân viên', 
+            icon: faUser,
+            path: '/admin/staff'
+        },
+        { 
+            text: 'Quản lý nhóm nhân viên', 
             icon: faUsers,
+            path: '/admin/staff-group'
+        },
+        { 
+            text: 'Quản lý vị trí', 
+            icon: faDesktop,
+            path: '/admin/gate'
+        },
+        { 
+            text: 'Quản lý người dùng', 
+            icon: faUserCircle,
             path: '/admin/users'
         },
         { 
