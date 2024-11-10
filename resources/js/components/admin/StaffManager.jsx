@@ -67,6 +67,16 @@ const StaffManager = () => {
     const [filterStatus, setFilterStatus] = useState('ACTIVE'); // Mặc định là ACTIVE
     const [avatarPreview, setAvatarPreview] = useState(null);
 
+    // Tách các state filter ra riêng để dễ quản lý
+    const [filters, setFilters] = useState({
+        search: '',
+        groupId: '',
+        status: 'ACTIVE'
+    });
+
+    // Tạo state để theo dõi việc cần fetch data
+    const [shouldFetch, setShouldFetch] = useState(true);
+
     // Cập nhật hàm format ngày
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -114,9 +124,9 @@ const StaffManager = () => {
                 params: {
                     page: page + 1,
                     per_page: rowsPerPage,
-                    search: searchTerm,
-                    group_id: filterGroupId,
-                    status: filterStatus || null
+                    search: filters.search,
+                    group_id: filters.groupId,
+                    status: filters.status || null
                 }
             });
             setStaffs(response.data.data);
@@ -143,20 +153,23 @@ const StaffManager = () => {
         fetchGroups();
     }, []); // Empty dependency array
 
-    // Tạo một effect duy nhất để xử lý tất cả các thay đổi liên quan đến fetch staffs
+    // Effect chính để fetch data
     useEffect(() => {
-        // Reset page về 0 khi thay đổi filter hoặc search
-        if (searchTerm || filterGroupId || filterStatus !== 'ACTIVE') {
-            setPage(0);
-        }
-        
-        // Debounce cho search và filter
-        const timeoutId = setTimeout(() => {
+        if (shouldFetch) {
             fetchStaffs();
-        }, 300); // Giảm thời gian debounce xuống
+            setShouldFetch(false);
+        }
+    }, [shouldFetch, page, rowsPerPage]);
+
+    // Effect riêng cho việc thay đổi filter
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setPage(0);
+            setShouldFetch(true);
+        }, 500);
 
         return () => clearTimeout(timeoutId);
-    }, [page, rowsPerPage, searchTerm, filterGroupId, filterStatus]); // Thêm filterStatus vào dependencies
+    }, [filters]);
 
     // Handle dialog
     const handleOpenDialog = (staff = null) => {
@@ -221,7 +234,7 @@ const StaffManager = () => {
             }
             
             setOpenDialog(false);
-            fetchStaffs();
+            setShouldFetch(true); // Thay vì gọi fetchStaffs trực tiếp
         } catch (error) {
             if (error.response?.data?.errors) {
                 const errorMessages = Object.values(error.response.data.errors).join('\n');
@@ -266,7 +279,10 @@ const StaffManager = () => {
 
     // Handle search change
     const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
+        setFilters(prev => ({
+            ...prev,
+            search: e.target.value
+        }));
     };
 
     // Handle page change
@@ -282,13 +298,18 @@ const StaffManager = () => {
 
     // Thêm handler cho việc thay đổi filter nhóm
     const handleFilterGroupChange = (event) => {
-        setFilterGroupId(event.target.value);
-        setPage(0); // Reset về trang đầu khi đổi filter
+        setFilters(prev => ({
+            ...prev,
+            groupId: event.target.value
+        }));
     };
 
     // Thêm handler cho việc thay đổi filter status
     const handleFilterStatusChange = (event) => {
-        setFilterStatus(event.target.value);
+        setFilters(prev => ({
+            ...prev,
+            status: event.target.value
+        }));
     };
 
     // Thêm hàm showAlert
@@ -316,7 +337,7 @@ const StaffManager = () => {
                         ? 'Vô hiệu hóa nhân viên thành công'
                         : 'Kích hoạt nhân viên thành công'
                 );
-                fetchStaffs();
+                setShouldFetch(true); // Thay vì gọi fetchStaffs trực tiếp
             } catch (error) {
                 showAlert('Lỗi khi vô hiệu hóa nhân viên', 'error');
             }
@@ -509,7 +530,7 @@ const StaffManager = () => {
                                         key={staff.id}
                                         sx={{ '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.04)' } }}
                                     >
-                                        <TableCell>{staff.code}</TableCell>
+                                        <TableCell sx={{ color: '#2c3e50', fontWeight: 'bold' }}>{staff.code}</TableCell>
                                         <TableCell>
                                             <Avatar 
                                                 src={staff.avatar_url} 
