@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 200);
             $table->string('username', 45);
             $table->text('password');
-            $table->date('birtdate')->nullable();
+            $table->date('birthdate')->nullable();
             $table->text('address')->nullable();
             $table->text('avatar_url')->nullable();
             $table->string('card_id', 45)->nullable();

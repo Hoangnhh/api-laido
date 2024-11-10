@@ -29,7 +29,7 @@ class StaffSeeder extends Seeder
                     'name' => $name,
                     'username' => strtolower(str_replace(' ', '', "tx{$group->name}{$i}")),
                     'password' => md5('123456'),
-                    'birtdate' => $faker->dateTimeBetween('-50 years', '-20 years'),
+                    'birthdate' => $faker->dateTimeBetween('-50 years', '-20 years'),
                     'address' => $faker->address(),
                     'card_id' => $faker->numerify('##########'),
                     'status' => 'ACTIVE',

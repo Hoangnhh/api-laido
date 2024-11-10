@@ -13,7 +13,7 @@ class StaffService
      */
     public function getPaginatedStaff(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
-        $query = Staff::query();
+        $query = Staff::with('group');
 
         // Lọc theo type
         if (isset($filters['type'])) {

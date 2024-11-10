@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\StaffGroupController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -54,4 +56,6 @@ Route::prefix('admin')->group(function () {
 
 Route::prefix('api/admin')->group(function () {
     Route::apiResource('users', UserController::class);
+    Route::apiResource('staffs', StaffController::class);
+    Route::apiResource('staff-groups', StaffGroupController::class);
 });
