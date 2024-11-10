@@ -4,7 +4,7 @@ import AdminLayout from './Layout/AdminLayout';
 const Dashboard = () => {
     return (
         <AdminLayout>
-            {/* Nội dung của dashboard */}
+            <h1>DASHBOARD</h1>
         </AdminLayout>
     );
 };

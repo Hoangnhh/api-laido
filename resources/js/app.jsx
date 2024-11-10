@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Dashboard from './components/admin/Dashboard';
 import Login from './components/auth/Login';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import UserManager from './components/admin/UserManager';
 
 const theme = createTheme({
     palette: {
@@ -26,6 +27,8 @@ const App = () => {
                 return <Login />;
             case '/admin/dashboard':
                 return <Dashboard />;
+            case '/admin/users':
+                return <UserManager />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }
