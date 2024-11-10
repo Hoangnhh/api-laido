@@ -1,0 +1,77 @@
+CREATE TABLE `admin-laido`.`staff` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `type` VARCHAR(45) NOT NULL DEFAULT 'DRIVER',
+  `group_id` INT NOT NULL,
+  `code` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(200) NOT NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `password` TEXT NOT NULL,
+  `birtdate` DATE NULL,
+  `address` TEXT NULL,
+  `avatar_url` TEXT NULL,
+  `card_id` VARCHAR(45) NULL,
+  `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
+  `vehical_size` INT NOT NULL DEFAULT 6,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+  PRIMARY KEY (`id`))
+COMMENT = 'nhan vien';
+
+CREATE TABLE `admin-laido`.`staff_group` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(200) NOT NULL,
+  `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`))
+COMMENT = 'Nhóm nhân viên';
+
+CREATE TABLE `admin-laido`.`gate` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NULL,
+  `status` VARCHAR(45) NULL DEFAULT 'ACTIVVE',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+
+CREATE TABLE `admin-laido`.`gate_shift` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `new_tablecol` VARCHAR(45) NULL,
+  `gate_id` INT NOT NULL,
+  `current_index` INT NOT NULL DEFAULT 1,
+  `status` VARCHAR(45) NULL DEFAULT 'ACTIVE',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+
+CREATE TABLE `admin-laido`.`checked_ticket` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) NULL,
+  `status` VARCHAR(45) NULL DEFAULT 'CHECKIN',
+  `date` DATE NOT NULL,
+  `checkin_at` DATETIME NULL,
+  `checkout_at` DATETIME NULL,
+  `paid` TINYINT(1) NOT NULL DEFAULT 0,
+  `price` VARCHAR(20) NOT NULL DEFAULT 0,
+  `commisson` INT NOT NULL DEFAULT 0,
+  `shift_gate_staff_id` INT NULL AFTER `updated_at`,
+`staff_id` INT NOT NULL AFTER `shift_gate_staff_id`,
+`extra_shift_id` INT NULL AFTER `staff_id`,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`))
+COMMENT = 'Thông tin vé đã quét';
+
+CREATE TABLE `admin-laido`.`extra_shift` (
+  `id` INT NOT NULL,
+  `gate_id` INT NULL,
+  `date` DATE NOT NULL,
+  `staff_id` INT NOT NULL,
+  `checkin_at` DATETIME NULL DEFAULT NULL,
+  `checkout_at` DATETIME NULL DEFAULT NULL,
+  `status` VARCHAR(45) NOT NULL DEFAULT 'WAITING',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
