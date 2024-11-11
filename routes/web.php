@@ -10,10 +10,6 @@ use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 
 Route::prefix('admin')->group(function () {
-    if (!Auth::check()) {
-        return redirect()->route('admin.login');
-    }
-    
     Route::get('/', function () {
         if (Auth::check()) {
             return redirect()->route('admin.dashboard');
@@ -80,6 +76,11 @@ Route::prefix('admin')->group(function () {
             return response()->json(auth()->user());
         });
     });
+
+    // Route login cho admin
+    Route::get('/login', function () {
+        return view('admin.login');
+    })->name('login');
 });
 
 Route::prefix('api/admin')->group(function () {
