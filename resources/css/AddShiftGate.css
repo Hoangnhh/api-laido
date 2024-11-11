@@ -5,11 +5,11 @@
 }
 
 .shift-header {
-    margin-bottom: 24px;
+    margin-bottom: 10px;
 }
 
 .shift-header h1 {
-    font-size: 24px;
+    font-size: 20px;
     color: #1a1a1a;
     margin: 0;
 }
@@ -107,6 +107,8 @@
 
 .assignment-section {
     flex: 1;
+    min-width: 300px;
+    max-width: 500px;
     background: white;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -116,7 +118,6 @@
 .selected-staff {
     display: flex;
     flex-direction: column;
-    gap: 20px;
 }
 
 .selected-staff h3 {
@@ -292,59 +293,128 @@
     border: 2px solid #2196f3;
 }
 
-/* Thêm styles cho phần phân bổ nhân viên */
-.staff-distribution {
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
+.staff-distribution h4 {
+    color: #1976d2;
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .distribution-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
 }
 
-.distribution-column {
+.distribution-item {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 6px;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
 }
 
-.distribution-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #eee;
+.distribution-item.has-assigned {
+    cursor: default;
 }
 
-.distribution-item .gate-name {
+.distribution-item.has-assigned:hover {
+    background: #f3f9ff;
+    border-color: #2196f3;
+    transform: translateY(-1px);
+}
+
+.gate-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.gate-name {
     font-weight: 500;
     color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
 }
 
-.distribution-item .staff-count {
-    color: #2196f3;
+.gate-name i {
+    color: #1976d2;
+    font-size: 14px;
+}
+
+.staff-counts {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.count-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    width: 70px;
+}
+
+.count-item i {
+    font-size: 12px;
+    width: 16px;
+    text-align: center;
+}
+
+.count-item span {
+    font-size: 13px;
+}
+
+.count-number {
+    margin-left: auto;
     font-weight: 500;
+    min-width: 24px;
+    text-align: right;
 }
 
-/* Thêm animation cho khi phân bổ thay đổi */
-.distribution-item {
-    animation: fadeIn 0.3s ease-in-out;
+.new-staff-count {
+    color: #2196f3;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+.new-staff-count i {
+    color: #2196f3;
+}
+
+.assigned-staff-count {
+    color: #4caf50;
+}
+
+.assigned-staff-count i {
+    color: #4caf50;
+}
+
+.view-details {
+    display: none;
+}
+
+.distribution-item.has-assigned:hover .view-details {
+    background: #e3f2fd;
+    color: #1976d2;
+    transform: translateX(2px);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .distribution-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -556,4 +626,103 @@
 .staff-card.assigned:hover {
     border-color: #ffb74d;
     background: #fff8e1;
+}
+
+/* Style cho close button */
+.close-button {
+    border: none;
+    background: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background: #f5f5f5;
+    color: #f44336;
+}
+
+/* Style cho search box */
+.search-box {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #757575;
+    z-index: 1;
+}
+
+.search-box .MuiInputBase-root {
+    padding-left: 36px;
+}
+
+/* Style cho staff item */
+.assigned-staff-item .staff-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.assigned-staff-item .staff-info i {
+    color: #2196f3;
+}
+
+.assignment-index {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #2196f3;
+}
+
+.assignment-index i {
+    font-size: 12px;
+}
+
+/* Style cho no results */
+.no-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #666;
+    font-style: italic;
+}
+
+.no-results i {
+    color: #9e9e9e;
+}
+
+/* Style cho gate select multiple */
+.gate-select-multiple {
+    min-height: 40px !important;
+    max-height: 80px !important;
+    height: auto !important;
+    overflow-y: auto !important;
+}
+
+/* Style cho selected values trong gate select */
+.gate-select-multiple .MuiSelect-select {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Style cho dropdown menu của gate select */
+.MuiMenu-paper {
+    max-width: 400px !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root {
+    white-space: normal;
+    word-break: break-word;
 }

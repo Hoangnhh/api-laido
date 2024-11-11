@@ -10,7 +10,10 @@ import {
     InputLabel,
     TextareaAutosize,
     Snackbar,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../common/Loading';
@@ -18,6 +21,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserCheck, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 const AddShiftGate = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -159,12 +164,20 @@ const AddShiftGate = () => {
         
         return selectedGates.map((gateId, index) => {
             const gate = gates.find(g => g.id === gateId);
-            // Cng thêm 1 nhân viên cho các vị trí đầu tiên nếu có số dư
             const extraStaff = index < remainder ? 1 : 0;
+            
+            // Tính số nhân viên đã được phân ca cho cổng này
+            const assignedStaffCount = staffs.filter(staff => 
+                staff.is_assigned && 
+                staff.assignment && 
+                staff.assignment.gate_name === gate?.name
+            ).length;
+
             return {
                 gateId,
                 gateName: gate?.name,
-                staffCount: staffPerGate + extraStaff
+                staffCount: staffPerGate + extraStaff,
+                assignedStaffCount // Thêm số nhân viên đã được phân ca
             };
         });
     };
@@ -194,9 +207,14 @@ const AddShiftGate = () => {
             if (response.data.status === 'success') {
                 showAlert(response.data.message, 'success');
                 
-                setTimeout(() => {
-                    navigate('/admin/shift-assignments');
-                }, 1000);
+                // Load lại danh sách nhân viên
+                await fetchStaffsByGroup(selectedGroup);
+                
+                // Reset các state liên quan
+                setSelectedStaffs([]);
+                setSelectedGates([]);
+                setAssignmentType('');
+
             } else {
                 showAlert(response.data.message || 'Có lỗi xảy ra khi tạo ca', 'error');
             }
@@ -218,52 +236,46 @@ const AddShiftGate = () => {
         const distribution = calculateStaffDistribution();
         if (!distribution) return null;
 
-        // Chia distribution thành 2 cột
-        const midPoint = Math.ceil(distribution.length / 2);
-        const leftColumn = distribution.slice(0, midPoint);
-        const rightColumn = distribution.slice(midPoint);
-
-        // Tính số nhân viên chưa được chọn
-        const unassignedStaff = filteredStaffs.length - selectedStaffs.length;
+        const renderDistributionItem = (item) => (
+            <div 
+                key={item.gateId} 
+                className="distribution-item"
+            >
+                <div className="gate-info">
+                    <div className="gate-name">
+                        <i className="fas fa-door-open"></i>
+                        {item.gateName}
+                    </div>
+                    
+                    <div className="staff-counts">
+                        <div className="count-item new-staff-count" title="Số nhân viên mới">
+                            <FontAwesomeIcon icon={faUserPlus} />
+                            <span className="count-number">{item.staffCount}</span>
+                        </div>
+                        
+                        {item.assignedStaffCount > 0 && (
+                            <div className="count-item assigned-staff-count" title="Số nhân viên đã có ca">
+                                <FontAwesomeIcon icon={faUserCheck} />
+                                <span className="count-number">{item.assignedStaffCount}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
 
         return (
             <>
                 {isCreating && <Loading message="Đang tạo ca làm việc..." />}
                 
                 <div className="staff-distribution">
-                    <h4>Phân bổ nhân viên:</h4>
+                    <h4>
+                        <i className="fas fa-random me-2"></i>
+                        Phân bổ nhân viên:
+                    </h4>
                     <div className="distribution-grid">
-                        <div className="distribution-column">
-                            {leftColumn.map(item => (
-                                <div key={item.gateId} className="distribution-item">
-                                    <span className="gate-name">{item.gateName}</span>
-                                    <span className="staff-count">{item.staffCount} nhân viên</span>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="distribution-column">
-                            {rightColumn.map(item => (
-                                <div key={item.gateId} className="distribution-item">
-                                    <span className="gate-name">{item.gateName}</span>
-                                    <span className="staff-count">{item.staffCount} nhân viên</span>
-                                </div>
-                            ))}
-                        </div>
+                        {distribution.map(renderDistributionItem)}
                     </div>
-                </div>
-
-                <div className="assignment-summary">
-                    <div className="unassigned-staff">
-                        <span>Nhân viên chưa được chọn:</span>
-                        <span className="count">{unassignedStaff}</span>
-                    </div>
-                    <button 
-                        className="create-shift-btn"
-                        onClick={handleCreateShift}
-                        disabled={isCreating}
-                    >
-                        Tạo ca làm việc
-                    </button>
                 </div>
             </>
         );
@@ -299,6 +311,11 @@ const AddShiftGate = () => {
         setSearchTerm('');
         setSelectedGates([]);
         setAssignmentType('');
+    };
+
+    // Thêm hàm kiểm tra số lượng nhân viên có thể chọn
+    const getSelectableStaffCount = () => {
+        return filteredStaffs.filter(staff => !staff.is_assigned).length;
     };
 
     if (loading) {
@@ -366,12 +383,17 @@ const AddShiftGate = () => {
                                         className="search-input"
                                     />
                                     
-                                    {filteredStaffs.length > 0 && (
+                                    {filteredStaffs.some(staff => !staff.is_assigned) && (
                                         <button 
-                                            className={`select-all-btn ${selectedStaffs.length === filteredStaffs.length ? 'active' : ''}`}
+                                            className={`select-all-btn ${
+                                                selectedStaffs.length === getSelectableStaffCount() ? 'active' : ''
+                                            }`}
                                             onClick={handleSelectAll}
                                         >
-                                            {selectedStaffs.length === filteredStaffs.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                                            {selectedStaffs.length === getSelectableStaffCount() 
+                                                ? 'Bỏ chọn tất cả' 
+                                                : 'Chọn tất cả'
+                                            }
                                         </button>
                                     )}
                                 </div>
@@ -461,6 +483,7 @@ const AddShiftGate = () => {
                                     onChange={handleGateChange}
                                     label="Chọn vị trí"
                                     disabled={assignmentType === 'all'}
+                                    className="gate-select-multiple"
                                     renderValue={(selected) => {
                                         const selectedNames = selected.map(id => 
                                             gates.find(gate => gate.id === id)?.name
@@ -477,7 +500,29 @@ const AddShiftGate = () => {
                             </FormControl>
 
                             {(selectedStaffs.length > 0 && selectedGates.length > 0) && (
-                                <StaffDistribution />
+                                <>
+                                    <StaffDistribution />
+                                    
+                                    <div className="assignment-summary">
+                                        <button 
+                                            className="create-shift-btn"
+                                            onClick={handleCreateShift}
+                                            disabled={isCreating || !selectedStaffs.length || !selectedGates.length}
+                                        >
+                                            {isCreating ? (
+                                                <>
+                                                    <i className="fas fa-spinner fa-spin me-2"></i>
+                                                    Đang tạo ca...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="fas fa-plus-circle me-2"></i>
+                                                    Tạo ca làm việc
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
