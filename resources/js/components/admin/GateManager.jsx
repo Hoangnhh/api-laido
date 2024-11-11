@@ -22,12 +22,13 @@ import {
     Alert,
     Snackbar
 } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Search as SearchIcon
-} from '@mui/icons-material';
+    faPlus,
+    faPenToSquare,
+    faTrash,
+    faMagnifyingGlass
+} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 const GateManager = () => {
@@ -141,12 +142,16 @@ const GateManager = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
-                                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                                startAdornment: (
+                                    <Box sx={{ mr: 1, color: 'text.secondary' }}>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                    </Box>
+                                )
                             }}
                         />
                         <Button
                             variant="contained"
-                            startIcon={<AddIcon />}
+                            startIcon={<FontAwesomeIcon icon={faPlus} />}
                             onClick={() => handleOpenDialog()}
                             sx={{ bgcolor: '#2c3e50', '&:hover': { bgcolor: '#1a252f' } }}
                         >
@@ -180,10 +185,10 @@ const GateManager = () => {
                                         </TableCell>
                                         <TableCell align="right">
                                             <IconButton onClick={() => handleOpenDialog(gate)}>
-                                                <EditIcon />
+                                                <FontAwesomeIcon icon={faPenToSquare} />
                                             </IconButton>
                                             <IconButton onClick={() => handleDelete(gate.id)}>
-                                                <DeleteIcon />
+                                                <FontAwesomeIcon icon={faTrash} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>

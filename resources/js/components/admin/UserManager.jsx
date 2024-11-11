@@ -22,12 +22,13 @@ import {
     Alert,
     Snackbar
 } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Search as SearchIcon
-} from '@mui/icons-material';
+    faPlus,
+    faPenToSquare,
+    faTrash,
+    faMagnifyingGlass
+} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 const UserManager = () => {
@@ -171,14 +172,18 @@ const UserManager = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             sx={{ width: '300px' }}
                             InputProps={{
-                                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                                startAdornment: (
+                                    <Box sx={{ mr: 1, color: 'text.secondary' }}>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                    </Box>
+                                )
                             }}
                         />
 
                         {/* Add Button */}
                         <Button
                             variant="contained"
-                            startIcon={<AddIcon />}
+                            startIcon={<FontAwesomeIcon icon={faPlus} />}
                             onClick={() => handleOpenDialog()}
                             sx={{ 
                                 bgcolor: '#2c3e50', 
@@ -224,13 +229,13 @@ const UserManager = () => {
                                                 color="primary"
                                                 onClick={() => handleOpenDialog(user)}
                                             >
-                                                <EditIcon />
+                                                <FontAwesomeIcon icon={faPenToSquare} />
                                             </IconButton>
                                             <IconButton
                                                 color="error"
                                                 onClick={() => handleDelete(user.id)}
                                             >
-                                                <DeleteIcon />
+                                                <FontAwesomeIcon icon={faTrash} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>

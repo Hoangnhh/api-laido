@@ -24,14 +24,15 @@ import {
     Avatar,
     Chip
 } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Search as SearchIcon,
-    Block as BlockIcon,
-    CheckCircle as CheckCircleIcon
-} from '@mui/icons-material';
+    faPlus,
+    faPenToSquare,
+    faBan,
+    faCircleCheck,
+    faMagnifyingGlass,
+    faImage
+} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 const StaffManager = () => {
@@ -471,14 +472,18 @@ const StaffManager = () => {
                                 }
                             }}
                             InputProps={{
-                                startAdornment: <SearchIcon sx={{ mr: 1, color: '#2c3e50' }} />
+                                startAdornment: (
+                                    <Box sx={{ mr: 1, color: '#2c3e50' }}>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                    </Box>
+                                )
                             }}
                         />
 
                         {/* Add Button */}
                         <Button
                             variant="contained"
-                            startIcon={<AddIcon />}
+                            startIcon={<FontAwesomeIcon icon={faPlus} />}
                             onClick={() => handleOpenDialog()}
                             sx={{ 
                                 bgcolor: '#2c3e50',
@@ -574,14 +579,14 @@ const StaffManager = () => {
                                                 onClick={() => handleOpenDialog(staff)}
                                                 sx={{ mr: 1 }}
                                             >
-                                                <EditIcon />
+                                                <FontAwesomeIcon icon={faPenToSquare} />
                                             </IconButton>
                                             <IconButton
                                                 color="error"
                                                 onClick={() => handleDelete(staff.id)}
                                                 title={staff.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
                                             >
-                                                {staff.status === 'ACTIVE' ? <BlockIcon /> : <CheckCircleIcon />}
+                                                {staff.status === 'ACTIVE' ? <FontAwesomeIcon icon={faBan} /> : <FontAwesomeIcon icon={faCircleCheck} />}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -632,7 +637,7 @@ const StaffManager = () => {
                                 <Button
                                     variant="outlined"
                                     component="label"
-                                    startIcon={<AddIcon />}
+                                    startIcon={<FontAwesomeIcon icon={faImage} />}
                                     sx={{ 
                                         color: '#2c3e50',
                                         borderColor: '#2c3e50',

@@ -202,14 +202,6 @@
     accent-color: #2196f3;
 }
 
-.MuiFormControl-root {
-    margin: 0 !important;
-}
-
-.MuiInputBase-root {
-    background-color: white !important;
-}
-
 .select-all-btn {
     padding: 8px 16px;
     border: 1px solid #2196f3;

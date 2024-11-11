@@ -22,12 +22,13 @@ import {
     Alert,
     Snackbar
 } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Search as SearchIcon
-} from '@mui/icons-material';
+    faPlus,
+    faPenToSquare,
+    faTrash,
+    faMagnifyingGlass
+} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 const StaffGroup = () => {
@@ -158,13 +159,17 @@ const StaffGroup = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             sx={{ width: '300px' }}
                             InputProps={{
-                                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                                startAdornment: (
+                                    <Box sx={{ mr: 1, color: 'text.secondary' }}>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                    </Box>
+                                )
                             }}
                         />
 
                         <Button
                             variant="contained"
-                            startIcon={<AddIcon />}
+                            startIcon={<FontAwesomeIcon icon={faPlus} />}
                             onClick={() => handleOpenDialog()}
                             sx={{ 
                                 bgcolor: '#2c3e50', 
@@ -202,11 +207,17 @@ const StaffGroup = () => {
                                             />
                                         </TableCell>
                                         <TableCell align="right">
-                                            <IconButton onClick={() => handleOpenDialog(group)}>
-                                                <EditIcon />
+                                            <IconButton 
+                                                onClick={() => handleOpenDialog(group)}
+                                                color="primary"
+                                            >
+                                                <FontAwesomeIcon icon={faPenToSquare} />
                                             </IconButton>
-                                            <IconButton onClick={() => handleDelete(group.id)}>
-                                                <DeleteIcon />
+                                            <IconButton 
+                                                onClick={() => handleDelete(group.id)}
+                                                color="error"
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>

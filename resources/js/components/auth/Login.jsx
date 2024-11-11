@@ -10,13 +10,14 @@ import {
     IconButton,
     Avatar
 } from '@mui/material';
-import {
-    Email as EmailIcon,
-    Lock as LockIcon,
-    Visibility,
-    VisibilityOff,
-    AdminPanelSettings as AdminIcon
-} from '@mui/icons-material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faUser, 
+    faLock, 
+    faEye, 
+    faEyeSlash, 
+    faUserShield 
+} from '@fortawesome/free-solid-svg-icons';
 import '../../../css/login-bg.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -133,7 +134,7 @@ const Login = () => {
                                     height: 56
                                 }}
                             >
-                                <AdminIcon fontSize="large" />
+                                <FontAwesomeIcon icon={faUserShield} size="lg" />
                             </Avatar>
                             <Typography component="h1" variant="h5" sx={{ mt: 1 }}>
                                 Đăng nhập Admin
@@ -160,7 +161,7 @@ const Login = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <EmailIcon />
+                                            <FontAwesomeIcon icon={faUser} />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -184,7 +185,7 @@ const Login = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LockIcon />
+                                            <FontAwesomeIcon icon={faLock} />
                                         </InputAdornment>
                                     ),
                                     endAdornment: (
@@ -193,7 +194,7 @@ const Login = () => {
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 edge="end"
                                             >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                {showPassword ? <FontAwesomeIcon icon={faEyeSlash} /> : <FontAwesomeIcon icon={faEye} />}
                                             </IconButton>
                                         </InputAdornment>
                                     ),
