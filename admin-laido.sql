@@ -38,7 +38,8 @@ CREATE TABLE `admin-laido`.`gate` (
 
 CREATE TABLE `admin-laido`.`gate_shift` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `new_tablecol` VARCHAR(45) NULL,
+  `date` DATE NOT NULL,
+  `staff_group_id` INT NOT NULL,
   `gate_id` INT NOT NULL,
   `current_index` INT NOT NULL DEFAULT 1,
   `status` VARCHAR(45) NULL DEFAULT 'ACTIVE',

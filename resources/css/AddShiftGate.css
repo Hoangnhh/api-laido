@@ -28,21 +28,25 @@
 }
 
 .search-section {
+    margin-bottom: 16px;
+}
+
+.search-row {
     display: flex;
-    align-items: center;
     gap: 16px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eee;
-    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-.search-section .group-select {
-    width: 200px;
+.search-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1;
 }
 
-.search-section .search-input {
-    width: 240px;
+.search-input {
+    width: 200px !important;
 }
 
 .filter-buttons {
@@ -77,6 +81,7 @@
     align-items: center;
     gap: 12px;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .staff-card:hover {
@@ -137,7 +142,7 @@
 }
 
 .group-select {
-    width: 200px;
+    width: 250px !important;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -203,34 +208,56 @@
 }
 
 .select-all-btn {
+    white-space: nowrap;
     padding: 8px 16px;
-    border: 1px solid #2196f3;
+    height: 40px;
+    border: 1px solid #ddd;
     border-radius: 4px;
     background: white;
-    color: #2196f3;
-    font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    margin-left: auto;
+    transition: all 0.3s;
 }
 
 .select-all-btn:hover {
-    background: #f5f9ff;
+    background: #f5f5f5;
 }
 
 .select-all-btn.active {
-    background: #2196f3;
+    background: #1976d2;
     color: white;
+    border-color: #1976d2;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .search-row {
+        flex-wrap: wrap;
+    }
+    
+    .search-container {
+        width: 100%;
+        margin-top: 8px;
+    }
 }
 
 @media (max-width: 768px) {
-    .search-section {
-        gap: 10px;
+    .search-row {
+        flex-direction: column;
     }
-    
+
+    .date-picker,
+    .group-select,
+    .search-input {
+        width: 100% !important;
+    }
+
+    .search-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+
     .select-all-btn {
         width: 100%;
-        margin-top: 10px;
     }
 }
 
@@ -251,4 +278,282 @@
 /* Điều chỉnh khoảng cách giữa các fields */
 .selected-staff .MuiFormControl-root {
     margin-bottom: 16px !important;
+}
+
+/* Thêm styles mới cho highlight effect */
+@keyframes highlightPulse {
+    0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(33, 150, 243, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+}
+
+.highlight-select {
+    animation: highlightPulse 1s infinite;
+    border: 2px solid #2196f3;
+}
+
+/* Thêm styles cho phần phân bổ nhân viên */
+.staff-distribution {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.distribution-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.distribution-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.distribution-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.distribution-item .gate-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.distribution-item .staff-count {
+    color: #2196f3;
+    font-weight: 500;
+}
+
+/* Thêm animation cho khi phân bổ thay đổi */
+.distribution-item {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Style cho phần tổng kết và nút tạo ca */
+.assignment-summary {
+    margin-top: 20px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.unassigned-staff {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #fff4e5;
+    border-radius: 4px;
+    color: #663c00;
+}
+
+.unassigned-staff .count {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.create-shift-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.create-shift-btn:hover {
+    background: #1976d2;
+}
+
+.create-shift-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .distribution-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Thêm hiệu ứng loading khi đang tạo ca */
+@keyframes buttonLoading {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.create-shift-btn:disabled {
+    animation: buttonLoading 1s infinite;
+}
+
+.date-picker {
+    margin-bottom: 16px;
+    width: 180px !important;
+}
+
+.highlight-select .MuiOutlinedInput-root {
+    animation: highlight-border 1s infinite;
+}
+
+@keyframes highlight-border {
+    0% {
+        border-color: #1976d2;
+        box-shadow: 0 0 5px #1976d2;
+    }
+    50% {
+        border-color: #90caf9;
+        box-shadow: 0 0 10px #90caf9;
+    }
+    100% {
+        border-color: #1976d2;
+        box-shadow: 0 0 5px #1976d2;
+    }
+}
+
+/* Disable group select when date is not selected */
+.group-select.Mui-disabled {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Đảm bảo các input cùng chiều cao */
+.MuiInputBase-root {
+    height: 40px;
+}
+
+.empty-staff-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 330px);
+    color: #666;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 2px dashed #e0e0e0;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.empty-staff-list:hover {
+    border-color: #2196f3;
+    background: #f8f9fa;
+}
+
+.empty-icon {
+    font-size: 64px;
+    color: #e0e0e0;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.empty-staff-list:hover .empty-icon {
+    color: #2196f3;
+    transform: scale(1.1);
+}
+
+.empty-text {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #2c3e50;
+}
+
+.empty-hint {
+    font-size: 14px;
+    color: #90a4ae;
+    max-width: 80%;
+    line-height: 1.5;
+    background: #f5f5f5;
+    padding: 8px 16px;
+    border-radius: 20px;
+    margin-top: 8px;
+}
+
+/* Thêm animation cho empty state */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Thêm style cho staff đã được phân ca */
+.staff-card.assigned {
+    opacity: 0.8;
+    background: #f8f9fa;
+    border: 1px dashed #ccc;
+}
+
+.staff-assignment {
+    font-size: 12px;
+    color: #f57c00;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.staff-card input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.staff-assignment-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: #fff3e0;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #e65100;
+}
+
+.staff-assignment-info i {
+    font-size: 14px;
+}
+
+/* Điều chỉnh layout khi không có checkbox */
+.staff-card.assigned .staff-info {
+    padding-left: 8px;
+}
+
+/* Thêm hiệu ứng hover nhẹ */
+.staff-card.assigned:hover {
+    border-color: #ffb74d;
+    background: #fff8e1;
 }

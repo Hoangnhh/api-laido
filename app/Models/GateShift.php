@@ -10,6 +10,8 @@ class GateShift extends Model
     protected $table = 'gate_shift';
 
     protected $fillable = [
+        'date',
+        'staff_group_id',
         'gate_id',
         'current_index',
         'status'
@@ -22,5 +24,10 @@ class GateShift extends Model
     public function gate(): BelongsTo
     {
         return $this->belongsTo(Gate::class);
+    }
+
+    public function staffGroup(): BelongsTo
+    {
+        return $this->belongsTo(StaffGroup::class);
     }
 } 

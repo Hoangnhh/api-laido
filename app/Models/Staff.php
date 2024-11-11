@@ -45,4 +45,9 @@ class Staff extends Model
     {
         return $this->hasMany(CheckedTicket::class);
     }
+
+    public function gateStaffShifts(): HasMany
+    {
+        return $this->hasMany(GateStaffShift::class);
+    }   
 } 

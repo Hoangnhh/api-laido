@@ -90,4 +90,7 @@ Route::prefix('api/admin')->group(function () {
     Route::apiResource('gates', GateController::class);
     Route::get('/shift-assignments-data', [ShiftAssignmentController::class, 'getData']);
     Route::get('/staffs-by-group/{groupId}', [StaffController::class, 'getStaffsByGroup']);
+    Route::get('/shift-assignments/get-staffs', [ShiftAssignmentController::class, 'getStaffsByGroup']);
+    Route::post('/shift-assignments', [ShiftAssignmentController::class, 'createShiftAssignment'])
+    ->name('admin.shift-assignments.store');
 });

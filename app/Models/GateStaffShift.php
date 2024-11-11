@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GateStaffShift extends Model
 {
+    protected $table = 'gate_staff_shift';
     protected $fillable = [
         'date',
         'gate_shift_id',
