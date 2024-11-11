@@ -16,10 +16,12 @@ import {
     faChevronRight,
     faBars,
     faAngleLeft,
+    faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
 import logoImage from '../../../assets/logo.png';
+import Loading from '../../common/Loading';
 
 const Sidebar = () => {
     const location = window.location.pathname;
@@ -135,8 +137,13 @@ const Sidebar = () => {
         fetchUser();
     }, []);
 
+    // Thêm state loading
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    // Cập nhật hàm handleLogout
     const handleLogout = async (e) => {
         e.preventDefault();
+        setIsLoggingOut(true);
         
         try {
             const response = await axios.post('/admin/logout', {}, {
@@ -153,6 +160,8 @@ const Sidebar = () => {
         } catch (error) {
             console.error('Logout error:', error);
             alert('Có lỗi xảy ra khi đăng xuất');
+        } finally {
+            setIsLoggingOut(false);
         }
     };
 
@@ -187,88 +196,91 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-header">
-                <div className="sidebar-logo">
-                    <img src={logoImage} alt="Logo" className="logo-image" />
-                    {!collapsed && (
-                        <div className="logo-content">
-                            <span className="logo-text">Admin Panel</span>
-                            {user && <span className="user-name">{user.name}</span>}
-                        </div>
-                    )}
+        <>
+            {isLoggingOut && <Loading message="Đang đăng xuất..." />}
+            <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+                <div className="sidebar-header">
+                    <div className="sidebar-logo">
+                        <img src={logoImage} alt="Logo" className="logo-image" />
+                        {!collapsed && (
+                            <div className="logo-content">
+                                <span className="logo-text">Admin Panel</span>
+                                {user && <span className="user-name">{user.name}</span>}
+                            </div>
+                        )}
+                    </div>
+                    <button 
+                        className="toggle-button"
+                        onClick={toggleSidebar}
+                        title={collapsed ? "Mở rộng" : "Thu gọn"}
+                    >
+                        <FontAwesomeIcon icon={collapsed ? faBars : faAngleLeft} />
+                    </button>
                 </div>
-                <button 
-                    className="toggle-button"
-                    onClick={toggleSidebar}
-                    title={collapsed ? "Mở rộng" : "Thu gọn"}
-                >
-                    <FontAwesomeIcon icon={collapsed ? faBars : faAngleLeft} />
-                </button>
-            </div>
-            <nav className="sidebar-menu">
-                {menuItems.map((item) => (
-                    item.children ? (
-                        <div key={item.text} className="menu-item-group">
-                            <div 
-                                className={`menu-item parent ${openSubmenu === item.text ? 'active' : ''}`}
-                                onClick={() => handleParentClick(item.text)}
-                            >
-                                <div className="menu-content">
-                                    <span className="menu-icon">
-                                        <FontAwesomeIcon icon={item.icon} />
-                                    </span>
-                                    <span className="menu-text">{item.text}</span>
-                                </div>
-                                <span className="arrow-icon">
-                                    <FontAwesomeIcon 
-                                        icon={openSubmenu === item.text ? faChevronDown : faChevronRight} 
-                                    />
-                                </span>
-                            </div>
-                            <div className={`submenu ${openSubmenu === item.text ? 'open' : ''}`}>
-                                {item.children.map((child) => (
-                                    <a
-                                        key={child.text}
-                                        href={child.path}
-                                        className={`menu-item ${location === child.path ? 'active' : ''}`}
-                                    >
+                <nav className="sidebar-menu">
+                    {menuItems.map((item) => (
+                        item.children ? (
+                            <div key={item.text} className="menu-item-group">
+                                <div 
+                                    className={`menu-item parent ${openSubmenu === item.text ? 'active' : ''}`}
+                                    onClick={() => handleParentClick(item.text)}
+                                >
+                                    <div className="menu-content">
                                         <span className="menu-icon">
-                                            <FontAwesomeIcon icon={child.icon} />
+                                            <FontAwesomeIcon icon={item.icon} />
                                         </span>
-                                        <span className="menu-text">{child.text}</span>
-                                    </a>
-                                ))}
+                                        <span className="menu-text">{item.text}</span>
+                                    </div>
+                                    <span className="arrow-icon">
+                                        <FontAwesomeIcon 
+                                            icon={openSubmenu === item.text ? faChevronDown : faChevronRight} 
+                                        />
+                                    </span>
+                                </div>
+                                <div className={`submenu ${openSubmenu === item.text ? 'open' : ''}`}>
+                                    {item.children.map((child) => (
+                                        <a
+                                            key={child.text}
+                                            href={child.path}
+                                            className={`menu-item ${location === child.path ? 'active' : ''}`}
+                                        >
+                                            <span className="menu-icon">
+                                                <FontAwesomeIcon icon={child.icon} />
+                                            </span>
+                                            <span className="menu-text">{child.text}</span>
+                                        </a>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <a
-                            key={item.text}
-                            href={item.path}
-                            className={`menu-item ${location === item.path ? 'active' : ''}`}
+                        ) : (
+                            <a
+                                key={item.text}
+                                href={item.path}
+                                className={`menu-item ${location === item.path ? 'active' : ''}`}
+                            >
+                                <span className="menu-icon">
+                                    <FontAwesomeIcon icon={item.icon} />
+                                </span>
+                                <span className="menu-text">{item.text}</span>
+                            </a>
+                        )
+                    ))}
+                    <div className="sidebar-bottom">
+                        <div className="menu-divider"></div>
+                        <a 
+                            href="#" 
+                            className="menu-item logout-item"
+                            onClick={handleLogout}
                         >
                             <span className="menu-icon">
-                                <FontAwesomeIcon icon={item.icon} />
+                                <FontAwesomeIcon icon={faRightFromBracket} />
                             </span>
-                            <span className="menu-text">{item.text}</span>
+                            <span className="menu-text">Đăng xuất</span>
                         </a>
-                    )
-                ))}
-                <div className="sidebar-bottom">
-                    <div className="menu-divider"></div>
-                    <a 
-                        href="#" 
-                        className="menu-item logout-item" 
-                        onClick={handleLogout}
-                    >
-                        <span className="menu-icon">
-                            <FontAwesomeIcon icon={faRightFromBracket} />
-                        </span>
-                        <span className="menu-text">Đăng xuất</span>
-                    </a>
-                </div>
-            </nav>
-        </aside>
+                    </div>
+                </nav>
+            </aside>
+        </>
     );
 };
 

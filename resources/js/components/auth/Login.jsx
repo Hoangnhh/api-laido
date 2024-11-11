@@ -8,7 +8,8 @@ import {
     Paper,
     InputAdornment,
     IconButton,
-    Avatar
+    Avatar,
+    CircularProgress
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -30,6 +31,7 @@ const Login = () => {
         password: ''
     });
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         // Tạo animation cho background
@@ -55,13 +57,23 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
         
         try {
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1];
+
+            if (!csrfToken) {
+                throw new Error('CSRF token không tìm thấy');
+            }
+
             const response = await fetch('/admin/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-XSRF-TOKEN': decodeURIComponent(csrfToken),
                     'Accept': 'application/json'
                 },
                 credentials: 'include',
@@ -78,6 +90,8 @@ const Login = () => {
         } catch (error) {
             setError('Có lỗi xảy ra khi đăng nhập');
             console.error('Login error:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -209,6 +223,7 @@ const Login = () => {
                                 type="submit"
                                 fullWidth
                                 variant="contained"
+                                disabled={isLoading}
                                 sx={{ 
                                     mt: 3, 
                                     mb: 2,
@@ -223,7 +238,10 @@ const Login = () => {
                                     transition: 'all 0.2s ease-in-out'
                                 }}
                             >
-                                Đăng nhập
+                                {isLoading ? (
+                                    <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
+                                ) : null}
+                                {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
                             </Button>
                         </Box>
                     </Paper>

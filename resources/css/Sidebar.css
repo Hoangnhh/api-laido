@@ -354,3 +354,14 @@
 .menu-item:hover::after {
     transform: translateX(0);
 }
+
+.menu-item.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+}
