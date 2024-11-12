@@ -756,6 +756,11 @@
     color: #e65100;
 }
 
+.count-badge.selected {
+    background-color: #fdfdfd;
+    color: #1976d2;
+}
+
 /* Thêm style mới để đặt badges inline với date picker */
 .date-picker-container {
     display: flex;

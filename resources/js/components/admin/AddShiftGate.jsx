@@ -22,7 +22,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCheck, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUserAlt, faUserCheck, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 const AddShiftGate = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -415,6 +415,12 @@ const AddShiftGate = () => {
                                         <FontAwesomeIcon icon={faUserPlus} className="me-1" />
                                         Chưa phân ca: {getStaffCounts().unassignedCount}
                                     </div>
+                                    {selectedStaffs.length > 0 && (
+                                        <div className="count-badge selected">
+                                            <FontAwesomeIcon icon={faUserAlt} className="me-1" />
+                                            Đã chọn: {selectedStaffs.length}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
