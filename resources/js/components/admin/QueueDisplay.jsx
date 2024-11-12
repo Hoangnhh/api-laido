@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { faVolumeMute, faVolumeUp, faUserClock, faUserCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import '../../../css/QueueDisplay.css';
 
 const QueueDisplay = () => {
-    const [selectedPosition, setSelectedPosition] = useState(1);
+    const [selectedPosition, setSelectedPosition] = useState(0);
     const [staffCode, setStaffCode] = useState('');
     const [error, setError] = useState('');
     const [assignments, setAssignments] = useState([]);
@@ -13,7 +13,8 @@ const QueueDisplay = () => {
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
-    const [isMuted, setIsMuted] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
+    const [showModal, setShowModal] = useState(true);
 
     const inputRef = useRef(null);
 
@@ -25,7 +26,7 @@ const QueueDisplay = () => {
         }, 30000);
 
         return () => clearInterval(intervalId);
-    }, [selectedPosition]);
+    }, [selectedPosition,isMuted]);
 
     useEffect(() => {
         calculateMaxWaitingItems();
@@ -39,7 +40,14 @@ const QueueDisplay = () => {
         }
     }, [checkedInStaff, error]);
 
+    useEffect(() => {
+        if (selectedPosition !== 0) {
+            setShowModal(false);
+        }
+    }, [selectedPosition]);
+
     const fetchAssignments = async () => {
+        if(selectedPosition === 0) return;
         try {
             const response = await axios.get(`/api/admin/get-assignments-by-gate?gate_id=${selectedPosition}`);
             setAssignments(response.data.assignments.waiting);
@@ -110,6 +118,15 @@ const QueueDisplay = () => {
     };
 
     const renderWaitingList = () => {
+        if (!assignments || assignments.length === 0) {
+            return (
+                <div className="qd-empty-state">
+                    <FontAwesomeIcon icon={faUserClock} className="qd-empty-icon" />
+                    <p>Không có nhân viên nào trong danh sách chờ</p>
+                </div>
+            );
+        }
+
         return assignments
             .slice(0, maxWaitingItems)
             .map((assignment) => (
@@ -133,6 +150,15 @@ const QueueDisplay = () => {
     };
 
     const renderCheckedInList = () => {
+        if (!checkedInAssignments || checkedInAssignments.length === 0) {
+            return (
+                <div className="qd-empty-state">
+                    <FontAwesomeIcon icon={faUserCheck} className="qd-empty-icon" />
+                    <p>Chưa có nhân viên nào checkin</p>
+                </div>
+            );
+        }
+
         return checkedInAssignments
             .slice(0, maxWaitingItems)
             .map((assignment) => (
@@ -193,6 +219,21 @@ const QueueDisplay = () => {
         }
     };
 
+    const Modal = ({ isOpen, onClose, children }) => {
+        if (!isOpen) return null;
+
+        return (
+            <div className="qd-modal-overlay">
+                <div className="qd-modal">
+                    {children}
+                    <button className="qd-modal-close" onClick={onClose}>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="qd-wrapper">
             <h1 className="qd-title">
@@ -205,6 +246,7 @@ const QueueDisplay = () => {
                             onChange={(e) => setSelectedPosition(Number(e.target.value))}
                             className="qd-position-select"
                         >
+                            <option value={0}>Lựa chọn vị trí</option>
                             {positions.map(pos => (
                                 <option key={pos} value={pos}>Cửa số {pos}</option>
                             ))}
@@ -295,6 +337,23 @@ const QueueDisplay = () => {
                     </div>
                 </div>
             </div>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                <h2>Chọn vị trí Làm Việc</h2>
+                <p>Vui lòng chọn một vị trí để bắt đầu quản lý hàng đợi của bạn</p>
+                <select 
+                    value={selectedPosition}
+                    onChange={(e) => {
+                        setSelectedPosition(Number(e.target.value));
+                        setShowModal(false);
+                    }}
+                    className="qd-position-select"
+                >
+                    <option value={0}>-- Chọn vị trí làm việc --</option>
+                    {positions.map(pos => (
+                        <option key={pos} value={pos}>Cửa số {pos}</option>
+                    ))}
+                </select>
+            </Modal>
        </div>
     );
 };

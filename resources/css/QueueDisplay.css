@@ -706,3 +706,168 @@
 .qd-sound-toggle.muted {
     color: #ff4444;
 }
+
+/* Thêm style cho trạng thái trống */
+.qd-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    margin: 10px 0;
+}
+
+.qd-empty-icon {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+}
+
+.qd-empty-state p {
+    color: #64748b;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Thêm animation nhẹ cho icon */
+@keyframes floatingIcon {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.qd-empty-icon {
+    animation: floatingIcon 2s ease-in-out infinite;
+}
+
+.qd-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+    backdrop-filter: blur(4px);
+}
+
+.qd-modal {
+    background-color: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 450px;
+    width: 100%;
+    position: relative;
+    animation: slideUp 0.3s ease-out;
+    transform-origin: bottom;
+}
+
+.qd-modal h2 {
+    margin-top: 0;
+    color: #1e293b;
+    font-size: 28px;
+    margin-bottom: 12px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.qd-modal p {
+    color: #64748b;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.qd-modal .qd-position-select {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #1e293b;
+    background-color: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+}
+
+.qd-modal .qd-position-select:hover {
+    border-color: #94a3b8;
+    background-color: white;
+}
+
+.qd-modal .qd-position-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background-color: white;
+}
+
+.qd-modal .qd-position-select option {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.qd-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.qd-modal-close:hover {
+    color: #475569;
+    background-color: #f1f5f9;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
