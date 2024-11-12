@@ -93,3 +93,13 @@ CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ca lam viec theo cong'
+
+CREATE TABLE `admin-laido`.`system_configs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `key` VARCHAR(45) NOT NULL,
+  `value` TEXT NULL,
+  `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
+  `created_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`))
+COMMENT = 'Lưu thông tin config của system';

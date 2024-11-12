@@ -8,6 +8,7 @@ use App\Models\StaffGroup;
 use App\Models\Staff;
 use App\Models\GateShift;
 use App\Models\GateStaffShift;
+use App\Models\SystemConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -100,7 +101,7 @@ class ShiftAssignmentController extends Controller
             if ($staffCount !== count($request->staff_ids)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Một số nhân viên không thuộc nhóm này'
+                    'message' => 'Một số nhân vi��n không thuộc nhóm này'
                 ], 422);
             }
 
@@ -190,7 +191,7 @@ class ShiftAssignmentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Có lỗi xảy ra khi phân ca',
+                'message' => 'C�� lỗi xảy ra khi phân ca',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -237,6 +238,76 @@ class ShiftAssignmentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Có lỗi xảy ra khi lấy danh sách nhân viên',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy thông tin dashboard phân ca
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAssignmentDashboard(Request $request)
+    {
+        try {
+            $date = $request->input('date') ?? SystemConfig::getConfig('CURRENT_SHIFT_DATE');
+            
+            if (!$date) {
+                $date = now()->format('Y-m-d');
+            }
+
+            $shiftData = GateShift::where('date', $date)
+                ->where('status', 'ACTIVE')
+                ->with(['staffGroup:id,name', 'gate:id,name'])
+                ->withCount('gateStaffShifts')
+                ->get()
+                ->map(function ($shift) {
+                    // Lấy thống kê index
+                    $indexStats = GateStaffShift::where('gate_shift_id', $shift->id)
+                        ->selectRaw('MIN(`index`) as min_index, MAX(`index`) as max_index')
+                        ->first();
+
+                    // Nếu current_index = 0 thì gán bằng min_index
+                    $currentIndex = $shift->current_index == 0 ? 
+                        $indexStats->min_index : 
+                        $shift->current_index;
+
+                    // Đếm số người đã và chưa checkin
+                    $checkedInCount = GateStaffShift::where('gate_shift_id', $shift->id)
+                        ->where('index', '<', $currentIndex)
+                        ->count();
+
+                    $remainingCount = GateStaffShift::where('gate_shift_id', $shift->id)
+                        ->where('index', '>=', $currentIndex)
+                        ->count();
+
+                    return [
+                        'id' => $shift->id,
+                        'gate_id' => $shift->gate->id,
+                        'gate_name' => $shift->gate->name,
+                        'staff_group_id' => $shift->staffGroup->id,
+                        'staff_group_name' => $shift->staffGroup->name,
+                        'staff_count' => $shift->gate_staff_shifts_count,
+                        'min_index' => $indexStats->min_index,
+                        'max_index' => $indexStats->max_index,
+                        'current_index' => $currentIndex,
+                        'checked_in_count' => $checkedInCount,
+                        'remaining_count' => $remainingCount,
+                        'total_staff' => $checkedInCount + $remainingCount
+                    ];
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'date' => $date,
+                'shifts' => $shiftData,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy thông tin dashboard',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GateShift extends Model
 {
@@ -29,5 +30,10 @@ class GateShift extends Model
     public function staffGroup(): BelongsTo
     {
         return $this->belongsTo(StaffGroup::class);
+    }
+
+    public function gateStaffShifts(): HasMany
+    {
+        return $this->hasMany(GateStaffShift::class, 'gate_shift_id');
     }
 } 
