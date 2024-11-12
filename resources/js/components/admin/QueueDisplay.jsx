@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import '../../../css/QueueDisplay.css';
 
 const QueueDisplay = () => {
@@ -11,6 +13,8 @@ const QueueDisplay = () => {
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
+    const [lastAnnouncedStaff, setLastAnnouncedStaff] = useState(null);
+    const [isMuted, setIsMuted] = useState(false);
 
     const inputRef = useRef(null);
 
@@ -41,6 +45,14 @@ const QueueDisplay = () => {
             const response = await axios.get(`/api/admin/get-assignments-by-gate?gate_id=${selectedPosition}`);
             setAssignments(response.data.assignments.waiting);
             setCheckedInAssignments(response.data.assignments.checkin);
+
+            const firstWaitingStaff = response.data.assignments.waiting[0];
+            if (firstWaitingStaff && 
+                (!lastAnnouncedStaff || lastAnnouncedStaff !== firstWaitingStaff.staff.id)) {
+                setLastAnnouncedStaff(firstWaitingStaff.staff.id);
+                await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
+            }
+
         } catch (err) {
             console.error('Lỗi khi lấy danh sách phân ca:', err);
         }
@@ -145,6 +157,42 @@ const QueueDisplay = () => {
         ));
     };
 
+    const announceStaff = async (staffName, staffIndex) => {
+        if (isMuted) return;
+        
+        try {
+            const response = await axios.post(
+                'https://texttospeech.googleapis.com/v1/text:synthesize',
+                {
+                    input: {
+                        text: `Mời lái đò số thứ tự ${staffIndex} ,${staffName}, tới cửa số ${selectedPosition} để checkin`
+                    },
+                    voice: {
+                        languageCode: 'vi-VN',
+                        name: 'vi-VN-Wavenet-A',
+                        ssmlGender: 'FEMALE'
+                    },
+                    audioConfig: {
+                        audioEncoding: 'MP3',
+                        pitch: 0,
+                        speakingRate: 1
+                    }
+                },
+                {
+                    params: {
+                        key: 'AIzaSyCs1WxI4euLChHIacdFZr1g00xgjAVmENA'
+                    }
+                }
+            );
+
+            const audio = new Audio(`data:audio/mp3;base64,${response.data.audioContent}`);
+            await audio.play();
+
+        } catch (error) {
+            console.error('Lỗi khi đọc tên nhân viên:', error);
+        }
+    };
+
     return (
         <div className="qd-wrapper">
             <h1 className="qd-title">
@@ -161,6 +209,16 @@ const QueueDisplay = () => {
                                 <option key={pos} value={pos}>Cửa số {pos}</option>
                             ))}
                         </select>
+                        <button 
+                            className={`qd-sound-toggle ${isMuted ? 'muted' : ''}`}
+                            onClick={() => setIsMuted(!isMuted)}
+                            title={isMuted ? 'Bật loa' : 'Tắt loa'}
+                        >
+                            <FontAwesomeIcon 
+                                icon={isMuted ? faVolumeMute : faVolumeUp} 
+                                className="fa-icon"
+                            />
+                        </button>
                     </div>
                 </div>
             </h1>

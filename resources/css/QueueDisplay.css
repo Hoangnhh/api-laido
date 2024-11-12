@@ -684,3 +684,25 @@
     font-weight: 600;
     color: #059669; /* Màu sắc khác để phân biệt */
 }
+
+.qd-sound-toggle {
+    background: none;
+    border: none;
+    color: white;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+}
+
+.qd-sound-toggle:hover {
+    opacity: 0.8;
+}
+
+.qd-sound-toggle.muted {
+    color: #ff4444;
+}
