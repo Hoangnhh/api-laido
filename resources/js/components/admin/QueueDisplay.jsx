@@ -92,7 +92,6 @@ const QueueDisplay = () => {
 
     const renderWaitingList = () => {
         return assignments
-            .filter(assignment => assignment.status === 'WAITING')
             .slice(0, maxWaitingItems)
             .map((assignment) => (
                 <div key={assignment.staff.id} className="qd-waiting-item">
@@ -115,9 +114,11 @@ const QueueDisplay = () => {
     };
 
     const renderCheckedInList = () => {
-        return checkedInAssignments.map((assignment) => (
-            <div key={assignment.staff.id} className="qd-checkedin-item">
-                <div className="qd-checkedin-number">{assignment.index}</div>
+        return checkedInAssignments
+            .slice(0, maxWaitingItems)
+            .map((assignment) => (
+                <div key={assignment.staff.id} className="qd-checkedin-item">
+                    <div className="qd-checkedin-number">{assignment.index}</div>
                 <div className="qd-checkedin-info">
                     <div className="qd-checkedin-header">
                         <div className="qd-checkedin-name">
