@@ -13,7 +13,6 @@ const QueueDisplay = () => {
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
-    const [lastAnnouncedStaff, setLastAnnouncedStaff] = useState(null);
     const [isMuted, setIsMuted] = useState(true);
 
     const inputRef = useRef(null);
@@ -47,9 +46,7 @@ const QueueDisplay = () => {
             setCheckedInAssignments(response.data.assignments.checkin);
 
             const firstWaitingStaff = response.data.assignments.waiting[0];
-            if (firstWaitingStaff && 
-                (!lastAnnouncedStaff || lastAnnouncedStaff !== firstWaitingStaff.staff.id)) {
-                setLastAnnouncedStaff(firstWaitingStaff.staff.id);
+            if (firstWaitingStaff) {
                 await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
             }
 
