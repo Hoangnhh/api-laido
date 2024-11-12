@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../../../css/QueueDisplay.css';
 
@@ -12,12 +12,30 @@ const QueueDisplay = () => {
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
 
+    const inputRef = useRef(null);
+
     useEffect(() => {
         fetchAssignments();
         calculateMaxWaitingItems();
         window.addEventListener('resize', calculateMaxWaitingItems);
         return () => window.removeEventListener('resize', calculateMaxWaitingItems);
     }, [selectedPosition]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }, 2000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [checkedInStaff, error]);
 
     const fetchAssignments = async () => {
         try {
@@ -58,7 +76,7 @@ const QueueDisplay = () => {
             setStaffCode('');
             
         } catch (err) {
-            console.log(err);
+            setStaffCode('');
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkin');
             
             if (err.response?.data?.data?.staff) {
@@ -148,7 +166,7 @@ const QueueDisplay = () => {
             </h1>
             <div className="qd-container">
                 <div className="qd-section qd-search">
-                    <h2>Tìm kiếm nhân viên</h2>
+                    <h2>CHECKIN NHÂN VIÊN</h2>
                     <div className="qd-content">
                         <form onSubmit={handleSubmit} className="qd-search-form">
                             <input
@@ -157,6 +175,7 @@ const QueueDisplay = () => {
                                 onChange={(e) => setStaffCode(e.target.value.toUpperCase())}
                                 placeholder="Nhập mã nhân viên..."
                                 className="qd-search-input"
+                                ref={inputRef}
                             />
                             <button type="submit" className="qd-search-button">
                                 Tìm kiếm
