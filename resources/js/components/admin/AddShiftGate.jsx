@@ -318,6 +318,13 @@ const AddShiftGate = () => {
         return filteredStaffs.filter(staff => !staff.is_assigned).length;
     };
 
+    // Thêm hàm tính toán số lượng nhân viên
+    const getStaffCounts = () => {
+        const assignedCount = staffs.filter(staff => staff.is_assigned).length;
+        const unassignedCount = staffs.filter(staff => !staff.is_assigned).length;
+        return { assignedCount, unassignedCount };
+    };
+
     if (loading) {
         return (
             <AdminLayout>
@@ -398,6 +405,18 @@ const AddShiftGate = () => {
                                     )}
                                 </div>
                             </div>
+                            {staffs.length > 0 && (
+                                <div className="staff-counts-info">
+                                    <div className="count-badge assigned">
+                                        <FontAwesomeIcon icon={faUserCheck} className="me-1" />
+                                        Đã phân ca: {getStaffCounts().assignedCount}
+                                    </div>
+                                    <div className="count-badge unassigned">
+                                        <FontAwesomeIcon icon={faUserPlus} className="me-1" />
+                                        Chưa phân ca: {getStaffCounts().unassignedCount}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="staff-list-container">

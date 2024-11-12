@@ -726,3 +726,39 @@
     white-space: normal;
     word-break: break-word;
 }
+
+.staff-counts-info {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.count-badge {
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.count-badge svg {
+    font-size: 0.75rem;
+}
+
+.count-badge.assigned {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.count-badge.unassigned {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+/* Thêm style mới để đặt badges inline với date picker */
+.date-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
