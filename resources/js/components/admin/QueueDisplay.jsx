@@ -7,6 +7,7 @@ const QueueDisplay = () => {
     const [staffCode, setStaffCode] = useState('');
     const [error, setError] = useState('');
     const [assignments, setAssignments] = useState([]);
+    const [checkedInAssignments, setCheckedInAssignments] = useState([]);
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
@@ -21,7 +22,8 @@ const QueueDisplay = () => {
     const fetchAssignments = async () => {
         try {
             const response = await axios.get(`/api/admin/get-assignments-by-gate?gate_id=${selectedPosition}`);
-            setAssignments(response.data.assignments);
+            setAssignments(response.data.assignments.waiting);
+            setCheckedInAssignments(response.data.assignments.checkin);
         } catch (err) {
             console.error('Lỗi khi lấy danh sách phân ca:', err);
         }
@@ -47,17 +49,16 @@ const QueueDisplay = () => {
                 fetchAssignments();
             } else {
                 setError(response.data.message);
-                if (response.data.data?.staff) {
-                    setCheckedInStaff({
-                        staff: response.data.data.staff,
-                        error: true
-                    });
-                }
+                setCheckedInStaff({
+                    ...response.data.data,
+                    error: true
+                });
             }
             
             setStaffCode('');
             
         } catch (err) {
+            console.log(err);
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkin');
             
             if (err.response?.data?.data?.staff) {
@@ -91,7 +92,7 @@ const QueueDisplay = () => {
                     <div className="qd-waiting-info">
                         <div className="qd-waiting-header">
                             <div className="qd-waiting-name">
-                                {assignment.staff?.name} ({assignment.staff?.code})
+                                {assignment.staff?.name}
                             </div>
                             <div className="qd-waiting-group">
                                 {assignment.staff?.group_name || 'Chưa phân nhóm'}
@@ -103,6 +104,27 @@ const QueueDisplay = () => {
                     </div>
                 </div>
             ));
+    };
+
+    const renderCheckedInList = () => {
+        return checkedInAssignments.map((assignment) => (
+            <div key={assignment.staff.id} className="qd-checkedin-item">
+                <div className="qd-checkedin-number">{assignment.index}</div>
+                <div className="qd-checkedin-info">
+                    <div className="qd-checkedin-header">
+                        <div className="qd-checkedin-name">
+                            {assignment.staff?.name}
+                        </div>
+                        <div className="qd-checkedin-group">
+                            {assignment.staff?.group_name || 'Chưa phân nhóm'}
+                        </div>
+                    </div>
+                    <div className="qd-checkedin-details">
+                        <span className="qd-checkedin-code">Mã NV: {assignment.staff?.code}</span>
+                    </div>
+                </div>
+            </div>
+        ));
     };
 
     return (
@@ -147,7 +169,7 @@ const QueueDisplay = () => {
                                     <img src={checkedInStaff.staff.avatar_url || "/images/default-avatar.png"} alt="" />
                                 </div>
                                 <div className="qd-staff-number">
-                                    #{!checkedInStaff.error ? (checkedInStaff.assignment?.index || "000") : "000"}
+                                    #{checkedInStaff.assignment?.index || "000"}
                                 </div>
                                 <div className="qd-staff-details">
                                     <div className="qd-info-row">
@@ -189,19 +211,10 @@ const QueueDisplay = () => {
                     </div>
                 </div>
 
-                <div className="qd-combined-section">
-                    <div className="qd-section qd-serving">
-                        <h2>Nhân viên đã checkin</h2>
-                        <div className="qd-content">
-                            {/* Danh sách số đang phục vụ */}
-                        </div>
-                    </div>
-
-                    <div className="qd-section qd-missed">
-                        <h2>Qua lượt</h2>
-                        <div className="qd-content">
-                            {/* Danh sách số qua lượt */}
-                        </div>
+                <div className="qd-section qd-serving">
+                    <h2>Nhân viên đã checkin</h2>
+                    <div className="qd-content">
+                        {renderCheckedInList()}
                     </div>
                 </div>
             </div>
