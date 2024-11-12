@@ -370,7 +370,7 @@ class ShiftAssignmentController extends Controller
                 $nextGateShift = GateShift::where('gate_id', $request->gate_id)
                     ->where('queue_status', GateShift::QUEUE_STATUS_WAITING)
                     ->where('status', GateShift::STATUS_ACTIVE)
-                    ->where('date', '<=', now()->format('Y-m-d'))
+                    ->where('date', '<=', now()->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d'))
                     ->orderBy('date')
                     ->first();
 
