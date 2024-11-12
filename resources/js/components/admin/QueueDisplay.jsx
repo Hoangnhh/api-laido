@@ -14,7 +14,7 @@ const QueueDisplay = () => {
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
     const [lastAnnouncedStaff, setLastAnnouncedStaff] = useState(null);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
 
     const inputRef = useRef(null);
 
