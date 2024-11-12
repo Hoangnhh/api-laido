@@ -46,7 +46,6 @@ const QueueDisplay = () => {
             setCheckedInAssignments(response.data.assignments.checkin);
 
             const firstWaitingStaff = response.data.assignments.waiting[0];
-            console.log(firstWaitingStaff);
             if (firstWaitingStaff) {
                 await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
             }
@@ -156,6 +155,8 @@ const QueueDisplay = () => {
     };
 
     const announceStaff = async (staffName, staffIndex) => {
+        
+        console.log("announceStaff",staffName,staffIndex,isMuted);
         if (isMuted) return;
         
         try {
