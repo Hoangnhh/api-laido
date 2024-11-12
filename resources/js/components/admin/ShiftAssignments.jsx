@@ -21,6 +21,186 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { Snackbar, Alert } from '@mui/material';
 
+// Tách TransferPopup thành component riêng để tránh re-render
+const TransferPopup = React.memo(({ 
+    showTransferPopup,
+    transferInfo,
+    sourceInfo,
+    targetInfo,
+    shifts,
+    transferAmount,
+    tempReason,
+    transferReason,
+    handleReasonChange,
+    handleTransfer,
+    handleBalance,
+    setTransferAmount,
+    setShowTransferPopup,
+    setTransferReason
+}) => {
+    if (!showTransferPopup) return null;
+
+    const currentShift = shifts.find(s => s.id === transferInfo.shiftId);
+    
+    // Tính toán số lượng sau khi chuyển
+    const sourceRemaining = sourceInfo?.remaining_count - transferAmount;
+    const targetRemaining = targetInfo?.remaining_count + transferAmount;
+
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content transfer-popup">
+                <h3>Xác nhận điều chuyển nhân viên</h3>
+                
+                <div className="transfer-info">
+                    <div className="shift-info-header">
+                        <div className="current-shift">
+                            <FontAwesomeIcon icon={faTag} className="shift-icon" />
+                            <span>Ca: {currentShift?.name}</span>
+                        </div>
+                    </div>
+
+                    <div className="gates-container">
+                        <div className="gate-detail source">
+                            <h4>Vị trí chuyển đi</h4>
+                            <div className="gate-name">
+                                <FontAwesomeIcon icon={faDesktop} />
+                                <span>{transferInfo.sourceGate?.name}</span>
+                            </div>
+                            <div className="gate-stats-grid">
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faUsers} className="stat-icon" />
+                                    <span className="stat-value">{sourceInfo?.total_staff || 0}</span>
+                                    <span className="stat-label">Tổng</span>
+                                </div>
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
+                                    <span className="stat-value checked">{sourceInfo?.checked_in_count || 0}</span>
+                                    <span className="stat-label">Đã check-in</span>
+                                </div>
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
+                                    <span className="stat-value remaining">{sourceInfo?.remaining_count || 0}</span>
+                                    <span className="stat-label">Còn lại</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="transfer-arrow">
+                            <FontAwesomeIcon icon={faArrowRight} size="lg" />
+                        </div>
+
+                        <div className="gate-detail target">
+                            <h4>Vị trí chuyển đến</h4>
+                            <div className="gate-name">
+                                <FontAwesomeIcon icon={faDesktop} />
+                                <span>{transferInfo.targetGate?.name}</span>
+                            </div>
+                            <div className="gate-stats-grid">
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faUsers} className="stat-icon" />
+                                    <span className="stat-value">{targetInfo?.total_staff || 0}</span>
+                                    <span className="stat-label">Tổng</span>
+                                </div>
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
+                                    <span className="stat-value checked">{targetInfo?.checked_in_count || 0}</span>
+                                    <span className="stat-label">Đã check-in</span>
+                                </div>
+                                <div className="stat-item">
+                                    <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
+                                    <span className="stat-value remaining">{targetInfo?.remaining_count || 0}</span>
+                                    <span className="stat-label">Còn lại</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="transfer-details">
+                        <div className="transfer-preview">
+                            <div className="preview-header">
+                                <h4>Dự kiến sau khi chuyển</h4>
+                                <button 
+                                    className="balance-button"
+                                    onClick={handleBalance}
+                                    title="Cân bằng số lượng giữa 2 cổng"
+                                >
+                                    <FontAwesomeIcon icon={faBalanceScale} />
+                                    Cân bằng 2 bên
+                                </button>
+                            </div>
+                            <div className="preview-stats">
+                                <div className="preview-item">
+                                    <span className="gate-name">{transferInfo.sourceGate?.name}</span>
+                                    <div className="preview-count">
+                                        <span className="current">{sourceInfo?.remaining_count}</span>
+                                        <FontAwesomeIcon icon={faArrowRight} className="arrow" />
+                                        <span className="after">{sourceRemaining}</span>
+                                    </div>
+                                </div>
+                                <div className="preview-item">
+                                    <span className="gate-name">{transferInfo.targetGate?.name}</span>
+                                    <div className="preview-count">
+                                        <span className="current">{targetInfo?.remaining_count}</span>
+                                        <FontAwesomeIcon icon={faArrowRight} className="arrow" />
+                                        <span className="after">{targetRemaining}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="amount-input">
+                            <label>Số lượng điều chuyển:</label>
+                            <input 
+                                type="number"
+                                min="1"
+                                max={transferInfo.maxAmount}
+                                value={transferAmount}
+                                onChange={(e) => setTransferAmount(Math.min(
+                                    Math.max(1, parseInt(e.target.value) || 0),
+                                    transferInfo.maxAmount
+                                ))}
+                            />
+                            <span className="max-amount">
+                                (Tối đa: {transferInfo.maxAmount})
+                            </span>
+                        </div>
+
+                        <div className="reason-input">
+                            <label>Lý do điều chuyển:</label>
+                            <textarea
+                                value={tempReason}
+                                onChange={handleReasonChange}
+                                placeholder="Nhập lý do điều chuyển..."
+                                rows={3}
+                                className="transfer-reason"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="popup-actions">
+                    <button 
+                        className="cancel-button"
+                        onClick={() => {
+                            setShowTransferPopup(false);
+                            setTransferReason('');
+                        }}
+                    >
+                        Hủy
+                    </button>
+                    <button 
+                        className="confirm-button"
+                        onClick={handleTransfer}
+                        disabled={!transferReason.trim()}
+                    >
+                        Xác nhận điều chuyển
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
+
 const ShiftAssignments = () => {
     const [gates, setGates] = useState([]);
     const [shifts, setShifts] = useState([]);
@@ -43,6 +223,8 @@ const ShiftAssignments = () => {
         severity: 'success'
     });
     const [transferReason, setTransferReason] = useState('');
+    const [tempReason, setTempReason] = useState('');
+    const [reasonTimeout, setReasonTimeout] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -158,11 +340,14 @@ const ShiftAssignments = () => {
                 sourceGateId: transferInfo.sourceGate.id,
                 targetGateId: transferInfo.targetGate.id,
                 shiftId: transferInfo.shiftId,
-                amount: transferAmount
+                amount: transferAmount,
+                reason: transferReason
             });
             
             if (response.data.status === 'success') {
                 setShowTransferPopup(false);
+                setTransferReason('');
+                setTempReason('');
                 fetchDashboardData();
                 showAlert('Chuyển nhân viên thành công', 'success');
             }
@@ -172,181 +357,15 @@ const ShiftAssignments = () => {
         }
     };
 
-    // Thêm component Popup
-    const TransferPopup = () => {
-        if (!showTransferPopup) return null;
-
-        const sourceInfo = getShiftInfo(transferInfo.sourceGate?.id, transferInfo.shiftId);
-        const targetInfo = getShiftInfo(transferInfo.targetGate?.id, transferInfo.shiftId);
-        const currentShift = shifts.find(s => s.id === transferInfo.shiftId);
-
-        // Tính toán số lượng sau khi chuyển
-        const sourceRemaining = sourceInfo?.remaining_count - transferAmount;
-        const targetRemaining = targetInfo?.remaining_count + transferAmount;
-
-        // Hàm cân bằng 2 bên
-        const handleBalance = () => {
-            const totalRemaining = sourceInfo?.remaining_count + targetInfo?.remaining_count;
-            const balanceAmount = Math.floor(totalRemaining / 2);
-            const transferNeeded = sourceInfo?.remaining_count - balanceAmount;
-            
-            if (transferNeeded > 0) {
-                setTransferAmount(Math.min(transferNeeded, transferInfo.maxAmount));
-            }
-        };
-
-        return (
-            <div className="popup-overlay">
-                <div className="popup-content transfer-popup">
-                    <h3>Xác nhận điều chuyển nhân viên</h3>
-                    
-                    <div className="transfer-info">
-                        <div className="shift-info-header">
-                            <div className="current-shift">
-                                <FontAwesomeIcon icon={faTag} className="shift-icon" />
-                                <span>Ca: {currentShift?.name}</span>
-                            </div>
-                        </div>
-
-                        <div className="gates-container">
-                            <div className="gate-detail source">
-                                <h4>Vị trí chuyển đi</h4>
-                                <div className="gate-name">
-                                    <FontAwesomeIcon icon={faDesktop} />
-                                    <span>{transferInfo.sourceGate?.name}</span>
-                                </div>
-                                <div className="gate-stats-grid">
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faUsers} className="stat-icon" />
-                                        <span className="stat-value">{sourceInfo?.total_staff || 0}</span>
-                                        <span className="stat-label">Tổng</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
-                                        <span className="stat-value checked">{sourceInfo?.checked_in_count || 0}</span>
-                                        <span className="stat-label">Đã check-in</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
-                                        <span className="stat-value remaining">{sourceInfo?.remaining_count || 0}</span>
-                                        <span className="stat-label">Còn lại</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="transfer-arrow">
-                                <FontAwesomeIcon icon={faArrowRight} size="lg" />
-                            </div>
-
-                            <div className="gate-detail target">
-                                <h4>Vị trí chuyển đến</h4>
-                                <div className="gate-name">
-                                    <FontAwesomeIcon icon={faDesktop} />
-                                    <span>{transferInfo.targetGate?.name}</span>
-                                </div>
-                                <div className="gate-stats-grid">
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faUsers} className="stat-icon" />
-                                        <span className="stat-value">{targetInfo?.total_staff || 0}</span>
-                                        <span className="stat-label">Tổng</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
-                                        <span className="stat-value checked">{targetInfo?.checked_in_count || 0}</span>
-                                        <span className="stat-label">Đã check-in</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
-                                        <span className="stat-value remaining">{targetInfo?.remaining_count || 0}</span>
-                                        <span className="stat-label">Còn lại</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="transfer-details">
-                            <div className="transfer-preview">
-                                <div className="preview-header">
-                                    <h4>Dự kiến sau khi chuyển</h4>
-                                    <button 
-                                        className="balance-button"
-                                        onClick={handleBalance}
-                                        title="Cân bằng số lượng giữa 2 cổng"
-                                    >
-                                        <FontAwesomeIcon icon={faBalanceScale} />
-                                        Cân bằng 2 bên
-                                    </button>
-                                </div>
-                                <div className="preview-stats">
-                                    <div className="preview-item">
-                                        <span className="gate-name">{transferInfo.sourceGate?.name}</span>
-                                        <div className="preview-count">
-                                            <span className="current">{sourceInfo?.remaining_count}</span>
-                                            <FontAwesomeIcon icon={faArrowRight} className="arrow" />
-                                            <span className="after">{sourceRemaining}</span>
-                                        </div>
-                                    </div>
-                                    <div className="preview-item">
-                                        <span className="gate-name">{transferInfo.targetGate?.name}</span>
-                                        <div className="preview-count">
-                                            <span className="current">{targetInfo?.remaining_count}</span>
-                                            <FontAwesomeIcon icon={faArrowRight} className="arrow" />
-                                            <span className="after">{targetRemaining}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="amount-input">
-                                <label>Số lượng điều chuyển:</label>
-                                <input 
-                                    type="number"
-                                    min="1"
-                                    max={transferInfo.maxAmount}
-                                    value={transferAmount}
-                                    onChange={(e) => setTransferAmount(Math.min(
-                                        Math.max(1, parseInt(e.target.value) || 0),
-                                        transferInfo.maxAmount
-                                    ))}
-                                />
-                                <span className="max-amount">
-                                    (Tối đa: {transferInfo.maxAmount})
-                                </span>
-                            </div>
-
-                            <div className="reason-input">
-                                <label>Lý do điều chuyển:</label>
-                                <textarea
-                                    value={transferReason}
-                                    onChange={(e) => setTransferReason(e.target.value)}
-                                    placeholder="Nhập lý do điều chuyển..."
-                                    rows={3}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="popup-actions">
-                        <button 
-                            className="cancel-button"
-                            onClick={() => {
-                                setShowTransferPopup(false);
-                                setTransferReason('');
-                            }}
-                        >
-                            Hủy
-                        </button>
-                        <button 
-                            className="confirm-button"
-                            onClick={handleTransfer}
-                            disabled={!transferReason.trim()}
-                        >
-                            Xác nhận điều chuyển
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+    // Hàm cân bằng 2 bên
+    const handleBalance = () => {
+        const totalRemaining = sourceInfo?.remaining_count + targetInfo?.remaining_count;
+        const balanceAmount = Math.floor(totalRemaining / 2);
+        const transferNeeded = sourceInfo?.remaining_count - balanceAmount;
+        
+        if (transferNeeded > 0) {
+            setTransferAmount(Math.min(transferNeeded, transferInfo.maxAmount));
+        }
     };
 
     // Helper function để render nội dung cell
@@ -433,6 +452,13 @@ const ShiftAssignments = () => {
         return '#4CAF50';
     };
 
+    // Hàm xử lý debounce cho việc nhập lý do
+    const handleReasonChange = (e) => {
+        const value = e.target.value;
+        setTempReason(value);
+        setTransferReason(value);
+    };
+
     if (loading) {
         return (
             <AdminLayout>
@@ -455,6 +481,7 @@ const ShiftAssignments = () => {
         );
     }
 
+    // Render TransferPopup với props
     return (
         <AdminLayout>
             <div className="shift-assignments">
@@ -547,7 +574,22 @@ const ShiftAssignments = () => {
                         ))}
                     </tbody>
                 </table>
-                <TransferPopup />
+                <TransferPopup 
+                    showTransferPopup={showTransferPopup}
+                    transferInfo={transferInfo}
+                    sourceInfo={getShiftInfo(transferInfo.sourceGate?.id, transferInfo.shiftId)}
+                    targetInfo={getShiftInfo(transferInfo.targetGate?.id, transferInfo.shiftId)}
+                    shifts={shifts}
+                    transferAmount={transferAmount}
+                    tempReason={tempReason}
+                    transferReason={transferReason}
+                    handleReasonChange={handleReasonChange}
+                    handleTransfer={handleTransfer}
+                    handleBalance={handleBalance}
+                    setTransferAmount={setTransferAmount}
+                    setShowTransferPopup={setShowTransferPopup}
+                    setTransferReason={setTransferReason}
+                />
                 
                 <Snackbar 
                     open={alert.open}
