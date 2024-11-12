@@ -22,16 +22,6 @@ const QueueDisplay = () => {
     }, [selectedPosition]);
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            if (inputRef.current) {
-                inputRef.current.focus();
-            }
-        }, 2000);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    useEffect(() => {
         if (inputRef.current) {
             inputRef.current.focus();
         }
