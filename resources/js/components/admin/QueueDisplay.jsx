@@ -46,6 +46,7 @@ const QueueDisplay = () => {
             setCheckedInAssignments(response.data.assignments.checkin);
 
             const firstWaitingStaff = response.data.assignments.waiting[0];
+            console.log(firstWaitingStaff);
             if (firstWaitingStaff) {
                 await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
             }
