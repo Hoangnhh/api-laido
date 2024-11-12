@@ -18,6 +18,7 @@ Route::prefix('admin')->group(function () {
     })->name('admin.login');
     
     Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
     
     Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', function () {
@@ -63,8 +64,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/payment-report', function () {
             return view('admin.payment-report');
         })->name('admin.payment-report');
-        
-        Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
