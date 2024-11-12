@@ -47,6 +47,7 @@ const QueueDisplay = () => {
 
             const firstWaitingStaff = response.data.assignments.waiting[0];
             if (firstWaitingStaff) {
+                console.log("fetchAssignments",isMuted);
                 await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
             }
 
