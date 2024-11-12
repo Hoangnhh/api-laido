@@ -451,7 +451,10 @@ class ShiftAssignmentController extends Controller
             // Lấy thông tin staff và kiểm tra trạng thái
             $staff = Staff::where('code', $request->staff_code)
                           ->where('status', Staff::STATUS_ACTIVE)
+                          ->with('group:id,name')
                           ->firstOrFail();
+            
+            $staff->group_name = $staff->group ? $staff->group->name : 'Chưa phân nhóm';
 
             // Lấy thông tin gate và kiểm tra trạng thái
             $gate = Gate::where('id', $request->gate_id)

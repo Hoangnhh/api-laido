@@ -264,7 +264,7 @@ const QueueDisplay = () => {
                                     <div className="qd-info-row">
                                         <div className="qd-info-label">Ca làm việc:</div>
                                         <div className={`qd-info-value ${checkedInStaff.error ? 'error' : ''}`}>
-                                            {checkedInStaff.staff.group_name || 'Ca 2 (Không hợp lệ)'}
+                                            {checkedInStaff.staff.group_name || 'Chưa phân nhóm'}
                                         </div>
                                     </div>
                                 </div>
