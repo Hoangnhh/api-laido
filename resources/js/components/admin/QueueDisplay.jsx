@@ -16,10 +16,19 @@ const QueueDisplay = () => {
 
     useEffect(() => {
         fetchAssignments();
+        
+        const intervalId = setInterval(() => {
+            fetchAssignments();
+        }, 30000);
+
+        return () => clearInterval(intervalId);
+    }, [selectedPosition]);
+
+    useEffect(() => {
         calculateMaxWaitingItems();
         window.addEventListener('resize', calculateMaxWaitingItems);
         return () => window.removeEventListener('resize', calculateMaxWaitingItems);
-    }, [selectedPosition]);
+    }, []);
 
     useEffect(() => {
         if (inputRef.current) {
