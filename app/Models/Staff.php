@@ -10,6 +10,9 @@ class Staff extends Model
 {
     protected $table = 'staff';
 
+    const STATUS_ACTIVE = 'ACTIVE';
+    const STATUS_INACTIVE = 'INACTIVE';
+
     protected $fillable = [
         'type',
         'group_id',

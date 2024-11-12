@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Gate extends Model
 {
     protected $table = 'gate';
-
+    const STATUS_ACTIVE = 'ACTIVE';
+    const STATUS_INACTIVE = 'INACTIVE';
     protected $fillable = [
         'name',
         'status'

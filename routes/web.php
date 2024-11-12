@@ -48,6 +48,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.add-shift-gate');
         })->name('admin.add-shift-gate');
 
+        Route::get('/queue-display', function () {
+            return view('admin.queue-display');
+        })->name('admin.queue-display');
+
         Route::get('/tickets', function () {
             return view('admin.tickets');
         })->name('admin.tickets');
@@ -94,4 +98,7 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/shift-assignments', [ShiftAssignmentController::class, 'createShiftAssignment'])
     ->name('admin.shift-assignments.store');
     Route::post('/get-assignments-dasboard', [ShiftAssignmentController::class, 'getAssignmentDashboard']);
+    Route::get('/staff/search', [StaffController::class, 'search']);
+    Route::get('/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
+    Route::post('/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
 });

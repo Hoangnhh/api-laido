@@ -101,7 +101,7 @@ class ShiftAssignmentController extends Controller
             if ($staffCount !== count($request->staff_ids)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Một số nhân vi��n không thuộc nhóm này'
+                    'message' => 'Một số nhân viên không thuộc nhóm này'
                 ], 422);
             }
 
@@ -191,7 +191,7 @@ class ShiftAssignmentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'C�� lỗi xảy ra khi phân ca',
+                'message' => 'Có lỗi xảy ra khi phân ca',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -312,4 +312,232 @@ class ShiftAssignmentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Lấy danh sách phân ca theo cửa
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAssignmentByGate(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'gate_id' => 'required|exists:gate,id'
+            ]);
+
+            $assignments = GateStaffShift::with([
+                'staff:id,code,name,group_id',
+                'staff.group:id,name',
+                'gateShift'
+            ])
+                ->whereHas('gateShift', function($query) {
+                    $query->where('queue_status', GateShift::QUEUE_STATUS_RUNNING)
+                        ->where('status', 'ACTIVE');
+                })
+                ->where('gate_id', $request->gate_id)
+                ->orderBy('index')
+                ->get()
+                ->map(function($assignment) {
+                    return [
+                        'index' => $assignment->index,
+                        'staff' => [
+                            'id' => $assignment->staff->id,
+                            'code' => $assignment->staff->code,
+                            'name' => $assignment->staff->name,
+                            'group_id' => $assignment->staff->group_id,
+                            'group_name' => $assignment->staff->group?->name ?? 'Chưa phân nhóm'
+                        ],
+                        'status' => $assignment->status,
+                        'checkin_at' => $assignment->checkin_at?->format('H:i:s'),
+                        'checkout_at' => $assignment->checkout_at?->format('H:i:s'),
+                        'checked_ticket_num' => $assignment->checked_ticket_num,
+                        'gate_shift_id' => $assignment->gate_shift_id
+                    ];
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'assignments' => $assignments
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy danh sách phân ca',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Checkin cho nhân viên
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function staffCheckin(Request $request)
+    {
+        try {
+            // Validate đầu vào
+            $validated = $request->validate([
+                'staff_code' => 'required|exists:staff,code',
+                'gate_id' => 'required|exists:gate,id',
+                'gate_shift_id' => 'required|exists:gate_shift,id'
+            ]);
+
+            // Lấy thông tin staff
+            $staff = Staff::where('code', $request->staff_code)
+                         ->where('status', Staff::STATUS_ACTIVE)
+                         ->first();
+
+            // Chuẩn bị response cơ bản với thông tin nhân viên
+            $response = [
+                'staff' => $staff ? [
+                    'id' => $staff->id,
+                    'code' => $staff->code,
+                    'avatar_url' => $staff->avatar_url,
+                    'name' => $staff->name,
+                    'group_name' => $staff->group?->name ?? 'Chưa phân nhóm',
+                    'status' => $staff->status
+                ] : null
+            ];
+
+            if (!$staff) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Nhân viên không tồn tại hoặc đã bị khóa',
+                    'data' => $response
+                ], 422);
+            }
+
+            // Kiểm tra gate
+            $gate = Gate::find($request->gate_id);
+            if ($gate->status !== Gate::STATUS_ACTIVE) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cửa này hiện không hoạt động',
+                    'data' => $response
+                ], 422);
+            }
+
+            // Kiểm tra ca làm việc
+            $gateShift = GateShift::find($request->gate_shift_id);
+            if ($gateShift->status !== GateShift::STATUS_ACTIVE || $gateShift->queue_status !== GateShift::QUEUE_STATUS_RUNNING) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ca làm việc này đã kết thúc hoặc tạm dừng',
+                    'data' => $response
+                ], 422);
+            }
+
+            // Lấy assignment
+            $assignment = GateStaffShift::where('staff_id', $staff->id)
+                                      ->where('gate_id', $request->gate_id)
+                                      ->where('gate_shift_id', $request->gate_shift_id)
+                                      ->first();
+
+            if (!$assignment) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không tìm thấy lịch phân ca cho nhân viên này',
+                    'data' => $response
+                ], 422);
+            }
+
+            // Thêm thông tin assignment vào response
+            $response['assignment'] = [
+                'index' => $assignment->index,
+                'status' => $assignment->status,
+                'checkin_at' => $assignment->checkin_at?->format('H:i:s'),
+                'gate_name' => $gate->name
+            ];
+
+            if ($assignment->status !== GateStaffShift::STATUS_WAITING) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Nhân viên đã checkin hoặc đã qua lượt',
+                    'data' => $response
+                ], 422);
+            }
+
+            DB::beginTransaction();
+            try {
+                // Kiểm tra xem có phải index nhỏ nhất trong danh sách chờ không
+                $minWaitingIndex = GateStaffShift::where('gate_id', $request->gate_id)
+                    ->where('gate_shift_id', $request->gate_shift_id)
+                    ->where('status', GateStaffShift::STATUS_WAITING)
+                    ->min('index');
+                
+                if ($assignment->index !== $minWaitingIndex) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Chưa đến lượt checkin',
+                        'data' => $response
+                    ], 422);
+                }
+
+                $assignment->update([
+                    'status' => GateStaffShift::STATUS_CHECKIN,
+                    'checkin_at' => now(),
+                    'checked_ticket_num' => 0
+                ]);
+
+                if ($assignment->index > $gateShift->current_index) {
+                    $gateShift->update([
+                        'current_index' => $assignment->index
+                    ]);
+                }
+
+                // Kiểm tra số lượng nhân viên đã checkin
+                $totalStaff = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)->count();
+                $checkedInStaff = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
+                    ->where('status', GateStaffShift::STATUS_CHECKIN)
+                    ->count();
+                
+                // Nếu là nhân viên đầu tiên checkin
+                if ($checkedInStaff == 0) {
+                    $gateShift->update([
+                        'queue_status' => GateShift::QUEUE_STATUS_RUNNING
+                    ]);
+                }
+                // Nếu là nhân viên cuối cùng checkin
+                else if ($checkedInStaff == $totalStaff - 1) {
+                    $gateShift->update([
+                        'queue_status' => GateShift::QUEUE_STATUS_COMPLETED  
+                    ]);
+                    
+                    // Thêm trạng thái shift_end vào response
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Checkin thành công',
+                        'data' => array_merge($response, ['shift_end' => true])
+                    ]);
+                }
+
+                DB::commit();
+
+                // Cập nhật thông tin assignment trong response
+                $response['assignment']['status'] = GateStaffShift::STATUS_CHECKIN;
+                $response['assignment']['checkin_at'] = now()->format('H:i:s');
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Checkin thành công',
+                    'data' => array_merge($response, ['shift_end' => false])
+                ]);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi checkin',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
 } 

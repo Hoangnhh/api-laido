@@ -39,6 +39,7 @@ CREATE TABLE `admin-laido`.`gate` (
 CREATE TABLE `admin-laido`.`gate_shift` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `date` DATE NOT NULL,
+  `queue_status` VARCHAR(45) NOT NULL DEFAULT 'WAITING' COMMENT 'WAITING: Chưa chạy\nRUNING: Đang chạy\nCOMPLETED: Đã chạy xong' ,
   `staff_group_id` INT NOT NULL,
   `gate_id` INT NOT NULL,
   `current_index` INT NOT NULL DEFAULT 1,

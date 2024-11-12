@@ -16,7 +16,8 @@ import {
     faChevronRight,
     faBars,
     faAngleLeft,
-    faSpinner
+    faSpinner,
+    faDisplay
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -38,6 +39,11 @@ const Sidebar = () => {
             text: 'Phân ca', 
             icon: faCalendarAlt,
             path: '/admin/shift-assignments'
+        },
+        { 
+            text: 'Màn hình xếp hàng', 
+            icon: faDisplay,
+            path: '/admin/queue-display'
         },
         { 
             text: 'Quản lý vị trí', 

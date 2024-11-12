@@ -182,4 +182,22 @@ class StaffController extends Controller
             ], 500);
         }
     }
+
+    public function search(Request $request)
+    {
+        try {
+            $code = $request->query('code');
+            $staff = Staff::with('group')
+                         ->where('code', $code)
+                         ->first();
+                         
+            if (!$staff) {
+                return response()->json(['message' => 'Không tìm thấy nhân viên'], 404);
+            }
+            
+            return response()->json($staff);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Có lỗi xảy ra khi tìm kiếm nhân viên'], 500);
+        }
+    }
 } 

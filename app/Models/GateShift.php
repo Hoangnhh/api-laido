@@ -10,8 +10,15 @@ class GateShift extends Model
 {
     protected $table = 'gate_shift';
 
+    const QUEUE_STATUS_WAITING = 'WAITING';
+    const QUEUE_STATUS_RUNNING = 'RUNNING';
+    const QUEUE_STATUS_COMPLETED = 'COMPLETED';
+    const STATUS_ACTIVE = 'ACTIVE';
+    const STATUS_INACTIVE = 'INACTIVE';
+
     protected $fillable = [
         'date',
+        'queue_status',
         'staff_group_id',
         'gate_id',
         'current_index',

@@ -1,0 +1,615 @@
+.qd-wrapper {
+    padding: 25px;
+    background-color: #f9fafb;
+    min-height: 100vh;
+}
+
+.qd-title {
+    text-align: center;
+    padding: 20px 30px;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 600;
+    margin: -25px -25px 0 -25px;
+    background-color: #415c95;
+    border-bottom: 1px solid #1d4ed8;
+    letter-spacing: 1px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
+.qd-position-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 16px;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.qd-position-selector span {
+    color: #ffffff;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+}
+
+.qd-position-select {
+    padding: 8px 35px 8px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    font-size: 15px;
+    color: #2563eb;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231e40af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.qd-position-select:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qd-position-select:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.qd-position-select option {
+    padding: 10px;
+    font-weight: 500;
+    color: #2563eb;
+    background-color: white;
+}
+
+.qd-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-top: 25px;
+    height: calc(100vh - 140px);
+    background-color: #f9fafb;
+}
+
+.qd-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+}
+
+.qd-section:hover {
+    transform: none;
+}
+
+.qd-section h2 {
+    color: #374151;
+    margin: -20px -20px 15px -20px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 20px;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 8px 8px 0 0;
+}
+
+.qd-calling {
+    background: #fff;
+    border-left: 3px solid #fb923c;
+}
+
+.qd-waiting {
+    background: #fff;
+    border-left: 3px solid #60a5fa;
+}
+
+.qd-serving {
+    background: #fff;
+    border-left: 3px solid #34d399;
+}
+
+.qd-missed {
+    background: #fff;
+    border-left: 3px solid #f87171;
+}
+
+.qd-calling h2 {
+    color: #fff;
+    background-color: #fb923c;
+    border-bottom: none;
+}
+
+.qd-waiting h2 {
+    color: #fff;
+    background-color: #60a5fa;
+    border-bottom: none;
+}
+
+.qd-serving h2 {
+    color: #fff;
+    background-color: #34d399;
+    border-bottom: none;
+}
+
+.qd-missed h2 {
+    color: #fff;
+    background-color: #f87171;
+    border-bottom: none;
+}
+
+.qd-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    margin-top: 5px;
+}
+
+.qd-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.qd-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.qd-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.qd-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+.qd-combined-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.qd-combined-section .qd-section {
+    height: calc(50% - 10px);
+}
+
+@media (max-width: 1200px) {
+    .qd-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .qd-combined-section {
+        grid-column: span 2;
+        flex-direction: row;
+    }
+    
+    .qd-combined-section .qd-section {
+        width: 50%;
+        height: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .qd-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .qd-combined-section {
+        grid-column: span 1;
+        flex-direction: column;
+    }
+    
+    .qd-combined-section .qd-section {
+        width: 100%;
+        height: calc(50% - 10px);
+    }
+}
+
+/* Staff search form */
+.qd-staff-search-form {
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.qd-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.qd-staff-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.qd-search-btn {
+    padding: 10px 20px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.qd-error-message {
+    color: #ef4444;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Style cho thông tin nhân viên */
+.qd-staff-info {
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+    padding: 20px;
+}
+
+/* Style cho avatar */
+.qd-staff-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #60a5fa;
+    margin: 0 auto 15px;
+    overflow: hidden;
+}
+
+.qd-staff-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Style cho số thứ tự */
+.qd-staff-number {
+    font-size: 48px;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1;
+    margin: 15px 0;
+}
+
+/* Style cho thông tin chi tiết */
+.qd-staff-details {
+    text-align: left;
+}
+
+.qd-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.qd-info-row:first-of-type {
+    border-top: none;
+}
+
+.qd-info-label {
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+}
+
+.qd-info-value {
+    color: #111827;
+    font-size: 15px;
+    font-weight: 600;
+    flex: 2;
+    text-align: left;
+}
+
+.qd-info-value.error {
+    color: #ef4444;
+}
+
+/* Style cho thông báo lỗi */
+.qd-error {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Waiting list styles */
+.qd-waiting-item {
+    display: flex;
+    align-items: center;
+    padding: 25px;
+    margin-bottom: 15px;
+    border-left: 4px solid #60a5fa;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.qd-waiting-item:hover {
+    transform: translateX(5px);
+    border-left-color: #2563eb;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+}
+
+.qd-waiting-number {
+    font-size: 40px;
+    font-weight: bold;
+    color: #f83b01;
+    min-width: 80px;
+    text-align: center;
+    padding-right: 20px;
+    border-right: 1px solid #e5e7eb;
+}
+
+.qd-waiting-info {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.qd-waiting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.qd-waiting-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qd-waiting-group {
+    font-size: 22px;
+    font-weight: 500;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.qd-waiting-details {
+    display: flex;
+    gap: 20px;
+    color: #64748b;
+    margin-top: 8px;
+}
+
+.qd-waiting-code {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.qd-waiting-time {
+    font-size: 15px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+}
+
+.qd-waiting-time::before {
+    content: "•";
+    margin-right: 8px;
+    color: #cbd5e1;
+}
+
+/* Scroll styles cho content area */
+.qd-content {
+    max-height: calc(100% - 50px);
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.qd-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.qd-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.qd-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.qd-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.qd-waiting .qd-content {
+    padding: 15px;
+    background-color: white;
+    overflow-y: auto;
+    height: calc(100% - 52px);
+}
+
+/* Hover effect */
+.qd-staff-info:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Điều chỉnh padding của waiting item để tối ưu không gian */
+.qd-waiting-item {
+    padding: 25px;
+    margin-bottom: 15px;
+}
+
+/* Thêm transition mượt mà khi thay đổi kích thước */
+.qd-waiting-item {
+    transition: all 0.3s ease;
+}
+
+/* Thêm keyframes cho hiệu ứng nhấp nháy */
+@keyframes blinkingItem {
+    0% {
+        border-left-color: #60a5fa;
+        background: white;
+    }
+    50% {
+        border-left-color: #f83b01;
+        background: #fff1f1;
+    }
+    100% {
+        border-left-color: #60a5fa;
+        background: white;
+    }
+}
+
+/* Style cho item đầu tiên */
+.qd-waiting-item:first-child {
+    animation: blinkingItem 2s ease-in-out infinite;
+    border-left-width: 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Điều chỉnh hover cho item đầu tiên */
+.qd-waiting-item:first-child:hover {
+    animation-play-state: paused;
+    border-left-color: #f83b01;
+    background: #fff1f1;
+    transform: translateX(5px);
+}
+
+/* Tăng độ nổi bật cho số thứ tự của item đầu tiên */
+.qd-waiting-item:first-child .qd-waiting-number {
+    font-size: 44px;
+    color: #f83b01;
+    font-weight: 800;
+}
+
+.qd-checkin-success {
+    background-color: #ecfdf5;
+    border: 1px solid #34d399;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.qd-checkin-success h3 {
+    color: #059669;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.qd-checkin-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.qd-checkin-details p {
+    margin: 0;
+    font-size: 16px;
+    color: #374151;
+}
+
+.qd-checkin-details strong {
+    color: #059669;
+    margin-right: 8px;
+}
+
+/* Cập nhật style cho form tìm kiếm */
+.qd-search-form {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.qd-search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #1e293b;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.qd-search-input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.qd-search-button {
+    padding: 12px 25px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.qd-search-button:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+/* Style cho thông báo */
+.qd-error, .qd-success {
+    margin-top: 16px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.qd-error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+}
+
+.qd-success {
+    background-color: #ecfdf5;
+    border: 1px solid #34d399;
+    color: #059669;
+}

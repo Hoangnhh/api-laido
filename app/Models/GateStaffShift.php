@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GateStaffShift extends Model
 {
     protected $table = 'gate_staff_shift';
+    const STATUS_WAITING = 'WAITING';
+    const STATUS_CHECKIN = 'CHECKIN'; 
+    const STATUS_CHECKOUT = 'CHECKOUT';
     protected $fillable = [
         'date',
         'gate_shift_id',
