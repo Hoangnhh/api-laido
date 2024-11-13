@@ -81,7 +81,7 @@ CREATE TABLE `admin-laido`.`extra_shift` (
 
 CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `date` datetime DEFAULT NULL,
+  `date` DATE DEFAULT NULL,
   `gate_shift_id` int NOT NULL,
   `index` int NOT NULL,
   `gate_id` varchar(45) NOT NULL,

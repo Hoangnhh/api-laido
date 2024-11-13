@@ -12,6 +12,7 @@ use App\Models\SystemConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Carbon\Carbon;
 
 class ShiftAssignmentController extends Controller
 {
@@ -106,10 +107,13 @@ class ShiftAssignmentController extends Controller
             }
 
             // Kiểm tra xem có nhân viên nào đã được phân ca trong ngày chưa
-            $existingAssignments = GateStaffShift::where('date', $request->date)
+            $searchDate = Carbon::parse($request->date)->startOfDay();
+            
+            $existingAssignments = GateStaffShift::whereDate('date', $searchDate)
                 ->whereIn('staff_id', $request->staff_ids)
                 ->with('staff:id,name,code')
                 ->get();
+                
 
             if ($existingAssignments->isNotEmpty()) {
                 $assignedStaffs = $existingAssignments->map(function($assignment) {
@@ -191,9 +195,9 @@ class ShiftAssignmentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Có lỗi xảy ra khi phân ca',
+                'message' => $e->getMessage(),
                 'error' => $e->getMessage()
-            ], 500);
+            ]);
         }
     }
 
@@ -210,13 +214,13 @@ class ShiftAssignmentController extends Controller
             }
 
             $staffs = Staff::where('group_id', $groupId)
-                ->where('status', 'ACTIVE')
+                ->where('status', Staff::STATUS_ACTIVE)
                 ->with(['gateStaffShifts' => function($query) use ($date) {
                     $query->where('date', $date)
                         ->with('gate:id,name');
                 }])
                 ->get()
-                ->map(function($staff) {
+                ->map(function($staff){
                     $assignment = $staff->gateStaffShifts->first();
                     return [
                         'id' => $staff->id,
@@ -483,7 +487,7 @@ class ShiftAssignmentController extends Controller
                 }
                 return response()->json([
                     'status' => 'error',
-                    'message' => $assignedStaffsmessage,
+                    'message' => $message,
                     'data' => ['staff' => $staff]
                 ]);
             }
