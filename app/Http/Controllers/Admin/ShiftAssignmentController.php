@@ -285,11 +285,11 @@ class ShiftAssignmentController extends Controller
 
                     // Đếm số người đã và chưa checkin
                     $checkedInCount = GateStaffShift::where('gate_shift_id', $shift->id)
-                        ->where('index', '<', $currentIndex)
+                        ->where('status', GateStaffShift::STATUS_CHECKIN)
                         ->count();
 
                     $remainingCount = GateStaffShift::where('gate_shift_id', $shift->id)
-                        ->where('index', '>', $currentIndex)
+                        ->where('status', GateStaffShift::STATUS_WAITING)
                         ->count();
 
                     return [

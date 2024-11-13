@@ -10,7 +10,8 @@ import {
     faUserClock,
     faBalanceScale,
     faChevronLeft,
-    faChevronRight
+    faChevronRight,
+    faRotate
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from './Layout/AdminLayout';
 import axios from 'axios';
@@ -20,6 +21,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { Snackbar, Alert } from '@mui/material';
+import Loading from '../common/Loading';
 
 // Tách TransferPopup thành component riêng để tránh re-render
 const TransferPopup = React.memo(({ 
@@ -47,80 +49,80 @@ const TransferPopup = React.memo(({
     const targetRemaining = targetInfo?.remaining_count + transferAmount;
 
     return (
-        <div className="popup-overlay">
-            <div className="popup-content transfer-popup">
+        <div className="sa-popup-overlay">
+            <div className="sa-popup-content sa-transfer-popup">
                 <h3>Xác nhận điều chuyển nhân viên</h3>
                 
-                <div className="transfer-info">
-                    <div className="shift-info-header">
-                        <div className="current-shift">
-                            <FontAwesomeIcon icon={faTag} className="shift-icon" />
+                <div className="sa-transfer-info">
+                    <div className="sa-shift-info-header">
+                        <div className="sa-current-shift">
+                            <FontAwesomeIcon icon={faTag} className="sa-shift-icon" />
                             <span>Ca: {currentShift?.name}</span>
                         </div>
                     </div>
 
-                    <div className="gates-container">
-                        <div className="gate-detail source">
+                    <div className="sa-gates-container">
+                        <div className="sa-gate-detail sa-source">
                             <h4>Vị trí chuyển đi</h4>
-                            <div className="gate-name">
+                            <div className="sa-gate-name">
                                 <FontAwesomeIcon icon={faDesktop} />
                                 <span>{transferInfo.sourceGate?.name}</span>
                             </div>
-                            <div className="gate-stats-grid">
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faUsers} className="stat-icon" />
-                                    <span className="stat-value">{sourceInfo?.total_staff || 0}</span>
-                                    <span className="stat-label">Tổng</span>
+                            <div className="sa-gate-stats-grid">
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faUsers} className="sa-stat-icon" />
+                                    <span className="sa-stat-value">{sourceInfo?.total_staff || 0}</span>
+                                    <span className="sa-stat-label">Tổng</span>
                                 </div>
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
-                                    <span className="stat-value checked">{sourceInfo?.checked_in_count || 0}</span>
-                                    <span className="stat-label">Đã check-in</span>
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faCheckCircle} className="sa-stat-icon checked" />
+                                    <span className="sa-stat-value checked">{sourceInfo?.checked_in_count || 0}</span>
+                                    <span className="sa-stat-label">Đã check-in</span>
                                 </div>
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
-                                    <span className="stat-value remaining">{sourceInfo?.remaining_count || 0}</span>
-                                    <span className="stat-label">Còn lại</span>
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faUserClock} className="sa-stat-icon remaining" />
+                                    <span className="sa-stat-value remaining">{sourceInfo?.remaining_count || 0}</span>
+                                    <span className="sa-stat-label">Còn lại</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="transfer-arrow">
+                        <div className="sa-transfer-arrow">
                             <FontAwesomeIcon icon={faArrowRight} size="lg" />
                         </div>
 
-                        <div className="gate-detail target">
+                        <div className="sa-gate-detail sa-target">
                             <h4>Vị trí chuyển đến</h4>
-                            <div className="gate-name">
+                            <div className="sa-gate-name">
                                 <FontAwesomeIcon icon={faDesktop} />
                                 <span>{transferInfo.targetGate?.name}</span>
                             </div>
-                            <div className="gate-stats-grid">
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faUsers} className="stat-icon" />
-                                    <span className="stat-value">{targetInfo?.total_staff || 0}</span>
-                                    <span className="stat-label">Tổng</span>
+                            <div className="sa-gate-stats-grid">
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faUsers} className="sa-stat-icon" />
+                                    <span className="sa-stat-value">{targetInfo?.total_staff || 0}</span>
+                                    <span className="sa-stat-label">Tổng</span>
                                 </div>
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faCheckCircle} className="stat-icon checked" />
-                                    <span className="stat-value checked">{targetInfo?.checked_in_count || 0}</span>
-                                    <span className="stat-label">Đã check-in</span>
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faCheckCircle} className="sa-stat-icon checked" />
+                                    <span className="sa-stat-value checked">{targetInfo?.checked_in_count || 0}</span>
+                                    <span className="sa-stat-label">Đã check-in</span>
                                 </div>
-                                <div className="stat-item">
-                                    <FontAwesomeIcon icon={faUserClock} className="stat-icon remaining" />
-                                    <span className="stat-value remaining">{targetInfo?.remaining_count || 0}</span>
-                                    <span className="stat-label">Còn lại</span>
+                                <div className="sa-stat-item">
+                                    <FontAwesomeIcon icon={faUserClock} className="sa-stat-icon remaining" />
+                                    <span className="sa-stat-value remaining">{targetInfo?.remaining_count || 0}</span>
+                                    <span className="sa-stat-label">Còn lại</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="transfer-details">
-                        <div className="transfer-preview">
-                            <div className="preview-header">
+                    <div className="sa-transfer-details">
+                        <div className="sa-transfer-preview">
+                            <div className="sa-preview-header">
                                 <h4>Dự kiến sau khi chuyển</h4>
                                 <button 
-                                    className="balance-button"
+                                    className="sa-balance-button"
                                     onClick={handleBalance}
                                     title="Cân bằng số lượng giữa 2 cổng"
                                 >
@@ -128,27 +130,27 @@ const TransferPopup = React.memo(({
                                     Cân bằng 2 bên
                                 </button>
                             </div>
-                            <div className="preview-stats">
-                                <div className="preview-item">
-                                    <span className="gate-name">{transferInfo.sourceGate?.name}</span>
-                                    <div className="preview-count">
-                                        <span className="current">{sourceInfo?.remaining_count}</span>
-                                        <FontAwesomeIcon icon={faArrowRight} className="arrow" />
-                                        <span className="after">{sourceRemaining}</span>
+                            <div className="sa-preview-stats">
+                                <div className="sa-preview-item">
+                                    <span className="sa-gate-name">{transferInfo.sourceGate?.name}</span>
+                                    <div className="sa-preview-count">
+                                        <span className="sa-current">{sourceInfo?.remaining_count}</span>
+                                        <FontAwesomeIcon icon={faArrowRight} className="sa-arrow" />
+                                        <span className="sa-after">{sourceRemaining}</span>
                                     </div>
                                 </div>
-                                <div className="preview-item">
-                                    <span className="gate-name">{transferInfo.targetGate?.name}</span>
-                                    <div className="preview-count">
-                                        <span className="current">{targetInfo?.remaining_count}</span>
-                                        <FontAwesomeIcon icon={faArrowRight} className="arrow" />
-                                        <span className="after">{targetRemaining}</span>
+                                <div className="sa-preview-item">
+                                    <span className="sa-gate-name">{transferInfo.targetGate?.name}</span>
+                                    <div className="sa-preview-count">
+                                        <span className="sa-current">{targetInfo?.remaining_count}</span>
+                                        <FontAwesomeIcon icon={faArrowRight} className="sa-arrow" />
+                                        <span className="sa-after">{targetRemaining}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="amount-input">
+                        <div className="sa-amount-input">
                             <label>Số lượng điều chuyển:</label>
                             <input 
                                 type="number"
@@ -160,27 +162,27 @@ const TransferPopup = React.memo(({
                                     transferInfo.maxAmount
                                 ))}
                             />
-                            <span className="max-amount">
+                            <span className="sa-max-amount">
                                 (Tối đa: {transferInfo.maxAmount})
                             </span>
                         </div>
 
-                        <div className="reason-input">
+                        <div className="sa-reason-input">
                             <label>Lý do điều chuyển:</label>
                             <textarea
                                 value={tempReason}
                                 onChange={handleReasonChange}
                                 placeholder="Nhập lý do điều chuyển..."
                                 rows={3}
-                                className="transfer-reason"
+                                className="sa-transfer-reason"
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="popup-actions">
+                <div className="sa-popup-actions">
                     <button 
-                        className="cancel-button"
+                        className="sa-cancel-button"
                         onClick={() => {
                             setShowTransferPopup(false);
                             setTransferReason('');
@@ -189,7 +191,7 @@ const TransferPopup = React.memo(({
                         Hủy
                     </button>
                     <button 
-                        className="confirm-button"
+                        className="sa-confirm-button"
                         onClick={handleTransfer}
                         disabled={!transferReason.trim()}
                     >
@@ -373,14 +375,14 @@ const ShiftAssignments = () => {
         const shiftInfo = getShiftInfo(gateId, groupId);
         
         if (!shiftInfo) {
-            return <div className="shift-cell empty">-</div>;
+            return <div className="sa-shift-cell sa-empty">-</div>;
         }
 
         // Tính toán phần trăm dựa trên số người còn lại
         const percentage = (shiftInfo.remaining_count / shiftInfo.total_staff) * 100;
         
         // Thêm class warning nếu percentage <= 20%
-        const cellClassName = `shift-cell active ${percentage <= 20 ? 'warning' : ''}`;
+        const cellClassName = `sa-shift-cell sa-active ${percentage <= 20 ? 'warning' : ''}`;
 
         return (
             <div 
@@ -392,34 +394,34 @@ const ShiftAssignments = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, gateId, groupId)}
             >
-                <div className="shift-info">
-                    <div className="staff-info">
-                        <div className="info-badge">
+                <div className="sa-shift-info">
+                    <div className="sa-staff-info">
+                        <div className="sa-info-badge">
                             <FontAwesomeIcon icon={faTag} />
                             <span>{shiftInfo.min_index} → {shiftInfo.max_index}</span>
                         </div>
                     </div>
-                    <div className="battery-container">
-                        <span className="min-index">
-                            <span className="checked-count">{shiftInfo.checked_in_count}</span>
+                    <div className="sa-battery-container">
+                        <span className="sa-min-index">
+                            <span className="sa-checked-count">{shiftInfo.checked_in_count}</span>
                         </span>
-                        <div className="battery">
+                        <div className="sa-battery">
                             <div 
-                                className="battery-progress" 
+                                className="sa-battery-progress" 
                                 style={{ 
                                     width: `${percentage}%`,
                                     right: 0,
                                     backgroundColor: getBatteryColor(percentage)
                                 }} 
                             />
-                            <div className="battery-label">
-                                <span className="current-index">
+                            <div className="sa-battery-label">
+                                <span className="sa-current-index">
                                     Còn {shiftInfo.remaining_count}
                                 </span>
                             </div>
                         </div>
-                        <span className="max-index">
-                            <span className="total-count">{shiftInfo.total_staff}</span>
+                        <span className="sa-max-index">
+                            <span className="sa-total-count">{shiftInfo.total_staff}</span>
                         </span>
                     </div>
                 </div>
@@ -462,10 +464,7 @@ const ShiftAssignments = () => {
     if (loading) {
         return (
             <AdminLayout>
-                <div className="loading-container">
-                    <FontAwesomeIcon icon={faSpinner} spin />
-                    <span>Đang tải dữ liệu...</span>
-                </div>
+                <Loading />
             </AdminLayout>
         );
     }
@@ -473,7 +472,7 @@ const ShiftAssignments = () => {
     if (error) {
         return (
             <AdminLayout>
-                <div className="error-container">
+                <div className="sa-error-container">
                     <span>{error}</span>
                     <button onClick={fetchData}>Thử lại</button>
                 </div>
@@ -484,13 +483,13 @@ const ShiftAssignments = () => {
     // Render TransferPopup với props
     return (
         <AdminLayout>
-            <div className="shift-assignments">
-                <div className="shift-header">
-                    <div className="header-left">
+            <div className="sa-shift-assignments">
+                <div className="sa-shift-header">
+                    <div className="sa-header-left">
                         <h1>Phân ca làm việc</h1>
-                        <div className="date-navigation">
+                        <div className="sa-date-navigation">
                             <button 
-                                className="date-nav-btn"
+                                className="sa-date-nav-btn"
                                 onClick={() => {
                                     const newDate = dayjs(selectedDate).subtract(1, 'day');
                                     setDate(newDate);
@@ -517,7 +516,7 @@ const ShiftAssignments = () => {
                             </LocalizationProvider>
 
                             <button 
-                                className="date-nav-btn"
+                                className="sa-date-nav-btn"
                                 onClick={() => {
                                     const newDate = dayjs(selectedDate).add(1, 'day');
                                     setDate(newDate);
@@ -526,12 +525,20 @@ const ShiftAssignments = () => {
                             >
                                 <FontAwesomeIcon icon={faChevronRight} />
                             </button>
+
+                            <button 
+                                className="sa-date-nav-btn sa-refresh-btn"
+                                onClick={() => fetchDashboardData()}
+                                title="Làm mới dữ liệu"
+                            >
+                                <FontAwesomeIcon icon={faRotate} />
+                            </button>
                         </div>
                     </div>
-                    <div className="shift-controls">
+                    <div className="sa-shift-controls">
                         <a 
                             href="/admin/add-shift-gate"
-                            className="shift-button"
+                            className="sa-shift-button"
                             style={{ textDecoration: 'none' }}
                         >
                             Phân ca làm việc
@@ -539,15 +546,15 @@ const ShiftAssignments = () => {
                     </div>
                 </div>
                 
-                <table className="shift-table">
+                <table className="sa-shift-table">
                     <thead>
                         <tr>
                             <th>Vị trí</th>
                             {shifts.map((shift) => (
                                 <th key={shift.id}>
-                                    <div className="shift-header-cell">
+                                    <div className="sa-shift-header-cell">
                                         <span>{shift.name}</span>
-                                        <div className="shift-count">
+                                        <div className="sa-shift-count">
                                             <FontAwesomeIcon icon={faUsers} />
                                             <span>{shift.staffs_count}</span>
                                         </div>
@@ -560,8 +567,8 @@ const ShiftAssignments = () => {
                         {gates.map((gate) => (
                             <tr key={gate.id}>
                                 <td>
-                                    <div className="gate-cell">
-                                        <FontAwesomeIcon icon={faDesktop} className="gate-icon" />
+                                    <div className="sa-gate-cell">
+                                        <FontAwesomeIcon icon={faDesktop} className="sa-gate-icon" />
                                         <span>{gate.name}</span>
                                     </div>
                                 </td>

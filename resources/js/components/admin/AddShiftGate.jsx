@@ -328,7 +328,7 @@ const AddShiftGate = () => {
     if (loading) {
         return (
             <AdminLayout>
-                <div>Đang tải...</div>
+                <Loading />
             </AdminLayout>
         );
     }
