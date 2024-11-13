@@ -30,9 +30,9 @@ const AdminLayout = ({ children }) => {
     }, []);
 
     return (
-        <div className="admin-layout">
+        <div className="sb-admin-layout">
             <Sidebar />
-            <main className={`admin-main ${isCollapsed ? 'expanded' : ''}`}>
+            <main className={`sb-admin-main ${isCollapsed ? 'sb-expanded' : ''}`}>
                 {children}
             </main>
         </div>

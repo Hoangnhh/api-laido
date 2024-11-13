@@ -1,4 +1,4 @@
-.admin-sidebar {
+.sb-admin-sidebar {
     width: 250px;
     height: 100vh;
     background-color: #2c3e50;
@@ -14,11 +14,11 @@
     -ms-user-select: none;
 }
 
-.admin-sidebar.collapsed {
+.sb-admin-sidebar.sb-collapsed {
     width: 60px;
 }
 
-.sidebar-header {
+.sb-sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -27,7 +27,7 @@
     position: relative;
 }
 
-.toggle-button {
+.sb-toggle-button {
     background: none;
     border: none;
     color: #fff;
@@ -48,27 +48,27 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.toggle-button:hover {
+.sb-toggle-button:hover {
     background-color: #34495e;
 }
 
-.sidebar-header .toggle-button svg {
+.sb-sidebar-header .sb-toggle-button svg {
     font-size: 14px;
     transition: transform 0.3s ease;
 }
 
-.admin-sidebar.collapsed .toggle-button {
+.sb-admin-sidebar.sb-collapsed .sb-toggle-button {
     transform: rotate(180deg);
 }
 
-.sidebar-logo {
+.sb-sidebar-logo {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 8px 0;
 }
 
-.logo-image {
+.sb-logo-image {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -79,19 +79,19 @@
     transition: all 0.3s ease;
 }
 
-.logo-image:hover {
+.sb-logo-image:hover {
     transform: scale(1.05);
     border-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.logo-content {
+.sb-logo-content {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.logo-text {
+.sb-logo-text {
     font-size: 16px;
     font-weight: 600;
     color: white;
@@ -102,7 +102,7 @@
     -ms-user-select: none;
 }
 
-.user-name {
+.sb-user-name {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.7);
     font-weight: 400;
@@ -112,35 +112,57 @@
     -ms-user-select: none;
 }
 
-.admin-sidebar.collapsed .logo-image {
+.sb-admin-sidebar.sb-collapsed .sb-logo-image {
     width: 32px;
     height: 32px;
     border-width: 1px;
 }
 
-.admin-sidebar.collapsed .logo-content {
+.sb-admin-sidebar.sb-collapsed .sb-logo-content {
     display: none;
 }
 
-.logo-content {
+.sb-logo-content {
     transition: opacity 0.3s ease;
 }
 
-.admin-sidebar.collapsed .logo-content {
+.sb-admin-sidebar.sb-collapsed .sb-logo-content {
     opacity: 0;
 }
 
 @media (max-width: 768px) {
-    .logo-text {
+    .sb-logo-text {
         font-size: 14px;
     }
     
-    .user-name {
+    .sb-user-name {
         font-size: 12px;
+    }
+
+    /* Ẩn nút toggle trên mobile */
+    .sb-toggle-button {
+        display: none;
+    }
+
+    /* Điều chỉnh header để không có khoảng trống của toggle button */
+    .sb-sidebar-header {
+        padding: 15px;
+        justify-content: center; /* Căn giữa logo khi không có nút toggle */
+    }
+
+    /* Điều chỉnh logo container */
+    .sb-sidebar-logo {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Điều chỉnh logo content */
+    .sb-logo-content {
+        text-align: center;
     }
 }
 
-.sidebar-menu {
+.sb-sidebar-menu {
     padding: 15px 0;
     display: flex;
     flex-direction: column;
@@ -148,7 +170,7 @@
     position: relative;
 }
 
-.menu-item {
+.sb-menu-item {
     display: flex;
     align-items: center;
     padding: 12px 15px;
@@ -163,21 +185,21 @@
     overflow: hidden;
 }
 
-.menu-item:hover {
+.sb-menu-item:hover {
     background-color: #34495e;
 }
 
-.menu-item.active {
+.sb-menu-item.active {
     background-color: #3498db;
 }
 
-.menu-icon {
+.sb-menu-icon {
     width: 20px;
     text-align: center;
     margin-right: 10px;
 }
 
-.menu-text {
+.sb-menu-text {
     white-space: nowrap;
     overflow: hidden;
     transition: opacity 0.2s ease;
@@ -188,7 +210,7 @@
     -ms-user-select: none;
 }
 
-.menu-divider {
+.sb-menu-divider {
     height: 1px;
     background: linear-gradient(to right, 
         transparent, 
@@ -202,7 +224,7 @@
     overflow: hidden;
 }
 
-.menu-divider::after {
+.sb-menu-divider::after {
     content: '';
     position: absolute;
     top: 0;
@@ -222,11 +244,11 @@
     }
 }
 
-.menu-item-group {
+.sb-menu-item-group {
     position: relative;
 }
 
-.menu-item.parent {
+.sb-menu-item.parent {
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -234,43 +256,41 @@
     padding-right: 15px;
 }
 
-.menu-content {
+.sb-menu-content {
     display: flex;
     align-items: center;
 }
 
-.arrow-icon {
+.sb-arrow-icon {
     font-size: 0.8em;
     transition: transform 0.3s ease;
 }
 
-.submenu {
+.sb-submenu {
     background-color: #243342;
-    padding-left: 20px;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
 }
 
-.submenu.open {
+.sb-submenu.open {
     max-height: 500px;
 }
 
-.submenu .menu-item {
-    padding-left: 25px;
+.sb-submenu .sb-menu-item {
     font-size: 0.9em;
 }
 
-.submenu .menu-item:hover {
+.sb-submenu .sb-menu-item:hover {
     background-color: #2c3e50;
 }
 
-.collapsed .menu-text {
+.sb-collapsed .sb-menu-text {
     opacity: 0;
     display: none;
 }
 
-.collapsed .submenu {
+.sb-collapsed .sb-submenu {
     position: absolute;
     left: 60px;
     top: 0;
@@ -279,67 +299,67 @@
     display: none;
 }
 
-.collapsed .menu-item-group:hover .submenu {
+.sb-collapsed .sb-menu-item-group:hover .sb-submenu {
     display: block;
 }
 
-.menu-item.parent.active {
+.sb-menu-item.parent.active {
     background-color: #34495e;
 }
 
-.collapsed .arrow-icon {
+.sb-collapsed .sb-arrow-icon {
     display: none;
 }
 
-.admin-layout {
+.sb-admin-layout {
     display: flex;
     min-height: 100vh;
 }
 
-.admin-main {
+.sb-admin-main {
     flex: 1;
     margin-left: 250px;
     transition: margin-left 0.3s ease;
     width: calc(100% - 250px);
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px;
 }
 
-.admin-main.expanded {
+.sb-admin-main.sb-expanded {
     margin-left: 60px;
     width: calc(100% - 60px);
 }
 
-.sidebar-bottom {
+.sb-sidebar-bottom {
     position: relative;
     margin-top: auto;
     padding: 20px 0;
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
 }
 
-.logout-item {
+.sb-logout-item {
     margin: 0 15px;
     border-radius: 8px;
     background: linear-gradient(135deg, #e74c3c20, #c0392b20);
     transition: all 0.3s ease;
 }
 
-.logout-item:hover {
+.sb-logout-item:hover {
     background: linear-gradient(135deg, #e74c3c40, #c0392b40);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.logout-item .menu-icon {
+.sb-logout-item .sb-menu-icon {
     color: #e74c3c;
     transition: transform 0.3s ease;
 }
 
-.logout-item:hover .menu-icon {
+.sb-logout-item:hover .sb-menu-icon {
     transform: rotate(360deg);
 }
 
-.menu-item::after {
+.sb-menu-item::after {
     content: '';
     position: absolute;
     left: 0;
@@ -351,17 +371,229 @@
     transition: transform 0.3s ease;
 }
 
-.menu-item:hover::after {
+.sb-menu-item:hover::after {
     transform: translateX(0);
 }
 
-.menu-item.disabled {
+.sb-menu-item.disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
 
-.loading-spinner {
+.sb-loading-spinner {
     display: inline-block;
     width: 16px;
     height: 16px;
+}
+
+@media (max-width: 768px) {
+    .sb-admin-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        position: fixed;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        z-index: 1001;
+    }
+
+    .sb-admin-sidebar.sb-show {
+        transform: translateX(0);
+    }
+
+    .sb-admin-sidebar.sb-collapsed {
+        transform: translateX(-100%);
+    }
+
+    .sb-admin-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 15px;
+    }
+
+    /* Nút toggle cho mobile */
+    .sb-mobile-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1002;
+        background: #2c3e50;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Điều chỉnh submenu trên mobile */
+    .sb-submenu {
+        position: static !important;
+        width: 100% !important;
+    }
+
+    /* Điều chỉnh logo và header */
+    .sb-sidebar-header {
+        padding: 15px;
+    }
+
+    .sb-logo-image {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Điều chỉnh menu items */
+    .sb-menu-item {
+        padding: 12px;
+    }
+
+    /* Ẩn sidebar header trên mobile */
+    .sb-sidebar-header {
+        display: none;
+    }
+
+    /* Điều chỉnh lại chiều cao của sidebar menu */
+    .sb-sidebar-menu {
+        height: 100%;
+        padding-top: 0;
+    }
+
+    /* Các style hiện tại */
+    .sb-mobile-header {
+        display: flex;
+    }
+
+    .sb-admin-sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sb-admin-main {
+        margin-top: 60px;
+        padding-top: 15px;
+    }
+
+    .sb-mobile-toggle {
+        position: static;
+        z-index: auto;
+    }
+}
+
+/* Styles cho submenu */
+.sb-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sb-submenu.sb-open {
+    max-height: 500px; /* Hoặc một giá trị phù hợp với số lượng menu items */
+    transition: max-height 0.3s ease-in;
+}
+
+/* Style cho parent menu item */
+.sb-menu-item.sb-parent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Style cho arrow icon */
+.sb-arrow-icon {
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+.sb-menu-item.sb-parent.sb-active .sb-arrow-icon {
+    transform: rotate(180deg);
+}
+
+/* Style cho submenu items */
+.sb-submenu .sb-menu-item {
+    padding-left: 30px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Ẩn text khi sidebar collapsed */
+.sb-admin-sidebar.sb-collapsed .sb-menu-text,
+.sb-admin-sidebar.sb-collapsed .sb-arrow-icon {
+    display: none;
+}
+
+/* Điều chỉnh padding cho submenu items khi collapsed */
+.sb-admin-sidebar.sb-collapsed .sb-submenu .sb-menu-item {
+    padding-left: 20px;
+}
+
+/* Mobile Header Styles */
+.sb-mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: #2c3e50;
+    padding: 0 15px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sb-mobile-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.sb-mobile-user-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sb-mobile-user-icon {
+    font-size: 20px;
+}
+
+.sb-mobile-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sb-mobile-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .sb-mobile-header {
+        display: flex;
+    }
+
+    /* Điều chỉnh main content để không bị che bởi header */
+    .sb-admin-main {
+        margin-top: 60px;
+        padding-top: 15px;
+    }
+
+    /* Điều chỉnh vị trí sidebar */
+    .sb-admin-sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    /* Ẩn nút toggle cũ */
+    .sb-mobile-toggle {
+        position: static;
+        z-index: auto;
+    }
 }

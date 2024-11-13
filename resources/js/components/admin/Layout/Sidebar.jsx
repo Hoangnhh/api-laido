@@ -201,59 +201,100 @@ const Sidebar = () => {
         return stars;
     };
 
+    // Thêm state cho mobile
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+    // Thêm useEffect để xử lý resize window
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setIsMobileOpen(false);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Hàm toggle mobile sidebar
+    const toggleMobileSidebar = () => {
+        setIsMobileOpen(!isMobileOpen);
+    };
+
+    // Hàm đóng sidebar khi click vào menu item trên mobile
+    const handleMobileMenuClick = () => {
+        if (window.innerWidth <= 768) {
+            setIsMobileOpen(false);
+        }
+    };
+
     return (
         <>
             {isLoggingOut && <Loading message="Đang đăng xuất..." />}
-            <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
-                <div className="sidebar-header">
-                    <div className="sidebar-logo">
-                        <img src={logoImage} alt="Logo" className="logo-image" />
+            
+            {/* Mobile Header */}
+            <div className="sb-mobile-header">
+                <button className="sb-mobile-toggle" onClick={toggleMobileSidebar}>
+                    <FontAwesomeIcon icon={faBars} />
+                </button>
+                {user && (
+                    <div className="sb-mobile-user">
+                        <span className="sb-mobile-user-name">{user.name}</span>
+                        <FontAwesomeIcon icon={faUserCircle} className="sb-mobile-user-icon" />
+                    </div>
+                )}
+            </div>
+
+            <aside className={`sb-admin-sidebar ${collapsed ? 'sb-collapsed' : ''} ${isMobileOpen ? 'sb-show' : ''}`}>
+                <div className="sb-sidebar-header">
+                    <div className="sb-sidebar-logo">
+                        <img src={logoImage} alt="Logo" className="sb-logo-image" />
                         {!collapsed && (
-                            <div className="logo-content">
-                                <span className="logo-text">Admin Panel</span>
-                                {user && <span className="user-name">{user.name}</span>}
+                            <div className="sb-logo-content">
+                                <span className="sb-logo-text">Admin Panel</span>
+                                {user && <span className="sb-user-name">{user.name}</span>}
                             </div>
                         )}
                     </div>
                     <button 
-                        className="toggle-button"
+                        className="sb-toggle-button"
                         onClick={toggleSidebar}
                         title={collapsed ? "Mở rộng" : "Thu gọn"}
                     >
                         <FontAwesomeIcon icon={collapsed ? faBars : faAngleLeft} />
                     </button>
                 </div>
-                <nav className="sidebar-menu">
+                <nav className="sb-sidebar-menu">
                     {menuItems.map((item) => (
                         item.children ? (
-                            <div key={item.text} className="menu-item-group">
+                            <div key={item.text} className="sb-menu-item-group">
                                 <div 
-                                    className={`menu-item parent ${openSubmenu === item.text ? 'active' : ''}`}
+                                    className={`sb-menu-item sb-parent ${openSubmenu === item.text ? 'sb-active' : ''}`}
                                     onClick={() => handleParentClick(item.text)}
                                 >
-                                    <div className="menu-content">
-                                        <span className="menu-icon">
+                                    <div className="sb-menu-content">
+                                        <span className="sb-menu-icon">
                                             <FontAwesomeIcon icon={item.icon} />
                                         </span>
-                                        <span className="menu-text">{item.text}</span>
+                                        <span className="sb-menu-text">{item.text}</span>
                                     </div>
-                                    <span className="arrow-icon">
+                                    <span className="sb-arrow-icon">
                                         <FontAwesomeIcon 
                                             icon={openSubmenu === item.text ? faChevronDown : faChevronRight} 
                                         />
                                     </span>
                                 </div>
-                                <div className={`submenu ${openSubmenu === item.text ? 'open' : ''}`}>
+                                <div className={`sb-submenu ${openSubmenu === item.text ? 'sb-open' : ''}`}>
                                     {item.children.map((child) => (
                                         <a
                                             key={child.text}
                                             href={child.path}
-                                            className={`menu-item ${location === child.path ? 'active' : ''}`}
+                                            className={`sb-menu-item ${location === child.path ? 'sb-active' : ''}`}
                                         >
-                                            <span className="menu-icon">
+                                            <span className="sb-menu-icon">
                                                 <FontAwesomeIcon icon={child.icon} />
                                             </span>
-                                            <span className="menu-text">{child.text}</span>
+                                            <span className="sb-menu-text">{child.text}</span>
                                         </a>
                                     ))}
                                 </div>
@@ -262,26 +303,27 @@ const Sidebar = () => {
                             <a
                                 key={item.text}
                                 href={item.path}
-                                className={`menu-item ${location === item.path ? 'active' : ''}`}
+                                className={`sb-menu-item ${location === item.path ? 'sb-active' : ''}`}
+                                onClick={handleMobileMenuClick}
                             >
-                                <span className="menu-icon">
+                                <span className="sb-menu-icon">
                                     <FontAwesomeIcon icon={item.icon} />
                                 </span>
-                                <span className="menu-text">{item.text}</span>
+                                <span className="sb-menu-text">{item.text}</span>
                             </a>
                         )
                     ))}
-                    <div className="sidebar-bottom">
-                        <div className="menu-divider"></div>
+                    <div className="sb-sidebar-bottom">
+                        <div className="sb-menu-divider"></div>
                         <a 
                             href="#" 
-                            className="menu-item logout-item"
+                            className="sb-menu-item sb-logout-item"
                             onClick={handleLogout}
                         >
-                            <span className="menu-icon">
+                            <span className="sb-menu-icon">
                                 <FontAwesomeIcon icon={faRightFromBracket} />
                             </span>
-                            <span className="menu-text">Đăng xuất</span>
+                            <span className="sb-menu-text">Đăng xuất</span>
                         </a>
                     </div>
                 </nav>
