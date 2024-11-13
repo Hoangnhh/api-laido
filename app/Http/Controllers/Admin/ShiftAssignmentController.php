@@ -255,10 +255,16 @@ class ShiftAssignmentController extends Controller
     public function getAssignmentDashboard(Request $request)
     {
         try {
-            $date = $request->input('date') ?? SystemConfig::getConfig('CURRENT_SHIFT_DATE');
+            $date = $request->input('date');
             
             if (!$date) {
-                $date = now()->format('Y-m-d');
+                $date = GateShift::where('queue_status', 'RUNNING')
+                    ->orderBy('date', 'asc')
+                    ->value('date');
+                    
+                if (!$date) {
+                    $date = now()->format('Y-m-d');
+                }
             }
 
             $shiftData = GateShift::where('date', $date)
