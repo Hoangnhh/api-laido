@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StaffController;
@@ -100,4 +101,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/staff/search', [StaffController::class, 'search']);
     Route::get('/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
     Route::post('/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
+    Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('admin.dashboard-data');
 });

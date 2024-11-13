@@ -1,0 +1,329 @@
+/* Container */
+.db-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Title */
+.db-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e3f2fd;
+}
+
+/* Stats Grid */
+.db-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* Stat Cards */
+.db-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.db-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.db-stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.db-stat-card:hover .db-stat-icon {
+    transform: scale(1.1);
+}
+
+/* Màu sắc cho các card */
+.db-total-staff .db-stat-icon {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.db-assigned-staff .db-stat-icon {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.db-checkin-staff .db-stat-icon {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.db-waiting-staff .db-stat-icon {
+    background: #fce4ec;
+    color: #ad1457;
+}
+
+.db-stat-content h3 {
+    font-size: 15px;
+    color: #546e7a;
+    margin: 0;
+    font-weight: 500;
+}
+
+.db-stat-content p {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a237e;
+    margin: 8px 0 0;
+}
+
+/* Chart Section */
+.db-chart-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 32px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.db-section-title {
+    font-size: 20px;
+    color: #1a237e;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.db-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+    height: 300px;
+    padding: 40px 10px 20px;
+    margin: 20px 0;
+    position: relative;
+}
+
+.db-chart::after {
+    content: '';
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+.db-chart-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    position: relative;
+}
+
+.db-bar-container {
+    height: 200px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.db-bar {
+    width: 40px;
+    background: linear-gradient(180deg, #2196f3 0%, #1976d2 100%);
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    position: relative;
+    margin: 0 auto;
+    min-height: 4px;
+}
+
+.db-bar:hover {
+    background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 100%);
+    transform: scaleY(1.02);
+}
+
+.db-bar-value {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1976d2;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.db-hour {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Recent Tickets Section */
+.db-recent-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.db-ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.db-ticket-item:hover {
+    background: #e3f2fd;
+    transform: translateX(5px);
+}
+
+.db-ticket-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.db-ticket-id {
+    font-weight: 600;
+    color: #1565c0;
+    font-size: 15px;
+}
+
+.db-ticket-staff {
+    font-weight: 500;
+    color: #37474f;
+    font-size: 15px;
+}
+
+.db-ticket-gate {
+    color: #546e7a;
+    font-size: 14px;
+    background: rgba(84, 110, 122, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.db-ticket-time {
+    color: #78909c;
+    font-size: 14px;
+}
+
+/* Loading State */
+.db-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    gap: 16px;
+    color: #1565c0;
+}
+
+.db-loading span {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .db-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .db-container {
+        padding: 16px;
+    }
+
+    .db-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .db-chart {
+        height: 250px;
+        gap: 15px;
+        padding-top: 50px;
+        justify-content: flex-start;
+    }
+
+    .db-chart-bar {
+        min-width: 50px;
+    }
+
+    .db-bar {
+        width: 30px;
+    }
+
+    .db-bar-value {
+        top: -30px;
+        font-size: 11px;
+        padding: 1px 6px;
+        background: rgba(25, 118, 210, 0.9);
+    }
+
+    .db-chart-section {
+        margin-top: 40px;
+    }
+
+    .db-bar-container {
+        padding-top: 40px;
+    }
+
+    .db-chart {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .db-chart::-webkit-scrollbar {
+        display: none;
+    }
+
+    .db-ticket-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .db-ticket-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .db-ticket-time {
+        align-self: flex-start;
+    }
+} 
