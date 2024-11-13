@@ -15,6 +15,8 @@ const QueueDisplay = () => {
     const [checkedInStaff, setCheckedInStaff] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
     const [showModal, setShowModal] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [lastAnnounced, setLastAnnounced] = useState(null);
 
     const inputRef = useRef(null);
 
@@ -55,7 +57,6 @@ const QueueDisplay = () => {
 
             const firstWaitingStaff = response.data.assignments.waiting[0];
             if (firstWaitingStaff) {
-                console.log("fetchAssignments",isMuted);
                 await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
             }
 
@@ -182,11 +183,15 @@ const QueueDisplay = () => {
     };
 
     const announceStaff = async (staffName, staffIndex) => {
+        if (isMuted || isPlaying) return;
         
-        console.log("announceStaff",staffName,staffIndex,isMuted);
-        if (isMuted) return;
+        const currentAnnouncement = `${staffIndex}-${staffName}`;
+        if (currentAnnouncement === lastAnnounced) return;
         
         try {
+            setIsPlaying(true);
+            setLastAnnounced(currentAnnouncement);
+            
             const response = await axios.post(
                 'https://texttospeech.googleapis.com/v1/text:synthesize',
                 {
@@ -212,10 +217,16 @@ const QueueDisplay = () => {
             );
 
             const audio = new Audio(`data:audio/mp3;base64,${response.data.audioContent}`);
+            
+            audio.addEventListener('ended', () => {
+                setIsPlaying(false);
+            });
+            
             await audio.play();
 
         } catch (error) {
             console.error('Lỗi khi đọc tên nhân viên:', error);
+            setIsPlaying(false);
         }
     };
 
