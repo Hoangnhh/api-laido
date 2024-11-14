@@ -515,11 +515,6 @@
     background-color: rgba(0, 0, 0, 0.12);
 }
 
-/* Đảm bảo các input cùng chiều cao */
-.MuiInputBase-root {
-    height: 40px;
-}
-
 .empty-staff-list {
     display: flex;
     flex-direction: column;

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Hash;
 
 class Staff extends Model
 {
@@ -52,5 +53,10 @@ class Staff extends Model
     public function gateStaffShifts(): HasMany
     {
         return $this->hasMany(GateStaffShift::class);
-    }   
+    }
+
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
 } 

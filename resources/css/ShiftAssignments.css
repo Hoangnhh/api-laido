@@ -306,12 +306,6 @@
     color: #1a1a1a;
 }
 
-.MuiTextField-root {
-    background: white;
-    border-radius: 4px;
-    width: 150px;
-}
-
 @media (max-width: 768px) {
     .sa-shift-header {
         flex-direction: column;

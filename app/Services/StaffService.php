@@ -46,14 +46,9 @@ class StaffService
      */
     public function createOrUpdate(array $data, ?Staff $staff = null): Staff
     {
-        if ($staff && empty($data['password'])) {
-            unset($data['password']);
-        } else if (isset($data['password'])) {
-            $data['password'] = bcrypt($data['password']);
-        }
-
         if ($staff) {
-            $staff->update($data);
+            $staff->fill($data);
+            $staff->save();
             return $staff;
         }
 

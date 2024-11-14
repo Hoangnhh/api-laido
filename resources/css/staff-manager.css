@@ -1,0 +1,147 @@
+/* Container */
+.staff-manager {
+    padding: 24px;
+}
+
+/* Header Section */
+.staff-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.staff-manager-title {
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* Controls Section */
+.staff-manager-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.staff-manager-filter {
+    width: 150px;
+}
+
+.staff-manager-search {
+    width: 300px;
+}
+
+/* Buttons */
+.staff-manager-add-btn {
+    background-color: #2c3e50 !important;
+    color: white !important;
+}
+
+.staff-manager-add-btn:hover {
+    background-color: #1a252f !important;
+}
+
+/* Avatar */
+.staff-manager-avatar {
+    width: 150px !important;
+    height: 150px !important;
+    border: 2px solid #2c3e50;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.staff-manager-avatar-container {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* Dialog */
+.staff-manager-dialog-title {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: bold;
+}
+
+.staff-manager-form {
+    padding-top: 16px;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* MUI Overrides */
+.staff-manager .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #2c3e50;
+}
+
+.staff-manager .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #2c3e50;
+}
+
+/* Table Styles */
+.staff-manager-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.staff-manager-table th {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-weight: bold;
+    padding: 12px;
+    text-align: left;
+}
+
+.staff-manager-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Status Chips */
+.staff-manager-status-active {
+    background-color: #4caf50 !important;
+    color: white !important;
+}
+
+.staff-manager-status-inactive {
+    background-color: #f44336 !important;
+    color: white !important;
+}
+
+/* Action Buttons */
+.staff-manager-edit-btn {
+    color: #2196f3 !important;
+}
+
+.staff-manager-delete-btn {
+    color: #f44336 !important;
+}
+
+/* Dialog Form Fields */
+.staff-manager-form-field {
+    margin-bottom: 16px;
+}
+
+.staff-manager-form-field label {
+    color: #2c3e50;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .staff-manager-controls {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .staff-manager-search,
+    .staff-manager-filter {
+        width: 100%;
+    }
+    
+    .staff-manager-form {
+        grid-template-columns: 1fr;
+    }
+}

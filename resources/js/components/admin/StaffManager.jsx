@@ -34,6 +34,7 @@ import {
     faImage
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import '../../../css/staff-manager.css';
 
 const StaffManager = () => {
     const [staffs, setStaffs] = useState([]);
@@ -42,7 +43,6 @@ const StaffManager = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [formData, setFormData] = useState({
         type: 'STAFF',
         group_id: '',
@@ -246,45 +246,38 @@ const StaffManager = () => {
         }
     };
 
-    // Thêm debounce cho search
+    // Tối ưu lại hàm debounce
     const debounce = (func, wait) => {
         let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
+        return (...args) => {
             clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
+            timeout = setTimeout(() => func(...args), wait);
         };
     };
 
-    // Debounced search function
+    // Tạo hàm search với debounce
     const debouncedSearch = React.useCallback(
-        debounce(() => {
-            setPage(0); // Reset về trang đầu khi search
-            fetchStaffs();
+        debounce((value) => {
+            setFilters(prev => ({
+                ...prev,
+                search: value
+            }));
         }, 500),
-        [searchTerm]
+        []
     );
 
-    // Effect cho search
-    useEffect(() => {
-        debouncedSearch();
-    }, [searchTerm]);
+    // Sửa lại hàm handleSearchChange
+    const handleSearchChange = (e) => {
+        // Cập nhật giá trị hiển thị ngay lập tức
+        e.persist();
+        // Thc hiện search sau khi người dùng ngừng gõ
+        debouncedSearch(e.target.value);
+    };
 
-    // Effect cho pagination
+    // Effect duy nhất để fetch data
     useEffect(() => {
         fetchStaffs();
-    }, [page, rowsPerPage]);
-
-    // Handle search change
-    const handleSearchChange = (e) => {
-        setFilters(prev => ({
-            ...prev,
-            search: e.target.value
-        }));
-    };
+    }, [page, rowsPerPage, filters]);
 
     // Handle page change
     const handlePageChange = (event, newPage) => {
@@ -374,49 +367,22 @@ const StaffManager = () => {
 
     return (
         <AdminLayout>
-            <Box sx={{ p: 3 }}>
+            <Box className="staff-manager">
                 {/* Header */}
-                <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    mb: 3
-                }}>
-                    <Typography 
-                        variant="h5" 
-                        component="h1"
-                        sx={{ 
-                            color: '#2c3e50',
-                            fontWeight: 'bold'
-                        }}
-                    >
+                <Box className="staff-manager-header">
+                    <Typography className="staff-manager-title">
                         Quản lý nhân viên
                     </Typography>
                     
-                    <Box sx={{ 
-                        display: 'flex', 
-                        gap: 2,
-                        alignItems: 'center' 
-                    }}>
+                    <Box className="staff-manager-controls">
                         {/* Status Filter */}
                         <TextField
                             select
                             size="small"
                             label="Trạng thái"
-                            placeholder="Tất cả trạng thái"
                             value={filterStatus}
                             onChange={handleFilterStatusChange}
-                            sx={{ 
-                                width: '150px',
-                                '& .MuiOutlinedInput-root': {
-                                    '&:hover fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                }
-                            }}
+                            className="staff-manager-filter"
                         >
                             <MenuItem value="ACTIVE">Hoạt động</MenuItem>
                             <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
@@ -453,24 +419,13 @@ const StaffManager = () => {
                             ))}
                         </TextField>
 
-                        {/* Search Field */}
+                        {/* Search */}
                         <TextField
                             size="small"
                             variant="outlined"
                             placeholder="Tìm kiếm..."
-                            value={searchTerm}
                             onChange={handleSearchChange}
-                            sx={{ 
-                                width: '300px',
-                                '& .MuiOutlinedInput-root': {
-                                    '&:hover fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                }
-                            }}
+                            className="staff-manager-search"
                             InputProps={{
                                 startAdornment: (
                                     <Box sx={{ mr: 1, color: '#2c3e50' }}>
@@ -485,13 +440,7 @@ const StaffManager = () => {
                             variant="contained"
                             startIcon={<FontAwesomeIcon icon={faPlus} />}
                             onClick={() => handleOpenDialog()}
-                            sx={{ 
-                                bgcolor: '#2c3e50',
-                                color: 'white',
-                                '&:hover': {
-                                    bgcolor: '#1a252f',
-                                }
-                            }}
+                            className="staff-manager-add-btn"
                         >
                             Thêm mới
                         </Button>
@@ -608,31 +557,22 @@ const StaffManager = () => {
                     />
                 </TableContainer>
 
-                {/* Form Dialog */}
+                {/* Dialog */}
                 <Dialog 
                     open={openDialog} 
                     onClose={() => setOpenDialog(false)}
                     maxWidth="md"
                     fullWidth
                 >
-                    <DialogTitle sx={{ 
-                        bgcolor: '#2c3e50', 
-                        color: 'white',
-                        fontWeight: 'bold'
-                    }}>
+                    <DialogTitle className="staff-manager-dialog-title">
                         {selectedStaff ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
                     </DialogTitle>
                     <DialogContent>
-                        <Box component="form" sx={{ pt: 2, display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)' }}>
-                            <Box sx={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 2 }}>
+                        <Box component="form" className="staff-manager-form">
+                            <Box className="staff-manager-avatar-container">
                                 <Avatar
                                     src={avatarPreview || formData.avatar_url}
-                                    sx={{ 
-                                        width: 150, 
-                                        height: 150,
-                                        border: '2px solid #2c3e50',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
+                                    className="staff-manager-avatar"
                                 />
                                 <Button
                                     variant="outlined"
