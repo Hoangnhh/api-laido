@@ -34,6 +34,8 @@ class AuthController extends Controller
 
         $payload = [
             'user_id' => $staff->id,
+            'code' => $staff->code,
+            'phone' => $staff->phone,
             'username' => $staff->username,
             'name' => $staff->name,
             'type' => $staff->type,
@@ -49,6 +51,8 @@ class AuthController extends Controller
             'user' => [
                 'id' => $staff->id,
                 'username' => $staff->username,
+                'code' => $staff->code,
+                'phone' => $staff->phone,
                 'name' => $staff->name,
                 'type' => $staff->type,
                 'group' => $staff->group

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\StaffController;
+use App\Http\Middleware\VerifyJWTToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,10 +23,10 @@ Route::group(['middleware' => ['api']], function () {
         });
 
         // Protected routes
-        Route::middleware('jwt.verify')->group(function () {
+        Route::middleware([VerifyJWTToken::class])->group(function () {
             // Staff routes
-            Route::group(['prefix' => 'staffs'], function () {
-                // Các route được bảo vệ bởi JWT
+            Route::group(['prefix' => 'staff'], function () {
+                Route::get('get-staff-info', [StaffController::class, 'getInfo']);
             });
         });
     });
