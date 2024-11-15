@@ -359,7 +359,7 @@ class ShiftAssignmentController extends Controller
 
             // Query base cho cả 2 danh sách
             $baseQuery = GateStaffShift::with([
-                'staff:id,code,name,group_id',
+                'staff:id,code,name,group_id,card_id',
                 'staff.group:id,name',
                 'gateShift'
             ])
@@ -386,7 +386,7 @@ class ShiftAssignmentController extends Controller
 
                 if ($nextGateShift) {
                     $additionalWaitingAssignments = GateStaffShift::with([
-                        'staff:id,code,name,group_id',
+                        'staff:id,code,name,group_id,card_id',
                         'staff.group:id,name',
                         'gateShift'
                     ])
@@ -415,6 +415,7 @@ class ShiftAssignmentController extends Controller
                         'id' => $assignment->staff->id,
                         'code' => $assignment->staff->code,
                         'name' => $assignment->staff->name,
+                        'card_id' => $assignment->staff->card_id,
                         'group_id' => $assignment->staff->group_id,
                         'group_name' => $assignment->staff->group?->name ?? 'Chưa phân nhóm'
                     ],
@@ -451,15 +452,15 @@ class ShiftAssignmentController extends Controller
     public function staffCheckin(Request $request)
     {
         try {
-            // Validate đầu vào
+            // Sửa validate đầu vào, thay staff_code bằng card_id
             $validated = $request->validate([
-                'staff_code' => 'required|exists:staff,code',
+                'card_id' => 'required|exists:staff,card_id',
                 'gate_id' => 'required|exists:gate,id',
                 'gate_shift_id' => 'required|exists:gate_shift,id'
             ]);
 
-            // Lấy thông tin staff và kiểm tra trạng thái
-            $staff = Staff::where('code', $request->staff_code)
+            // Sửa query lấy thông tin staff theo card_id
+            $staff = Staff::where('card_id', $request->card_id)
                           ->where('status', Staff::STATUS_ACTIVE)
                           ->with('group:id,name')
                           ->firstOrFail();

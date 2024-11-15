@@ -6,17 +6,23 @@ import '../../../css/QueueDisplay.css';
 
 const QueueDisplay = () => {
     const [selectedPosition, setSelectedPosition] = useState(0);
-    const [staffCode, setStaffCode] = useState('');
+    const [cardId, setCardId] = useState('');
     const [error, setError] = useState('');
     const [assignments, setAssignments] = useState([]);
     const [checkedInAssignments, setCheckedInAssignments] = useState([]);
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(() => {
+        const savedMute = localStorage.getItem('queueDisplay_isMuted');
+        return savedMute ? JSON.parse(savedMute) : false;
+    });
     const [showModal, setShowModal] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [lastAnnounced, setLastAnnounced] = useState(null);
+    const [cardBuffer, setCardBuffer] = useState('');
+    const [lastKeyTime, setLastKeyTime] = useState(Date.now());
+    const SCAN_TIMEOUT = 100; // 100ms timeout giữa các ký tự
 
     const inputRef = useRef(null);
 
@@ -48,6 +54,47 @@ const QueueDisplay = () => {
         }
     }, [selectedPosition]);
 
+    useEffect(() => {
+        localStorage.setItem('queueDisplay_isMuted', JSON.stringify(isMuted));
+    }, [isMuted]);
+
+    useEffect(() => {
+        const handleKeyPress = (e) => {
+            const currentTime = Date.now();
+            
+            // Nếu thời gian giữa 2 ký tự > timeout, reset buffer
+            if (currentTime - lastKeyTime > SCAN_TIMEOUT) {
+                setCardBuffer('');
+            }
+            
+            // Cập nhật thời gian của ký tự cuối
+            setLastKeyTime(currentTime);
+
+            // Nếu là Enter, xử lý quét thẻ hoàn tất
+            if (e.key === 'Enter') {
+                if (cardBuffer) {
+                    setCardId(cardBuffer.toUpperCase());
+                    // Tự động submit form
+                    handleSubmit(new Event('submit'));
+                }
+                setCardBuffer('');
+                return;
+            }
+
+            // Thêm ký tự vào buffer
+            setCardBuffer(prev => prev + e.key);
+        };
+
+        // Chỉ lắng nghe khi modal đã đóng
+        if (!showModal) {
+            window.addEventListener('keypress', handleKeyPress);
+        }
+
+        return () => {
+            window.removeEventListener('keypress', handleKeyPress);
+        };
+    }, [cardBuffer, lastKeyTime, showModal]);
+
     const fetchAssignments = async () => {
         if(selectedPosition === 0) return;
         try {
@@ -72,7 +119,7 @@ const QueueDisplay = () => {
             setCheckedInStaff(null);
             
             const response = await axios.post('/api/admin/staff-checkin', {
-                staff_code: staffCode,
+                card_id: cardId,
                 gate_id: selectedPosition,
                 gate_shift_id: assignments[0]?.gate_shift_id
             });
@@ -91,10 +138,10 @@ const QueueDisplay = () => {
                 });
             }
             
-            setStaffCode('');
+            setCardId('');
             
         } catch (err) {
-            setStaffCode('');
+            setCardId('');
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkin');
             
             if (err.response?.data?.data?.staff) {
@@ -144,6 +191,7 @@ const QueueDisplay = () => {
                         </div>
                         <div className="qd-waiting-details">
                             <span className="qd-waiting-code">Mã NV: {assignment.staff?.code}</span>
+                            <span className="qd-waiting-card">CCCD: {assignment.staff?.card_id || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
@@ -165,21 +213,22 @@ const QueueDisplay = () => {
             .map((assignment) => (
                 <div key={assignment.staff.id} className="qd-checkedin-item">
                     <div className="qd-checkedin-number">{assignment.index}</div>
-                <div className="qd-checkedin-info">
-                    <div className="qd-checkedin-header">
-                        <div className="qd-checkedin-name">
-                            {assignment.staff?.name}
+                    <div className="qd-checkedin-info">
+                        <div className="qd-checkedin-header">
+                            <div className="qd-checkedin-name">
+                                {assignment.staff?.name}
+                            </div>
+                            <div className="qd-checkedin-group">
+                                {assignment.staff?.group_name || 'Chưa phân nhóm'}
+                            </div>
                         </div>
-                        <div className="qd-checkedin-group">
-                            {assignment.staff?.group_name || 'Chưa phân nhóm'}
+                        <div className="qd-checkedin-details">
+                            <span className="qd-checkedin-code">Mã NV: {assignment.staff?.code}</span>
+                            <span className="qd-checkedin-card">Thẻ: {assignment.staff?.card_id || 'N/A'}</span>
                         </div>
-                    </div>
-                    <div className="qd-checkedin-details">
-                        <span className="qd-checkedin-code">Mã NV: {assignment.staff?.code}</span>
                     </div>
                 </div>
-            </div>
-        ));
+            ));
     };
 
     const announceStaff = async (staffName, staffIndex) => {
@@ -282,15 +331,13 @@ const QueueDisplay = () => {
                         <form onSubmit={handleSubmit} className="qd-search-form">
                             <input
                                 type="text"
-                                value={staffCode}
-                                onChange={(e) => setStaffCode(e.target.value.toUpperCase())}
-                                placeholder="Nhập mã nhân viên..."
+                                value={cardId}
+                                onChange={(e) => setCardId(e.target.value.toUpperCase())}
+                                placeholder="Quẹt thẻ hoặc nhập mã thẻ rồi nhấn Enter..."
                                 className="qd-search-input"
                                 ref={inputRef}
+                                autoComplete="off"
                             />
-                            <button type="submit" className="qd-search-button">
-                                Tìm kiếm
-                            </button>
                         </form>
                         
                         {checkedInStaff && (
@@ -359,7 +406,7 @@ const QueueDisplay = () => {
                     }}
                     className="qd-position-select"
                 >
-                    <option value={0}>-- Chọn vị trí làm việc --</option>
+                    <option value={0}>Chọn vị trí Làm Việc</option>
                     {positions.map(pos => (
                         <option key={pos} value={pos}>Cửa số {pos}</option>
                     ))}

@@ -6,30 +6,30 @@
 
 .qd-title {
     text-align: center;
-    padding: 20px 30px;
+    padding: 12px 20px;
     color: #ffffff;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 600;
     margin: -25px -25px 0 -25px;
     background-color: #415c95;
     border-bottom: 1px solid #1d4ed8;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px;
+    gap: 30px;
 }
 
 .qd-position-selector {
     display: flex;
     align-items: center;
-    gap: 15px;
-    font-size: 16px;
+    gap: 12px;
+    font-size: 14px;
     white-space: nowrap;
     background: rgba(255, 255, 255, 0.15);
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
 }
 
 .qd-position-selector span {
@@ -37,14 +37,14 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .qd-position-select {
-    padding: 8px 35px 8px 15px;
+    padding: 6px 30px 6px 12px;
     border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 6px;
-    font-size: 15px;
+    font-size: 14px;
     color: #2563eb;
     background-color: white;
     cursor: pointer;
@@ -77,22 +77,21 @@
 
 .qd-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding-top: 25px;
-    height: calc(100vh - 140px);
-    background-color: #f9fafb;
+    grid-template-columns: 450px minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 25px;
+    padding: 25px;
+    max-width: 1800px;
+    margin: 0 auto;
 }
 
 .qd-section {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    height: 100%;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e5e7eb;
+    height: calc(100vh - 150px);
 }
 
 .qd-section:hover {
@@ -100,16 +99,12 @@
 }
 
 .qd-section h2 {
-    color: #374151;
-    margin: -20px -20px 15px -20px;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 20px;
-    text-align: center;
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-radius: 8px 8px 0 0;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
 }
 
 .qd-calling {
@@ -267,11 +262,11 @@
 /* Style cho thông tin nhân viên */
 .qd-staff-info {
     margin-top: 20px;
+    padding: 30px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
     text-align: center;
-    padding: 20px;
 }
 
 /* Style cho avatar */
@@ -279,9 +274,9 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    border: 4px solid #60a5fa;
-    margin: 0 auto 15px;
     overflow: hidden;
+    margin: 0 auto 20px;
+    border: 4px solid #3b82f6;
 }
 
 .qd-staff-avatar img {
@@ -295,43 +290,32 @@
     font-size: 48px;
     font-weight: 800;
     color: #2563eb;
-    line-height: 1;
-    margin: 15px 0;
+    margin: 20px 0;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
 
 /* Style cho thông tin chi tiết */
 .qd-staff-details {
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .qd-info-row {
     display: flex;
     justify-content: space-between;
-    padding: 12px 15px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.qd-info-row:first-of-type {
-    border-top: none;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .qd-info-label {
-    color: #6b7280;
-    font-size: 15px;
+    color: #64748b;
     font-weight: 500;
-    flex: 1;
 }
 
 .qd-info-value {
-    color: #111827;
-    font-size: 15px;
+    color: #1e293b;
     font-weight: 600;
-    flex: 2;
-    text-align: left;
-}
-
-.qd-info-value.error {
-    color: #ef4444;
 }
 
 /* Style cho thông báo lỗi */
@@ -550,41 +534,44 @@
 
 /* Cập nhật style cho form tìm kiếm */
 .qd-search-form {
-    display: flex;
-    gap: 10px;
+    display: block;
     padding: 15px;
-    background: white;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .qd-search-input {
-    flex: 1;
-    padding: 12px 15px;
+    width: 100%;
+    padding: 15px 20px;
     border: 2px solid #e5e7eb;
     border-radius: 8px;
     font-size: 16px;
     color: #1e293b;
-    font-weight: 500;
+    background: white;
     transition: all 0.2s ease;
 }
 
 .qd-search-input:focus {
     outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.qd-search-input::placeholder {
+    color: #94a3b8;
 }
 
 .qd-search-button {
     padding: 12px 25px;
-    background-color: #2563eb;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 15px;
-    transition: all 0.2s ease;
     white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
 .qd-search-button:hover {
@@ -689,9 +676,9 @@
     background: none;
     border: none;
     color: white;
-    padding: 8px;
+    padding: 6px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -870,4 +857,229 @@
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+.qd-waiting-card, .qd-checkedin-card {
+    font-size: 18px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.qd-waiting-card::before, .qd-checkedin-card::before {
+    content: "•";
+    margin: 0 8px;
+    color: #cbd5e1;
+}
+
+/* Cập nhật container chính */
+.qd-container {
+    display: grid;
+    grid-template-columns: 450px minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 25px;
+    padding: 25px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Cập nhật section */
+.qd-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+}
+
+.qd-section h2 {
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+}
+
+/* Cập nhật form tìm kiếm */
+.qd-search-form {
+    margin: 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.qd-search-input {
+    border-color: #e2e8f0;
+    background: white;
+}
+
+.qd-search-button {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+}
+
+/* Cập nhật danh sách chờ và đã checkin */
+.qd-waiting-item, .qd-checkedin-item {
+    margin: 15px;
+    border-radius: 12px;
+    border-left-width: 5px;
+}
+
+.qd-waiting-item:first-child {
+    background: linear-gradient(to right, rgba(37, 99, 235, 0.05), transparent);
+}
+
+/* Responsive */
+@media (max-width: 1600px) {
+    .qd-container {
+        grid-template-columns: 450px minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .qd-container {
+        grid-template-columns: 450px minmax(0, 1.2fr) minmax(0, 0.8fr);
+    }
+    
+    .qd-section.qd-serving {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    .qd-section.qd-waiting {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}
+
+@media (max-width: 1200px) {
+    .qd-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .qd-section.qd-search {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    
+    .qd-section.qd-waiting {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .qd-section.qd-serving {
+        grid-column: 1;
+        grid-row: 3;
+    }
+}
+
+/* Cập nhật section checkin */
+.qd-section.qd-search {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    height: auto;
+    min-height: 200px;
+}
+
+.qd-section.qd-search h2 {
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.qd-section.qd-search .qd-content {
+    padding: 20px;
+}
+
+/* Cập nhật form tìm kiếm */
+.qd-search-form {
+    display: flex;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.qd-search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #1e293b;
+    background: white;
+}
+
+.qd-search-button {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+/* Cập nhật thông tin nhân viên */
+.qd-staff-info {
+    margin-top: 20px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.qd-staff-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 20px;
+    border: 4px solid #3b82f6;
+}
+
+.qd-staff-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.qd-staff-number {
+    font-size: 48px;
+    font-weight: 800;
+    color: #2563eb;
+    margin: 20px 0;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+.qd-staff-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.qd-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.qd-info-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.qd-info-value {
+    color: #1e293b;
+    font-weight: 600;
 }
