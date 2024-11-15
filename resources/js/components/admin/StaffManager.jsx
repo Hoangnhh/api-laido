@@ -46,6 +46,21 @@ const BANK_OPTIONS = [
     { value: 'MBbank', label: 'MBbank' }
 ];
 
+// Thêm constant cho tên hiển thị của các trường
+const FIELD_LABELS = {
+    code: 'Mã nhân viên',
+    name: 'Tên nhân viên', 
+    group_id: 'Nhóm nhân viên',
+    card_id: 'CMND/CCCD',
+    bank_name: 'Tên ngân hàng',
+    bank_account: 'Số tài khoản',
+    card_date: 'Ngày cấp CMND/CCCD',
+    birthdate: 'Ngày sinh',
+    address: 'Địa chỉ',
+    phone: 'Số điện thoại',
+    password: 'Mật khẩu'
+};
+
 const StaffManager = () => {
     const [staffs, setStaffs] = useState([]);
     const [groups, setGroups] = useState([]); // Để chọn nhóm nhân viên
@@ -55,20 +70,20 @@ const StaffManager = () => {
     const [selectedStaff, setSelectedStaff] = useState(null);
     const [formData, setFormData] = useState({
         type: 'DRIVER',
-        group_id: '',
-        code: '',
-        name: '',
+        group_id: null,
+        code: null,
+        name: null,
         username: '',
         password: '',
-        birthdate: '',
-        address: '',
-        card_id: '',
+        birthdate: null,
+        address: null,
+        card_id: null,
         status: 'ACTIVE',
         vehical_size: 0,
-        phone: '',
-        card_date: '',
-        bank_name: 'Agribank',
-        bank_account: '',
+        phone: null,
+        card_date: null,
+        bank_name: null,
+        bank_account: null,
     });
     const [alert, setAlert] = useState({
         open: false,
@@ -189,27 +204,28 @@ const StaffManager = () => {
             setSelectedStaff(staff);
             setFormData({
                 ...staff,
-                birthdate: formatDateForInput(staff.birthdate), // Format ngày sinh cho input
-                password: '' // Reset password khi edit
+                birthdate: formatDateForInput(staff.birthdate),
+                card_date: formatDateForInput(staff.card_date),
+                password: ''
             });
         } else {
             setSelectedStaff(null);
             setFormData({
                 type: 'STAFF',
-                group_id: '',
-                code: '',
-                name: '',
+                group_id: null,
+                code: null,
+                name: null,
                 username: '',
                 password: '',
-                birthdate: '',
-                address: '',
-                card_id: '',
+                birthdate: null,
+                address: null,
+                card_id: null,
                 status: 'ACTIVE',
                 vehical_size: 0,
-                phone: '',
-                card_date: '',
-                bank_name: 'Agribank',
-                bank_account: '',
+                phone: null,
+                card_date: null,
+                bank_name: null,
+                bank_account: null,
             });
         }
         setOpenDialog(true);
@@ -218,6 +234,46 @@ const StaffManager = () => {
     // Xử lý submit form
     const handleSubmit = async () => {
         try {
+            // Kiểm tra các trường bắt buộc
+            const requiredFields = [
+                'code', 'name', 'group_id', 'card_id', 
+                'bank_name', 'bank_account', 'card_date',
+                'birthdate', 'address', 'phone'
+            ];
+
+            if (!selectedStaff) {
+                requiredFields.push('password');
+            }
+
+            // Kiểm tra password confirmation
+            if (formData.password && formData.password !== formData.password_confirmation) {
+                showAlert('Mật khẩu nhập lại không khớp', 'error');
+                return;
+            }
+
+            // Kiểm tra các trường bắt buộc với tên tiếng Việt
+            const emptyFields = requiredFields
+                .filter(field => !formData[field])
+                .map(field => FIELD_LABELS[field]);
+
+            if (emptyFields.length > 0) {
+                showAlert(`Vui lòng điền đầy đủ thông tin các trường sau:\n${emptyFields.join('\n')}`, 'error');
+                return;
+            }
+
+            // Kiểm tra định dạng số điện thoại
+            if (formData.phone && formData.phone.length !== 10) {
+                showAlert('Số điện thoại phải có đúng 10 số', 'error');
+                return;
+            }
+
+            // Kiểm tra định dạng số tài khoản (chỉ được nhập số)
+            if (formData.bank_account && !/^\d+$/.test(formData.bank_account)) {
+                showAlert('Số tài khoản chỉ được phép nhập số', 'error');
+                return;
+            }
+
+            // Tiếp tục xử lý submit như cũ
             const formDataToSend = new FormData();
             
             Object.keys(formData).forEach(key => {
@@ -252,10 +308,16 @@ const StaffManager = () => {
             setShouldFetch(true); // Thay vì gọi fetchStaffs trực tiếp
         } catch (error) {
             if (error.response?.data?.errors) {
-                const errorMessages = Object.values(error.response.data.errors).join('\n');
+                // Format lại thông báo lỗi từ server
+                const errorMessages = Object.entries(error.response.data.errors)
+                    .map(([field, messages]) => {
+                        const fieldLabel = FIELD_LABELS[field] || field;
+                        return `${fieldLabel}: ${messages.join(', ')}`;
+                    })
+                    .join('\n');
                 showAlert(errorMessages, 'error');
             } else {
-                showAlert(error.response?.data?.message || 'Có lỗi xảy ra', 'error');
+                showAlert(error.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin', 'error');
             }
         }
     };
@@ -640,18 +702,21 @@ const StaffManager = () => {
                                     </Typography>
                                     <Box className="staff-manager-section-content">
                                         <TextField
+                                            required
                                             label="Mã nhân viên"
                                             value={formData.code}
                                             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                                         />
                                         
                                         <TextField
+                                            required
                                             label="Tên nhân viên"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         />
 
                                         <TextField
+                                            required
                                             label="Số điện thoại"
                                             value={formData.phone}
                                             onChange={handlePhoneChange}
@@ -663,12 +728,14 @@ const StaffManager = () => {
                                         />
 
                                         <TextField
+                                            required
                                             label="CMND/CCCD"
                                             value={formData.card_id}
                                             onChange={(e) => setFormData({ ...formData, card_id: e.target.value })}
                                         />
 
                                         <TextField
+                                            required
                                             label="Ngày cấp CMND/CCCD"
                                             type="date"
                                             value={formData.card_date ? formatDateForInput(formData.card_date) : ''}
@@ -677,6 +744,7 @@ const StaffManager = () => {
                                         />
 
                                         <TextField
+                                            required
                                             label="Ngày sinh"
                                             type="date"
                                             value={formData.birthdate ? formatDateForInput(formData.birthdate) : ''}
@@ -685,6 +753,7 @@ const StaffManager = () => {
                                         />
 
                                         <TextField
+                                            required
                                             label="Địa chỉ"
                                             value={formData.address}
                                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -712,6 +781,8 @@ const StaffManager = () => {
                                                 type="password"
                                                 value={formData.password}
                                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                required={!selectedStaff}
+                                                helperText={selectedStaff ? "Để trống nếu không muốn đổi mật khẩu" : "Bắt buộc nhập mật khẩu"}
                                             />
 
                                             <TextField
@@ -719,8 +790,12 @@ const StaffManager = () => {
                                                 type="password"
                                                 value={formData.password_confirmation || ''}
                                                 onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                                                required={!selectedStaff || formData.password}
                                                 error={formData.password !== formData.password_confirmation}
-                                                helperText={formData.password !== formData.password_confirmation ? "Mật khẩu không khớp" : ""}
+                                                helperText={formData.password !== formData.password_confirmation ? 
+                                                    "Mật khẩu không khớp" : 
+                                                    selectedStaff ? "Để trống nếu không muốn đổi mật khẩu" : "Bắt buộc nhập lại mật khẩu"
+                                                }
                                             />
 
                                             <TextField
@@ -743,9 +818,10 @@ const StaffManager = () => {
                                         </Typography>
                                         <Box className="staff-manager-section-content">
                                             <TextField
+                                                required
                                                 select
                                                 label="Tên ngân hàng"
-                                                value={formData.bank_name || 'Agribank'}
+                                                value={formData.bank_name || ''}
                                                 onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
                                                 placeholder="Chọn ngân hàng"
                                             >
@@ -757,6 +833,7 @@ const StaffManager = () => {
                                             </TextField>
 
                                             <TextField
+                                                required
                                                 label="Số tài khoản"
                                                 value={formData.bank_account}
                                                 onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
