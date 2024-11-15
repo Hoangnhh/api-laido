@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\Traits\ApiResponse;
 use App\Models\Staff;
 use App\Models\GateStaffShift;
+use App\Models\GateShift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -16,7 +17,6 @@ class StaffController extends Controller
     public function getInfo(Request $request)
     {
         try {
-            // Lấy user_id từ JWT token đã được decode trong middleware
             $userId = $request->user_id;
             
             $staff = Staff::with('group')
@@ -28,19 +28,40 @@ class StaffController extends Controller
                 return $this->errorResponse('Không tìm thấy thông tin nhân viên', 404);
             }
 
-            // Lấy ca làm việc hiện tại của nhân viên và tính số người đứng trước trong hàng đợi
-            $currentShift = GateStaffShift::where('staff_id', $userId)
-                ->whereIn('status', [GateStaffShift::STATUS_CHECKIN, GateStaffShift::STATUS_WAITING])
-                ->with('gate:id,name')
-                ->with('gateShift:id,date')
-                ->orderBy('id')
-                ->first();
+            // Lấy ca làm việc hiện tại hoặc ca tiếp theo của nhân viên
+            $shift = GateStaffShift::join('gate_shift', 'gate_staff_shift.gate_shift_id', '=', 'gate_shift.id')
+                ->where('gate_staff_shift.staff_id', $userId)
+                ->whereIn('gate_shift.queue_status', [GateShift::QUEUE_STATUS_WAITING, GateShift::QUEUE_STATUS_RUNNING])
+                ->where('gate_shift.status', GateShift::STATUS_ACTIVE)
+                ->orderBy('gate_shift.date', 'asc')
+                ->with(['gate:id,name', 'gateShift:id,date'])
+                ->select('gate_staff_shift.*')
+                ->get();
+
+            // Tìm ca làm việc phù hợp
+            $currentShift = null;
+            $lastCheckoutShift = null;
+
+            foreach ($shift as $s) {
+                if ($s->status !== GateStaffShift::STATUS_CHECKOUT) {
+                    $currentShift = $s;
+                    break;
+                } else {
+                    $lastCheckoutShift = $s; // Lưu lại ca checkout gần nhất
+                }
+            }
+
+            // Nếu không tìm thấy ca nào đang hoạt động, sử dụng ca checkout gần nhất
+            if (!$currentShift && $lastCheckoutShift) {
+                $currentShift = $lastCheckoutShift;
+            }
+
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
             if ($currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
                 $queuePosition = GateStaffShift::where('gate_shift_id', $currentShift->gate_shift_id)
                     ->where('status', GateStaffShift::STATUS_WAITING)
-                    ->where('id', '<', $currentShift->id)
+                    ->where('index', '<', $currentShift->index)
                     ->count();
             }
 
@@ -63,7 +84,7 @@ class StaffController extends Controller
                         'status' => $currentShift->status,
                         'checkin_at' => $currentShift->checkin_at,
                     ] : null,
-                    'revenue' => "5000000", // Doanh thu trong ngày
+                    'revenue' => "5000000",
                     'avatar' => $staff->avatar_url,
                     'group' => [
                         'id' => $staff->group->id,
@@ -73,7 +94,7 @@ class StaffController extends Controller
             ], 'Lấy thông tin nhân viên thành công');
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Có lỗi xảy ra khi lấy thông tin nhân viên', 500);
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 } 
