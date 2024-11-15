@@ -39,6 +39,13 @@ import {
 import axios from 'axios';
 import '../../../css/staff-manager.css';
 
+// Thêm constant cho danh sách ngân hàng
+const BANK_OPTIONS = [
+    { value: 'Agribank', label: 'Agribank' },
+    { value: 'Vietcombank', label: 'Vietcombank' },
+    { value: 'MBbank', label: 'MBbank' }
+];
+
 const StaffManager = () => {
     const [staffs, setStaffs] = useState([]);
     const [groups, setGroups] = useState([]); // Để chọn nhóm nhân viên
@@ -60,7 +67,7 @@ const StaffManager = () => {
         vehical_size: 0,
         phone: '',
         card_date: '',
-        bank_name: '',
+        bank_name: 'Agribank',
         bank_account: '',
     });
     const [alert, setAlert] = useState({
@@ -203,7 +210,7 @@ const StaffManager = () => {
                 vehical_size: 0,
                 phone: '',
                 card_date: '',
-                bank_name: '',
+                bank_name: 'Agribank',
                 bank_account: '',
             });
         }
@@ -473,15 +480,16 @@ const StaffManager = () => {
                             <TableRow sx={{ 
                                 bgcolor: '#2c3e50',
                             }}>
-                                <TableCell sx={{ color: 'white' }}>Mã NV</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Ảnh</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Tên</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Nhóm</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Ngày sinh</TableCell>
-                                <TableCell sx={{ color: 'white' }}>CMND/CCCD</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Tải trọng</TableCell>
-                                <TableCell sx={{ color: 'white' }}>Trạng thái</TableCell>
-                                <TableCell sx={{ color: 'white' }} align="right">Thao tác</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Avatar</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tên nhân viên</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Nhóm</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày sinh</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>CMND/CCCD</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày cấp</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tải trọng</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngân hàng</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Trạng thái</TableCell>
+                                <TableCell align="right" sx={{ color: '#fff', fontWeight: 'bold' }}>Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -503,7 +511,6 @@ const StaffManager = () => {
                                         key={staff.id}
                                         sx={{ '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.04)' } }}
                                     >
-                                        <TableCell sx={{ color: '#2c3e50', fontWeight: 'bold' }}>{staff.code}</TableCell>
                                         <TableCell>
                                             <Box 
                                                 className="staff-manager-avatar-wrapper"
@@ -544,7 +551,24 @@ const StaffManager = () => {
                                             {formatDate(staff.birthdate)}
                                         </TableCell>
                                         <TableCell>{staff.card_id}</TableCell>
+                                        <TableCell>{formatDate(staff.card_date)}</TableCell>
                                         <TableCell>{staff.vehical_size}</TableCell>
+                                        <TableCell>
+                                            {staff.bank_name && staff.bank_account ? (
+                                                <Box>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                                                        {staff.bank_name}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {staff.bank_account}
+                                                    </Typography>
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Chưa cập nhật
+                                                </Typography>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             <Chip
                                                 label={staff.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
@@ -732,11 +756,18 @@ const StaffManager = () => {
                                         </Typography>
                                         <Box className="staff-manager-section-content">
                                             <TextField
+                                                select
                                                 label="Tên ngân hàng"
-                                                value={formData.bank_name}
+                                                value={formData.bank_name || 'Agribank'}
                                                 onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                                                placeholder="VD: Vietcombank, BIDV,..."
-                                            />
+                                                placeholder="Chọn ngân hàng"
+                                            >
+                                                {BANK_OPTIONS.map((option) => (
+                                                    <MenuItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
 
                                             <TextField
                                                 label="Số tài khoản"
