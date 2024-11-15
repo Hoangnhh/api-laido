@@ -34,7 +34,7 @@ class StaffController extends Controller
                 ->whereIn('gate_shift.queue_status', [GateShift::QUEUE_STATUS_WAITING, GateShift::QUEUE_STATUS_RUNNING])
                 ->where('gate_shift.status', GateShift::STATUS_ACTIVE)
                 ->orderBy('gate_shift.date', 'asc')
-                ->with(['gate:id,name', 'gateShift:id,date'])
+                ->with(['gateShift.gate:id,name', 'gateShift:id,date,gate_id'])
                 ->select('gate_staff_shift.*')
                 ->get();
 
@@ -59,9 +59,16 @@ class StaffController extends Controller
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
             if ($currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
-                $queuePosition = GateStaffShift::where('gate_shift_id', $currentShift->gate_shift_id)
-                    ->where('status', GateStaffShift::STATUS_WAITING)
-                    ->where('index', '<', $currentShift->index)
+                // Lấy gate_id và date từ gateShift hiện tại
+                $gateId = $currentShift->gateShift->gate_id;
+                $shiftDate = $currentShift->gateShift->date;
+
+                // Đếm tất cả các gate_staff_shift có cùng gate_id, cùng ngày và index nhỏ hơn
+                $queuePosition = GateStaffShift::join('gate_shift', 'gate_staff_shift.gate_shift_id', '=', 'gate_shift.id')
+                    ->where('gate_shift.gate_id', $gateId)
+                    ->whereDate('gate_shift.date', $shiftDate)
+                    ->where('gate_staff_shift.status', GateStaffShift::STATUS_WAITING)
+                    ->where('gate_staff_shift.id', '<', $currentShift->id)
                     ->count();
             }
 
@@ -78,8 +85,8 @@ class StaffController extends Controller
                     'shift' => $currentShift ? [
                         'id' => $currentShift->id,
                         'index' => $currentShift->index,
-                        'queue_position' => $queuePosition,
-                        'gate' => $currentShift->gate->name,
+                        'queue_position' => $queuePosition + 1, // Thêm 1 vào vị trí để hiển thị số thứ tự
+                        'gate' => $currentShift->gateShift->gate->name,
                         'date' => $currentShift->gateShift->date,
                         'status' => $currentShift->status,
                         'checkin_at' => $currentShift->checkin_at,
