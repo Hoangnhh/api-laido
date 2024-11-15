@@ -68,8 +68,7 @@
 .staff-manager-form {
     padding-top: 16px;
     display: grid;
-    gap: 16px;
-    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
 }
 
 /* MUI Overrides */
@@ -141,7 +140,271 @@
         width: 100%;
     }
     
-    .staff-manager-form {
+}
+
+/* Form Sections */
+.staff-manager-form-section {
+    grid-column: 1 / -1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.staff-manager-section-title {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.staff-manager-section-icon {
+    color: #3b82f6;
+    font-size: 20px;
+}
+
+.staff-manager-section-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .staff-manager-section-content {
         grid-template-columns: 1fr;
     }
+}
+
+/* Form fields styling */
+.staff-manager-section-content .MuiTextField-root {
+    width: 100%;
+}
+
+/* Section hover effect */
+.staff-manager-form-section:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Dialog styles */
+.staff-manager-dialog {
+    .MuiDialog-paper {
+        margin: 16px;
+        max-width: 80vw !important;
+        width: 80vw !important;
+    }
+
+    .MuiDialogContent-root {
+        padding: 24px;
+        overflow-y: auto;
+    }
+
+    /* Form layout */
+    .staff-manager-form {
+        display: flex;
+        gap: 24px;
+    }
+
+    /* Avatar section */
+    .staff-manager-avatar-container {
+        flex: 0 0 200px; /* Cố định width 200px */
+        position: sticky;
+        top: 24px;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Main content section */
+    .staff-manager-main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* Form sections */
+    .staff-manager-form-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Section content layout */
+    .staff-manager-section-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .staff-manager-section-content .MuiTextField-root {
+        flex: 1 1 calc(50% - 8px); /* 2 cột với gap 16px */
+        min-width: 250px;
+    }
+
+    /* Section titles */
+    .staff-manager-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px !important;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1rem !important;
+    }
+
+    .staff-manager-section-icon {
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    /* Bank and Account sections container */
+    .staff-manager-secondary-sections {
+        display: flex;
+        gap: 24px;
+    }
+
+    .staff-manager-secondary-sections .staff-manager-form-section {
+        flex: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .staff-manager-dialog {
+        .staff-manager-form {
+            flex-direction: column;
+        }
+
+        .staff-manager-avatar-container {
+            position: static;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .staff-manager-secondary-sections {
+            flex-direction: column;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .staff-manager-dialog {
+        .MuiDialog-paper {
+            width: 95% !important;
+            margin: 10px;
+        }
+
+        .staff-manager-section-content .MuiTextField-root {
+            flex: 1 1 100%;
+        }
+    }
+}
+
+/* Style cho section thông tin cá nhân */
+.staff-manager-personal-info {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Avatar bên trái, thông tin bên phải */
+    gap: 24px;
+    grid-column: 1 / -1; /* Full width */
+}
+
+/* Điều chỉnh container avatar */
+.staff-manager-avatar-container {
+    width: 200px; /* Cố định chiều rộng */
+    align-self: start; /* Căn trên cùng */
+}
+
+/* Điều chỉnh section content cho thông tin cá nhân */
+.staff-manager-personal-info .staff-manager-section-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* Style cho các section tài khoản và ngân hàng */
+.staff-manager-form-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .staff-manager-form {
+        grid-template-columns: 1fr; /* Chuyển về 1 cột */
+    }
+    
+    .staff-manager-personal-info {
+        grid-template-columns: 1fr; /* Avatar và thông tin xếp dọc */
+    }
+    
+    .staff-manager-avatar-container {
+        width: 100%;
+        margin-bottom: 24px;
+    }
+}
+
+/* Avatar styles */
+.staff-manager-avatar-container {
+    flex: 0 0 200px;
+    position: sticky;
+    top: 24px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.staff-manager-avatar-wrapper {
+    position: relative;
+    cursor: pointer;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.staff-manager-avatar-wrapper:hover::after {
+    content: 'Chọn ảnh';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.staff-manager-avatar {
+    width: 150px !important;
+    height: 150px !important;
+    border: 2px solid #2c3e50;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.staff-manager-avatar-wrapper:hover .staff-manager-avatar {
+    filter: brightness(0.8);
 }

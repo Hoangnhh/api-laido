@@ -31,7 +31,10 @@ import {
     faBan,
     faCircleCheck,
     faMagnifyingGlass,
-    faImage
+    faImage,
+    faUser,
+    faIdCard,
+    faCreditCard
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../css/staff-manager.css';
@@ -44,7 +47,7 @@ const StaffManager = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState(null);
     const [formData, setFormData] = useState({
-        type: 'STAFF',
+        type: 'DRIVER',
         group_id: '',
         code: '',
         name: '',
@@ -55,7 +58,10 @@ const StaffManager = () => {
         card_id: '',
         status: 'ACTIVE',
         vehical_size: 0,
-        phone: ''
+        phone: '',
+        card_date: '',
+        bank_name: '',
+        bank_account: '',
     });
     const [alert, setAlert] = useState({
         open: false,
@@ -195,7 +201,10 @@ const StaffManager = () => {
                 card_id: '',
                 status: 'ACTIVE',
                 vehical_size: 0,
-                phone: ''
+                phone: '',
+                card_date: '',
+                bank_name: '',
+                bank_account: '',
             });
         }
         setOpenDialog(true);
@@ -365,6 +374,16 @@ const StaffManager = () => {
         }));
     };
 
+    // Thêm hàm xử lý ngày cấp CMND/CCCD
+    const handleCardDateChange = (e) => {
+        const inputDate = e.target.value;
+        if (!inputDate) {
+            setFormData({ ...formData, card_date: '' });
+            return;
+        }
+        setFormData({ ...formData, card_date: inputDate });
+    };
+
     return (
         <AdminLayout>
             <Box className="staff-manager">
@@ -486,11 +505,22 @@ const StaffManager = () => {
                                     >
                                         <TableCell sx={{ color: '#2c3e50', fontWeight: 'bold' }}>{staff.code}</TableCell>
                                         <TableCell>
-                                            <Avatar 
-                                                src={staff.avatar_url} 
-                                                alt={staff.name}
-                                                sx={{ width: 40, height: 40 }}
-                                            />
+                                            <Box 
+                                                className="staff-manager-avatar-wrapper"
+                                                component="label"
+                                            >
+                                                <Avatar
+                                                    src={staff.avatar_url} 
+                                                    alt={staff.name}
+                                                    sx={{ width: 40, height: 40 }}
+                                                />
+                                                <input
+                                                    type="file"
+                                                    hidden
+                                                    accept="image/*"
+                                                    onChange={handleAvatarChange}
+                                                />
+                                            </Box>
                                         </TableCell>
                                         <TableCell>{staff.name}</TableCell>
                                         <TableCell>
@@ -561,121 +591,166 @@ const StaffManager = () => {
                 <Dialog 
                     open={openDialog} 
                     onClose={() => setOpenDialog(false)}
-                    maxWidth="md"
-                    fullWidth
+                    maxWidth={false}
+                    className="staff-manager-dialog"
                 >
                     <DialogTitle className="staff-manager-dialog-title">
                         {selectedStaff ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
                     </DialogTitle>
+                    
                     <DialogContent>
-                        <Box component="form" className="staff-manager-form">
+                        <Box className="staff-manager-form">
+                            {/* Left side - Avatar */}
                             <Box className="staff-manager-avatar-container">
-                                <Avatar
-                                    src={avatarPreview || formData.avatar_url}
-                                    className="staff-manager-avatar"
-                                />
-                                <Button
-                                    variant="outlined"
+                                <Box 
+                                    className="staff-manager-avatar-wrapper"
                                     component="label"
-                                    startIcon={<FontAwesomeIcon icon={faImage} />}
-                                    sx={{ 
-                                        color: '#2c3e50',
-                                        borderColor: '#2c3e50',
-                                        '&:hover': {
-                                            borderColor: '#1a252f',
-                                            bgcolor: 'rgba(44, 62, 80, 0.1)',
-                                        }
-                                    }}
                                 >
-                                    Chọn ảnh đại diện
+                                    <Avatar
+                                        src={avatarPreview || formData.avatar_url}
+                                        className="staff-manager-avatar"
+                                    />
                                     <input
                                         type="file"
                                         hidden
                                         accept="image/*"
                                         onChange={handleAvatarChange}
                                     />
-                                </Button>
+                                </Box>
                             </Box>
 
-                            <TextField
-                                label="Mã nhân viên"
-                                value={formData.code}
-                                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                            />
-                            <TextField
-                                select
-                                fullWidth
-                                label="Nhóm"
-                                value={formData.group_id}
-                                onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
-                                error={!formData.group_id}
-                                helperText={!formData.group_id ? "Vui lòng chọn nhóm" : ""}
-                            >
-                                <MenuItem value="">
-                                    <em>Chọn nhóm</em>
-                                </MenuItem>
-                                {groups.filter(group => group.status === 'ACTIVE').map((group) => (
-                                    <MenuItem key={group.id} value={group.id}>
-                                        {group.name}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
-                                label="Tên nhân viên"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            />
-                            <TextField
-                                label="Số điện thoại"
-                                value={formData.phone}
-                                onChange={handlePhoneChange}
-                                inputProps={{
-                                    maxLength: 10,
-                                    pattern: '[0-9]*'
-                                }}
-                                helperText="Số điện thoại sẽ được sử dụng làm tên đăng nhập"
-                            />
-                            <TextField
-                                label="Username"
-                                value={formData.username}
-                                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                disabled={!!formData.phone}
-                                helperText={formData.phone ? "Username tự động theo số điện thoại" : ""}
-                            />
-                            <TextField
-                                label="Mật khẩu"
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            />
-                            <TextField
-                                label="CMND/CCCD"
-                                value={formData.card_id}
-                                onChange={(e) => setFormData({ ...formData, card_id: e.target.value })}
-                            />
-                            <TextField
-                                label="Ngày sinh"
-                                type="date"
-                                value={formData.birthdate ? formatDateForInput(formData.birthdate) : ''}
-                                onChange={handleDateChange}
-                                InputLabelProps={{ shrink: true }}
-                                fullWidth
-                            />
-                            <TextField
-                                label="Địa chỉ"
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            />
-                            <TextField
-                                label="Tải trọng phương tiện (Người)"
-                                type="number"
-                                value={formData.vehical_size}
-                                onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
-                                InputProps={{
-                                    inputProps: { min: 0 }
-                                }}
-                                helperText="Nhập 0 nếu không có phương tiện"
-                            />
+                            {/* Right side - Main content */}
+                            <Box className="staff-manager-main-content">
+                                {/* Thông tin cá nhân */}
+                                <Box className="staff-manager-form-section">
+                                    <Typography variant="h6" className="staff-manager-section-title">
+                                        <FontAwesomeIcon icon={faUser} className="staff-manager-section-icon" />
+                                        Thông tin cá nhân
+                                    </Typography>
+                                    <Box className="staff-manager-section-content">
+                                        <TextField
+                                            label="Mã nhân viên"
+                                            value={formData.code}
+                                            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                                        />
+                                        
+                                        <TextField
+                                            label="Tên nhân viên"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        />
+
+                                        <TextField
+                                            label="Số điện thoại"
+                                            value={formData.phone}
+                                            onChange={handlePhoneChange}
+                                            inputProps={{
+                                                maxLength: 10,
+                                                pattern: '[0-9]*'
+                                            }}
+                                            helperText="Số điện thoại sẽ được sử dụng làm tên đăng nhập"
+                                        />
+
+                                        <TextField
+                                            label="CMND/CCCD"
+                                            value={formData.card_id}
+                                            onChange={(e) => setFormData({ ...formData, card_id: e.target.value })}
+                                        />
+
+                                        <TextField
+                                            label="Ngày cấp CMND/CCCD"
+                                            type="date"
+                                            value={formData.card_date ? formatDateForInput(formData.card_date) : ''}
+                                            onChange={handleCardDateChange}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+
+                                        <TextField
+                                            label="Ngày sinh"
+                                            type="date"
+                                            value={formData.birthdate ? formatDateForInput(formData.birthdate) : ''}
+                                            onChange={handleDateChange}
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+
+                                        <TextField
+                                            label="Địa chỉ"
+                                            value={formData.address}
+                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                        />
+                                    </Box>
+                                </Box>
+
+                                {/* Thông tin tài khoản và ngân hàng */}
+                                <Box className="staff-manager-secondary-sections">
+                                    <Box className="staff-manager-form-section">
+                                        <Typography variant="h6" className="staff-manager-section-title">
+                                            <FontAwesomeIcon icon={faIdCard} className="staff-manager-section-icon" />
+                                            Thông tin tài khoản
+                                        </Typography>
+                                        <Box className="staff-manager-section-content">
+                                            <TextField
+                                                label="Username"
+                                                value={formData.username}
+                                                disabled
+                                                helperText="Username tự động theo số điện thoại"
+                                            />
+
+                                            <TextField
+                                                label="Mật khẩu"
+                                                type="password"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            />
+
+                                            <TextField
+                                                label="Nhập lại mật khẩu"
+                                                type="password"
+                                                value={formData.password_confirmation || ''}
+                                                onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                                                error={formData.password !== formData.password_confirmation}
+                                                helperText={formData.password !== formData.password_confirmation ? "Mật khẩu không khớp" : ""}
+                                            />
+
+                                            <TextField
+                                                label="Tải trọng phương tiện (Người)"
+                                                type="number"
+                                                value={formData.vehical_size}
+                                                onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
+                                                InputProps={{
+                                                    inputProps: { min: 0 }
+                                                }}
+                                                helperText="Nhập 0 nếu không có phương tiện"
+                                            />
+                                        </Box>
+                                    </Box>
+
+                                    <Box className="staff-manager-form-section">
+                                        <Typography variant="h6" className="staff-manager-section-title">
+                                            <FontAwesomeIcon icon={faCreditCard} className="staff-manager-section-icon" />
+                                            Thông tin ngân hàng
+                                        </Typography>
+                                        <Box className="staff-manager-section-content">
+                                            <TextField
+                                                label="Tên ngân hàng"
+                                                value={formData.bank_name}
+                                                onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                                                placeholder="VD: Vietcombank, BIDV,..."
+                                            />
+
+                                            <TextField
+                                                label="Số tài khoản"
+                                                value={formData.bank_account}
+                                                onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
+                                                placeholder="Nhập số tài khoản ngân hàng"
+                                                inputProps={{
+                                                    pattern: '[0-9]*'
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 3 }}>

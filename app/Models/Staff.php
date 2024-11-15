@@ -25,6 +25,9 @@ class Staff extends Model
         'address',
         'avatar_url',
         'card_id',
+        'card_date',
+        'bank_name',
+        'bank_account',
         'status',
         'vehical_size',
         'phone'
