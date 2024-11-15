@@ -77,8 +77,6 @@ const StaffManager = () => {
     });
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [filterGroupId, setFilterGroupId] = useState(''); // Thêm state cho filter nhóm
-    const [filterStatus, setFilterStatus] = useState('ACTIVE'); // Mặc định là ACTIVE
     const [avatarPreview, setAvatarPreview] = useState(null);
 
     // Tách các state filter ra riêng để dễ quản lý
@@ -396,9 +394,9 @@ const StaffManager = () => {
             <Box className="staff-manager">
                 {/* Header */}
                 <Box className="staff-manager-header">
-                    <Typography className="staff-manager-title">
+                    <h2 className="staff-manager-title">
                         Quản lý nhân viên
-                    </Typography>
+                    </h2>
                     
                     <Box className="staff-manager-controls">
                         {/* Status Filter */}
@@ -406,7 +404,7 @@ const StaffManager = () => {
                             select
                             size="small"
                             label="Trạng thái"
-                            value={filterStatus}
+                            value={filters.status}
                             onChange={handleFilterStatusChange}
                             className="staff-manager-filter"
                         >
@@ -420,20 +418,9 @@ const StaffManager = () => {
                             select
                             size="small"
                             label="Lọc theo nhóm"
-                            placeholder="Tất cả nhóm"
-                            value={filterGroupId}
+                            value={filters.groupId}
                             onChange={handleFilterGroupChange}
-                            sx={{ 
-                                width: '200px',
-                                '& .MuiOutlinedInput-root': {
-                                    '&:hover fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#2c3e50',
-                                    },
-                                }
-                            }}
+                            className="staff-manager-filter"
                         >
                             <MenuItem value="">
                                 <em>Tất cả nhóm</em>
