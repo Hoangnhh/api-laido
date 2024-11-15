@@ -41,7 +41,7 @@ class AuthController extends Controller
             'type' => $staff->type,
             'group_id' => $staff->group_id,
             'iat' => time(),
-            'exp' => time() + (60 * 60 * 24)
+            'exp' => time() + (60 * 60 * 24 * 30) // 30 ngày
         ];
 
         $token = JWT::encode($payload, config('app.key'), 'HS256');
