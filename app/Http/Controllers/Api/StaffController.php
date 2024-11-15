@@ -28,13 +28,21 @@ class StaffController extends Controller
                 return $this->errorResponse('Không tìm thấy thông tin nhân viên', 404);
             }
 
-            // Lấy ca làm việc hiện tại của nhân viên
+            // Lấy ca làm việc hiện tại của nhân viên và tính số người đứng trước trong hàng đợi
             $currentShift = GateStaffShift::where('staff_id', $userId)
                 ->whereIn('status', [GateStaffShift::STATUS_CHECKIN, GateStaffShift::STATUS_WAITING])
                 ->with('gate:id,name')
                 ->with('gateShift:id,date')
                 ->orderBy('id')
                 ->first();
+            // Tính số người đứng trước trong hàng đợi
+            $queuePosition = 0;
+            if ($currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
+                $queuePosition = GateStaffShift::where('gate_shift_id', $currentShift->gate_shift_id)
+                    ->where('status', GateStaffShift::STATUS_WAITING)
+                    ->where('id', '<', $currentShift->id)
+                    ->count();
+            }
 
             return $this->successResponse([
                 'staff' => [
@@ -49,6 +57,7 @@ class StaffController extends Controller
                     'shift' => $currentShift ? [
                         'id' => $currentShift->id,
                         'index' => $currentShift->index,
+                        'queue_position' => $queuePosition,
                         'gate' => $currentShift->gate->name,
                         'date' => $currentShift->gateShift->date,
                         'status' => $currentShift->status,

@@ -47,6 +47,13 @@ class GateStaffShift extends Model
         return $this->belongsTo(Staff::class);
     }
 
+    // Thêm relationship mới
+    public function queueBefore()
+    {
+        return $this->hasMany(GateStaffShift::class, 'gate_shift_id', 'gate_shift_id')
+            ->where('id', '<', $this->id);
+    }
+
     // Scopes
     public function scopeWaiting($query)
     {

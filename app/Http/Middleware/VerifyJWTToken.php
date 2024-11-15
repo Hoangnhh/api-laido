@@ -37,9 +37,9 @@ class VerifyJWTToken
             return $next($request);
             
         } catch (ExpiredException $e) {
-            return response()->json(['error' => 'Token đã hết hạn'], 401);
+            return response()->json(['error' => 'Token đã hết hạn','error_code' => 1000], 401);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Token không hợp lệ'], 401);
+            return response()->json(['error' => 'Token không hợp lệ','error_code' => 1000], 401);
         }
     }
 } 
