@@ -5,7 +5,8 @@ namespace App\Enums;
 enum SystemConfigKey: string 
 {
     case CURRENT_GATE_SHIFT_ID = 'CURRENT_GATE_SHIFT_ID';
-    case LIMIT_BY_VEHICAL_SIZE = 'LIMIT_BY_VEHICAL_SIZE';
+    case ENABLE_LIMIT_BY_VEHICAL_SIZE = 'ENABLE_LIMIT_BY_VEHICAL_SIZE';
+    case ENABLE_CHECKIN_BY_INDEX = 'ENABLE_CHECKIN_BY_INDEX';
     case CURRENT_SHIFT_DATE = 'CURRENT_SHIFT_DATE';
 
     /**
@@ -35,7 +36,9 @@ enum SystemConfigKey: string
     {
         return match($this) {
             self::CURRENT_GATE_SHIFT_ID => 'ID của ca trực cổng hiện tại',
-            self::LIMIT_BY_VEHICAL_SIZE => 'Giới hạn theo kích thước phương tiện',
+            self::ENABLE_LIMIT_BY_VEHICAL_SIZE => 'Giới hạn theo kích thước phương tiện',
+            self::ENABLE_CHECKIN_BY_INDEX => 'Check-in lần lượt theo số',
+            self::CURRENT_SHIFT_DATE => 'Ngày ca trực hiện tại',
         };
     }
 } 

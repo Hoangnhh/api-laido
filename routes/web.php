@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffGroupController;
 use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
+use App\Http\Controllers\Admin\SystemConfigController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -102,4 +103,6 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
     Route::post('/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
     Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('admin.dashboard-data');
+    Route::get('/system-configs', [SystemConfigController::class, 'index'])->name('admin.system-configs');
+    Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
 });

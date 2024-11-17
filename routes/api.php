@@ -28,6 +28,11 @@ Route::group(['middleware' => ['api']], function () {
             Route::group(['prefix' => 'staff'], function () {
                 Route::get('get-staff-info', [StaffController::class, 'getInfo']);
             });
+
+            // Ticket routes
+            Route::group(['prefix' => 'ticket'], function () {
+                Route::get('use-ticket', [TicketController::class, 'useTicket']);
+            });
         });
     });
 

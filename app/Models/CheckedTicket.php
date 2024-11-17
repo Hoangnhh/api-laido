@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CheckedTicket extends Model
 {
     protected $table = 'checked_ticket';
+    public const STATUS_CHECKIN = 'CHECKIN';
+    public const STATUS_CHECKOUT = 'CHECKOUT';
 
     protected $fillable = [
         'code',
