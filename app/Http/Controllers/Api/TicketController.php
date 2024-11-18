@@ -92,7 +92,7 @@ class TicketController extends Controller
 
                     // Tạo bản ghi checked_ticket cho checkin
                     $ticketData = $result['data']['ticket'];
-                    CheckedTicket::create([
+                    $createdCheckedTicket = CheckedTicket::create([
                         'code' => $ticketData['code'],
                         'name' => $ticketData['service_name'], 
                         'status' => CheckedTicket::STATUS_CHECKIN,
@@ -111,10 +111,7 @@ class TicketController extends Controller
                     throw $e;
                 }
 
-                return $this->successResponse(
-                    array_merge($result['data']['ticket'], [
-                        'gate_name' => $activeAssignment->gate->name
-                    ]),
+                return $this->successResponse($createdCheckedTicket->toArray(),
                     'Checkin thành công'
                 );
 
