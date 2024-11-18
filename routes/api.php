@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Middleware\VerifyJWTToken;
 use Illuminate\Support\Facades\Route;
 

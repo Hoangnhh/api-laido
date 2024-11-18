@@ -61,7 +61,7 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `checkout_at` DATETIME NULL,
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
-  `commisson` INT NOT NULL DEFAULT 0,
+  `commission` INT NOT NULL DEFAULT 0,
   `shift_gate_staff_id` INT NULL AFTER `updated_at`,
 `staff_id` INT NOT NULL AFTER `shift_gate_staff_id`,
 `extra_shift_id` INT NULL AFTER `staff_id`,

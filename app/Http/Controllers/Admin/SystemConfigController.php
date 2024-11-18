@@ -12,6 +12,7 @@ class SystemConfigController extends Controller
     private $show_config_keys = [
         SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value,
         SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value,
+        SystemConfigKey::CHECKOUT_DELAY_MINUTE->value,
     ];
     public function index()
     {

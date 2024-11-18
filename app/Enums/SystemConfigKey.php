@@ -8,6 +8,7 @@ enum SystemConfigKey: string
     case ENABLE_LIMIT_BY_VEHICAL_SIZE = 'ENABLE_LIMIT_BY_VEHICAL_SIZE';
     case ENABLE_CHECKIN_BY_INDEX = 'ENABLE_CHECKIN_BY_INDEX';
     case CURRENT_SHIFT_DATE = 'CURRENT_SHIFT_DATE';
+    case CHECKOUT_DELAY_MINUTE = 'CHECKOUT_DELAY_MINUTE';
 
     /**
      * Lấy danh sách tất cả các key
@@ -39,6 +40,7 @@ enum SystemConfigKey: string
             self::ENABLE_LIMIT_BY_VEHICAL_SIZE => 'Giới hạn theo kích thước phương tiện',
             self::ENABLE_CHECKIN_BY_INDEX => 'Check-in lần lượt theo số',
             self::CURRENT_SHIFT_DATE => 'Ngày ca trực hiện tại',
+            self::CHECKOUT_DELAY_MINUTE => 'Thời gian delay khi checkout(Phút)',
         };
     }
 } 

@@ -20,7 +20,7 @@ class CheckedTicket extends Model
         'checkout_at',
         'paid',
         'price',
-        'commisson',
+        'commission',
         'shift_gate_staff_id',
         'staff_id',
         'extra_shift_id'
