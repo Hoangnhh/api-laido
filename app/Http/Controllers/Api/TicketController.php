@@ -139,14 +139,7 @@ class TicketController extends Controller
                     'commission' => $commission
                 ]);
 
-                return $this->successResponse([
-                    'code' => $existingTicket->code,
-                    'name' => $existingTicket->name,
-                    'checkin_at' => $existingTicket->checkin_at->format('H:i:s'),
-                    'checkout_at' => Carbon::now()->format('H:i:s'),
-                    'commission' => $commission,
-                    'gate_name' => $activeAssignment->gate->name
-                ], 'Checkout thành công');
+                return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
             } else {
                 return $this->errorResponse('Vé đã được sử dụng', 400);
             }
