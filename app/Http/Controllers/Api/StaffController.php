@@ -66,9 +66,14 @@ class StaffController extends Controller
                 // Đếm tất cả các gate_staff_shift có cùng gate_id, cùng ngày và index nhỏ hơn
                 $queuePosition = GateStaffShift::join('gate_shift', 'gate_staff_shift.gate_shift_id', '=', 'gate_shift.id')
                     ->where('gate_shift.gate_id', $gateId)
-                    ->whereDate('gate_shift.date', $shiftDate)
                     ->where('gate_staff_shift.status', GateStaffShift::STATUS_WAITING)
-                    ->where('gate_staff_shift.id', '<', $currentShift->id)
+                    ->where(function($query) use ($shiftDate, $currentShift) {
+                        $query->whereDate('gate_shift.date', '<', $shiftDate)
+                            ->orWhere(function($q) use ($shiftDate, $currentShift) {
+                                $q->whereDate('gate_shift.date', $shiftDate)
+                                    ->where('gate_staff_shift.id', '<', $currentShift->id);
+                            });
+                    })
                     ->count();
             }
 
