@@ -59,9 +59,7 @@ class TicketController extends Controller
             }
 
             // Kiểm tra vé trong bảng checked_ticket
-            $existingTicket = CheckedTicket::where('code', $request->code)
-                ->where('status', CheckedTicket::STATUS_CHECKIN)
-                ->first();
+            $existingTicket = CheckedTicket::where('code', $request->code)->first();
 
             // Nếu chưa có record hoặc đã checkout thì là checkin
             if (!$existingTicket) {
@@ -120,7 +118,7 @@ class TicketController extends Controller
                     'Checkin thành công'
                 );
 
-            } else { // Đã có record và chưa checkout thì là checkout
+            } else if($existingTicket->status == CheckedTicket::STATUS_CHECKIN) { // Đã có record và chưa checkout thì là checkout
                 $checkoutDelayMinute = SystemConfig::getConfig(SystemConfigKey::CHECKOUT_DELAY_MINUTE->value);
                 // Tính số phút từ lúc checkin đến hiện tại, đảm bảo luôn là số dương
                 $minutesSinceCheckin = abs(Carbon::now()->diffInMinutes($existingTicket->checkin_at));
@@ -152,6 +150,8 @@ class TicketController extends Controller
                     'commission' => $commission,
                     'gate_name' => $activeAssignment->gate->name
                 ], 'Checkout thành công');
+            } else {
+                return $this->errorResponse('Vé đã được sử dụng', 400);
             }
 
         } catch (\Exception $e) {
