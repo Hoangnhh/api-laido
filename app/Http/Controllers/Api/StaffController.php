@@ -121,7 +121,10 @@ class StaffController extends Controller
             $tickets = CheckedTicket::where('staff_id', $userId)
                 ->whereDate('date', '>=', $fromDate)
                 ->whereDate('date', '<=', $toDate)
-                ->orderBy('created_at', 'desc')
+                ->orderByRaw('CASE 
+                    WHEN status = ? THEN checkout_at 
+                    ELSE checkin_at 
+                    END DESC', [CheckedTicket::STATUS_CHECKOUT])
                 ->get()
                 ->map(function ($ticket) {
                     return [
