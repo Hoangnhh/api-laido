@@ -9,6 +9,7 @@ use App\Models\GateStaffShift;
 use App\Models\GateShift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\CheckedTicket;
 
 class StaffController extends Controller
 {
@@ -104,6 +105,42 @@ class StaffController extends Controller
                     ]
                 ]
             ], 'Lấy thông tin nhân viên thành công');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function getCheckedTickets(Request $request)
+    {
+        try {
+            $userId = $request->user_id;
+            $fromDate = $request->from_date ?? now()->toDateString();
+            $toDate = $request->to_date ?? $fromDate;
+
+            $tickets = CheckedTicket::where('staff_id', $userId)
+                ->whereDate('date', '>=', $fromDate)
+                ->whereDate('date', '<=', $toDate)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'code' => $ticket->code,
+                        'name' => $ticket->name,
+                        'status' => $ticket->status,
+                        'checkin_at' => $ticket->checkin_at,
+                        'checkout_at' => $ticket->checkout_at,
+                        'price' => $ticket->price,
+                        'commission' => $ticket->commission,
+                        'paid' => $ticket->paid
+                    ];
+                });
+
+            return $this->successResponse([
+                'tickets' => $tickets,
+                'total' => $tickets->count()
+            ], 'Lấy danh sách vé thành công');
 
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);

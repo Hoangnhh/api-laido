@@ -28,6 +28,7 @@ Route::group(['middleware' => ['api']], function () {
             // Staff routes
             Route::group(['prefix' => 'staff'], function () {
                 Route::get('get-staff-info', [StaffController::class, 'getInfo']);
+                Route::get('get-checked-tickets', [StaffController::class, 'getCheckedTickets']);
             });
 
             // Ticket routes
