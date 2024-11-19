@@ -169,7 +169,7 @@ class StaffController extends Controller
             $totalCommission = $tickets->sum('commission');
 
             // Tổng tiền đã thanh toán
-            $totalPaid = $tickets->where('paid', true)->sum('commission');
+            $totalPaid = $tickets->where('paid', 1)->sum('commission');
 
             // Tổng tiền còn lại chưa thanh toán
             $totalRemaining = $totalCommission - $totalPaid;
