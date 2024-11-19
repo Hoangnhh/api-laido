@@ -149,4 +149,40 @@ class StaffController extends Controller
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
+
+    public function getDashboardInfo(Request $request)
+    {
+        try {
+            $userId = $request->user_id;
+            $fromDate = $request->from_date ?? now()->toDateString();
+            $toDate = $request->to_date ?? $fromDate;
+
+            $tickets = CheckedTicket::where('staff_id', $userId)
+                ->whereDate('date', '>=', $fromDate)
+                ->whereDate('date', '<=', $toDate)
+                ->get();
+
+            // Tổng số vé
+            $totalTickets = $tickets->count();
+
+            // Tổng tiền commission
+            $totalCommission = $tickets->sum('commission');
+
+            // Tổng tiền đã thanh toán
+            $totalPaid = $tickets->where('paid', true)->sum('commission');
+
+            // Tổng tiền còn lại chưa thanh toán
+            $totalRemaining = $totalCommission - $totalPaid;
+
+            return $this->successResponse([
+                'total_tickets' => $totalTickets,
+                'total_commission' => $totalCommission,
+                'total_paid' => $totalPaid,
+                'total_remaining' => $totalRemaining
+            ], 'Lấy thông tin dashboard thành công');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
 } 
