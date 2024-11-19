@@ -19,7 +19,7 @@ trait ApiResponse
     /**
      * Error Response
      */
-    protected function errorResponse($message = 'Lỗi', $code = 400, $data = null)
+    protected function errorResponse($message = 'Lỗi', $code = 200, $data = null)
     {
         return response()->json([
             'success' => false,

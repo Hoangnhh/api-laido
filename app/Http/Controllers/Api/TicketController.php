@@ -43,7 +43,7 @@ class TicketController extends Controller
             'code' => 'required|string',
         ]);
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors()->first(), 422);
+            return $this->errorResponse($validator->errors()->first());
         }
         $staffId = $request->user_id;
 
@@ -55,7 +55,7 @@ class TicketController extends Controller
                 ->first();
 
             if (!$activeAssignment) {
-                return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực', 403);
+                return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
             }
 
             // Kiểm tra vé trong bảng checked_ticket
@@ -72,8 +72,7 @@ class TicketController extends Controller
                     
                     if ($currentTicketCount >= $vehicalSize) {
                         return $this->errorResponse(
-                            "Không thể checkin vé! Bạn chỉ được phép chở {$vehicalSize} Người mỗi ca",
-                            400
+                            "Không thể checkin vé! Bạn chỉ được phép chở {$vehicalSize} Người mỗi ca"
                         );
                     }
                 }
@@ -82,7 +81,7 @@ class TicketController extends Controller
                 $result = $this->ticketService->useTicket($request->code);
 
                 if (!$result['success']) {
-                    return $this->errorResponse($result['message'], 400);
+                    return $this->errorResponse($result['message']);
                 }
                 // Thực hiện các thao tác trong transaction
                 DB::beginTransaction();
@@ -124,7 +123,6 @@ class TicketController extends Controller
                         "Chưa đủ thời gian để checkout. Vui lòng đợi thêm " . 
                         round($checkoutDelayMinute - $minutesSinceCheckin) . 
                         " phút nữa",
-                        400
                     );
                 }
                 
@@ -141,7 +139,7 @@ class TicketController extends Controller
 
                 return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
             } else {
-                return $this->errorResponse('Vé đã được sử dụng', 400);
+                return $this->errorResponse('Vé đã được sử dụng');
             }
 
         } catch (\Exception $e) {
