@@ -115,8 +115,8 @@ class StaffController extends Controller
     {
         try {
             $userId = $request->user_id;
-            $fromDate = $request->from_date ?? now()->toDateString();
-            $toDate = $request->to_date ?? $fromDate;
+            $fromDate = $request->fromDate ?? now()->toDateString();
+            $toDate = $request->toDate ?? $fromDate;
 
             $tickets = CheckedTicket::where('staff_id', $userId)
                 ->whereDate('date', '>=', $fromDate)
@@ -154,13 +154,14 @@ class StaffController extends Controller
     {
         try {
             $userId = $request->user_id;
-            $fromDate = $request->from_date ?? now()->toDateString();
-            $toDate = $request->to_date ?? $fromDate;
+            $fromDate = $request->fromDate ?? now()->toDateString();
+            $toDate = $request->toDate ?? $fromDate;
 
             $tickets = CheckedTicket::where('staff_id', $userId)
                 ->whereDate('date', '>=', $fromDate)
                 ->whereDate('date', '<=', $toDate)
                 ->get();
+
 
             // Tổng số vé
             $totalTickets = $tickets->count();
