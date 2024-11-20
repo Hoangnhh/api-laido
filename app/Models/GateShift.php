@@ -12,6 +12,7 @@ class GateShift extends Model
 
     const QUEUE_STATUS_WAITING = 'WAITING';
     const QUEUE_STATUS_RUNNING = 'RUNNING';
+    const QUEUE_STATUS_CHECKIN_ALL = 'CHECKIN_ALL';
     const QUEUE_STATUS_COMPLETED = 'COMPLETED';
     const STATUS_ACTIVE = 'ACTIVE';
     const STATUS_INACTIVE = 'INACTIVE';

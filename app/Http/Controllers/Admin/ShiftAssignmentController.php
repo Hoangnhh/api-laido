@@ -475,7 +475,7 @@ class ShiftAssignmentController extends Controller
             // Lấy thông tin gateShift và kiểm tra trạng thái
             $gateShift = GateShift::where('id', $request->gate_shift_id)
                                   ->where('status', GateShift::STATUS_ACTIVE)
-                                  ->where('queue_status', GateShift::QUEUE_STATUS_RUNNING)
+                                  ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
                                   ->firstOrFail();
 
             // Lấy assignment và kiểm tra trạng thái
@@ -499,17 +499,22 @@ class ShiftAssignmentController extends Controller
                 ]);
             }
 
-            // Kiểm tra xem có phải index nhỏ nhất trong danh sách chờ không
-            $minWaitingIndex = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
-                                             ->where('status', GateStaffShift::STATUS_WAITING)
-                                             ->min('index');
+            // Kiểm tra theo index nếu config cho phép
+            $enableCheckinByIndex = SystemConfig::getConfig('ENABLE_CHECKIN_BY_INDEX');
+            
+            if ($enableCheckinByIndex == 1) {
+                // Kiểm tra xem có phải index nhỏ nhất trong danh sách chờ không
+                $minWaitingIndex = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
+                                                ->where('status', GateStaffShift::STATUS_WAITING)
+                                                ->min('index');
 
-            if ($assignment->index !== $minWaitingIndex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Chưa đến lượt checkin',
-                    'data' => ['staff' => $staff]
-                ]);
+                if ($assignment->index !== $minWaitingIndex) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Chưa đến lượt checkin',
+                        'data' => ['staff' => $staff]
+                    ]);
+                }
             }
 
             DB::beginTransaction();
@@ -531,7 +536,7 @@ class ShiftAssignmentController extends Controller
 
             // Nếu không còn nhân viên nào WAITING, cập nhật trạng thái GateShift
             if ($waitingStaffCount == 0) {
-                // $gateShift->update(['queue_status' => GateShift::QUEUE_STATUS_COMPLETED]);
+                $gateShift->update(['queue_status' => GateShift::QUEUE_STATUS_CHECKIN_ALL]);
             }
 
             DB::commit();
@@ -554,7 +559,7 @@ class ShiftAssignmentController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Nhân viên không trong hàng đợi',
+                'message' => 'Checkin thất bại - ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }
