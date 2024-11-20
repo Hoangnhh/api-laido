@@ -23,6 +23,7 @@ const QueueDisplay = () => {
     const [cardBuffer, setCardBuffer] = useState('');
     const [lastKeyTime, setLastKeyTime] = useState(Date.now());
     const SCAN_TIMEOUT = 100; // 100ms timeout giữa các ký tự
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const inputRef = useRef(null);
 
@@ -114,7 +115,13 @@ const QueueDisplay = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isProcessing) {
+            setCardId('');
+            return;
+        }
+
         try {
+            setIsProcessing(true);
             setError('');
             setCheckedInStaff(null);
             
@@ -150,6 +157,8 @@ const QueueDisplay = () => {
                     error: true
                 });
             }
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -314,7 +323,7 @@ const QueueDisplay = () => {
                         <button 
                             className={`qd-sound-toggle ${isMuted ? 'muted' : ''}`}
                             onClick={() => setIsMuted(!isMuted)}
-                            title={isMuted ? 'Bật loa' : 'Tắt loa'}
+                            title={isMuted ? 'Bật loa' : 'T���t loa'}
                         >
                             <FontAwesomeIcon 
                                 icon={isMuted ? faVolumeMute : faVolumeUp} 
@@ -337,9 +346,17 @@ const QueueDisplay = () => {
                                 className="qd-search-input"
                                 ref={inputRef}
                                 autoComplete="off"
+                                disabled={isProcessing}
                             />
                         </form>
                         
+                        {isProcessing && (
+                            <div className="qd-processing">
+                                <div className="qd-spinner"></div>
+                                <p>Đang xử lý checkin...</p>
+                            </div>
+                        )}
+
                         {checkedInStaff && (
                             <div className="qd-staff-info">
                                 <div className="qd-staff-avatar">
