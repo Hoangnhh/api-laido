@@ -116,13 +116,19 @@ class TicketController extends Controller
 
             } else if($existingTicket->status == CheckedTicket::STATUS_CHECKIN) { // Đã có record và chưa checkout thì là checkout
                 $checkoutDelayMinute = SystemConfig::getConfig(SystemConfigKey::CHECKOUT_DELAY_MINUTE->value);
-                // Tính số phút từ lúc checkin đến hiện tại, đảm bảo luôn là số dương
-                $minutesSinceCheckin = abs(Carbon::now()->diffInMinutes($existingTicket->checkin_at));
+                // Tính số phút và giây từ lúc checkin đến hiện tại, đảm bảo luôn là số dương
+                $secondsSinceCheckin = abs(Carbon::now()->diffInSeconds($existingTicket->checkin_at));
+                $minutesSinceCheckin = floor($secondsSinceCheckin / 60);
+                $remainingSeconds = $secondsSinceCheckin % 60;
+                
                 if ($minutesSinceCheckin < $checkoutDelayMinute) {
+                    $remainingMinutes = $checkoutDelayMinute - $minutesSinceCheckin - 1;
+                    $remainingSecondsDisplay = 60 - $remainingSeconds;
+                    
                     return $this->errorResponse(
                         "Chưa đủ thời gian để checkout. Vui lòng đợi thêm " . 
-                        round($checkoutDelayMinute - $minutesSinceCheckin) . 
-                        " phút nữa",
+                        $remainingMinutes . " phút " . 
+                        $remainingSecondsDisplay . " giây nữa"
                     );
                 }
                 
