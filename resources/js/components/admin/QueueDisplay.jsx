@@ -68,33 +68,29 @@ const QueueDisplay = () => {
                 setCardBuffer('');
             }
             
-            // Cập nhật thời gian của ký tự cuối
+            // Cập nhật buffer và thời gian
+            setCardBuffer(prev => prev + e.key);
             setLastKeyTime(currentTime);
 
-            // Nếu là Enter, xử lý quét thẻ hoàn tất
+            // Nếu nhận được ký tự Enter
             if (e.key === 'Enter') {
+                // Đảm bảo có đủ dữ liệu thẻ trước khi submit
                 if (cardBuffer) {
-                    setCardId(cardBuffer.toUpperCase());
-                    // Tự động submit form
-                    handleSubmit(new Event('submit'));
+                    console.log('Enter',cardBuffer);
+                    setCardId(cardBuffer); // Cập nhật cardId
+                    
+                    // Sử dụng setTimeout để đảm bảo state đã được cập nhật
+                    setTimeout(() => {
+                        handleSubmit(new Event('submit'));
+                    }, 0);
                 }
-                setCardBuffer('');
-                return;
+                setCardBuffer(''); // Reset buffer
             }
-
-            // Thêm ký tự vào buffer
-            setCardBuffer(prev => prev + e.key);
         };
 
-        // Chỉ lắng nghe khi modal đã đóng
-        if (!showModal) {
-            window.addEventListener('keypress', handleKeyPress);
-        }
-
-        return () => {
-            window.removeEventListener('keypress', handleKeyPress);
-        };
-    }, [cardBuffer, lastKeyTime, showModal]);
+        window.addEventListener('keypress', handleKeyPress);
+        return () => window.removeEventListener('keypress', handleKeyPress);
+    }, [cardBuffer, lastKeyTime]);
 
     const fetchAssignments = async () => {
         if(selectedPosition === 0) return;
@@ -120,13 +116,19 @@ const QueueDisplay = () => {
             return;
         }
 
+        // Lấy giá trị cardId hiện tại
+        const currentCardId = cardId || cardBuffer;
+        
+        if (!currentCardId) return;
+
         try {
             setIsProcessing(true);
             setError('');
             setCheckedInStaff(null);
+            console.log('currentCardId',currentCardId);
             
             const response = await axios.post('/api/admin/staff-checkin', {
-                card_id: cardId,
+                card_id: currentCardId,
                 gate_id: selectedPosition,
                 gate_shift_id: assignments[0]?.gate_shift_id
             });
@@ -146,6 +148,7 @@ const QueueDisplay = () => {
             }
             
             setCardId('');
+            setCardBuffer('');
             
         } catch (err) {
             setCardId('');
@@ -323,7 +326,7 @@ const QueueDisplay = () => {
                         <button 
                             className={`qd-sound-toggle ${isMuted ? 'muted' : ''}`}
                             onClick={() => setIsMuted(!isMuted)}
-                            title={isMuted ? 'Bật loa' : 'T���t loa'}
+                            title={isMuted ? 'Bật loa' : 'Tắt loa'}
                         >
                             <FontAwesomeIcon 
                                 icon={isMuted ? faVolumeMute : faVolumeUp} 
@@ -341,7 +344,7 @@ const QueueDisplay = () => {
                             <input
                                 type="text"
                                 value={cardId}
-                                onChange={(e) => setCardId(e.target.value.toUpperCase())}
+                                onChange={(e) => {console.log(e); setCardId(e.target.value.toUpperCase())}}
                                 placeholder="Quẹt thẻ hoặc nhập mã thẻ rồi nhấn Enter..."
                                 className="qd-search-input"
                                 ref={inputRef}
@@ -360,7 +363,7 @@ const QueueDisplay = () => {
                         {checkedInStaff && (
                             <div className="qd-staff-info">
                                 <div className="qd-staff-avatar">
-                                    <img src={checkedInStaff.staff.avatar_url || "/images/default-avatar.png"} alt="" />
+                                    <img src={checkedInStaff.staff?.avatar_url || "/images/default-avatar.png"} alt="" />
                                 </div>
                                 <div className="qd-staff-number">
                                     #{checkedInStaff.assignment?.index || "000"}
@@ -369,19 +372,19 @@ const QueueDisplay = () => {
                                     <div className="qd-info-row">
                                         <div className="qd-info-label">Mã NV:</div>
                                         <div className="qd-info-value">
-                                            {checkedInStaff.staff.code}
+                                            {checkedInStaff.staff?.code}
                                         </div>
                                     </div>
                                     <div className="qd-info-row">
                                         <div className="qd-info-label">Họ tên:</div>
                                         <div className="qd-info-value">
-                                            {checkedInStaff.staff.name}
+                                            {checkedInStaff.staff?.name}
                                         </div>
                                     </div>
                                     <div className="qd-info-row">
                                         <div className="qd-info-label">Ca làm việc:</div>
                                         <div className={`qd-info-value ${checkedInStaff.error ? 'error' : ''}`}>
-                                            {checkedInStaff.staff.group_name || 'Chưa phân nhóm'}
+                                            {checkedInStaff.staff?.group_name || 'Chưa phân nhóm'}
                                         </div>
                                     </div>
                                 </div>

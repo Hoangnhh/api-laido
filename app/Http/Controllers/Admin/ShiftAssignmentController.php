@@ -454,7 +454,7 @@ class ShiftAssignmentController extends Controller
         try {
             // Sửa validate đầu vào, thay staff_code bằng card_id
             $validated = $request->validate([
-                'card_id' => 'required|exists:staff,card_id',
+                'card_id' => 'required',
                 'gate_id' => 'required|exists:gate,id',
                 'gate_shift_id' => 'required|exists:gate_shift,id'
             ]);
@@ -463,26 +463,58 @@ class ShiftAssignmentController extends Controller
             $staff = Staff::where('card_id', $request->card_id)
                           ->where('status', Staff::STATUS_ACTIVE)
                           ->with('group:id,name')
-                          ->firstOrFail();
+                          ->first();
             
+            if (!$staff) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Nhân viên không tồn tại',
+                    'data' => null
+                ]);
+            }
+
             $staff->group_name = $staff->group ? $staff->group->name : 'Chưa phân nhóm';
 
             // Lấy thông tin gate và kiểm tra trạng thái
             $gate = Gate::where('id', $request->gate_id)
                         ->where('status', Gate::STATUS_ACTIVE)
-                        ->firstOrFail();
+                        ->first();
+
+            if (!$gate) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cửa không tồn tại',
+                    'data' => ['staff' => $staff]
+                ]);
+            }
 
             // Lấy thông tin gateShift và kiểm tra trạng thái
             $gateShift = GateShift::where('id', $request->gate_shift_id)
                                   ->where('status', GateShift::STATUS_ACTIVE)
                                   ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
-                                  ->firstOrFail();
+                                  ->first();
+
+            if (!$gateShift) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ca làm việc không tồn tại',
+                    'data' => ['staff' => $staff]
+                ]);
+            }
 
             // Lấy assignment và kiểm tra trạng thái
             $assignment = GateStaffShift::where('staff_id', $staff->id)
                                         ->where('gate_id', $request->gate_id)
                                         ->where('gate_shift_id', $request->gate_shift_id)
-                                        ->firstOrFail();
+                                        ->first();
+
+            if (!$assignment) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Nhân viên không trong hàng đợi',
+                    'data' => ['staff' => $staff]
+                ]);
+            }
 
             if ($assignment->status !== GateStaffShift::STATUS_WAITING) {
                 switch ($assignment->status) {
