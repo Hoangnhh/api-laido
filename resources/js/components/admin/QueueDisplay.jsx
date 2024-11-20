@@ -24,8 +24,11 @@ const QueueDisplay = () => {
     const [lastKeyTime, setLastKeyTime] = useState(Date.now());
     const SCAN_TIMEOUT = 100; // 100ms timeout giữa các ký tự
     const [isProcessing, setIsProcessing] = useState(false);
+    const [lastSubmitTime, setLastSubmitTime] = useState(0);
+    const SUBMIT_DELAY = 500; // 500ms delay giữa các lần submit
 
     const inputRef = useRef(null);
+    const isSubmitting = useRef(false);
 
     useEffect(() => {
         fetchAssignments();
@@ -63,34 +66,41 @@ const QueueDisplay = () => {
         const handleKeyPress = (e) => {
             const currentTime = Date.now();
             
-            // Nếu thời gian giữa 2 ký tự > timeout, reset buffer
             if (currentTime - lastKeyTime > SCAN_TIMEOUT) {
                 setCardBuffer('');
             }
             
-            // Cập nhật buffer và thời gian
-            setCardBuffer(prev => prev + e.key);
             setLastKeyTime(currentTime);
 
-            // Nếu nhận được ký tự Enter
             if (e.key === 'Enter') {
-                // Đảm bảo có đủ dữ liệu thẻ trước khi submit
-                if (cardBuffer) {
-                    console.log('Enter',cardBuffer);
-                    setCardId(cardBuffer); // Cập nhật cardId
-                    
-                    // Sử dụng setTimeout để đảm bảo state đã được cập nhật
-                    setTimeout(() => {
-                        handleSubmit(new Event('submit'));
-                    }, 0);
+                e.preventDefault(); // Ngăn form submit
+                
+                if (currentTime - lastSubmitTime < SUBMIT_DELAY) {
+                    setCardBuffer('');
+                    return;
                 }
-                setCardBuffer(''); // Reset buffer
+
+                if (cardBuffer && !isSubmitting.current) {
+                    const scannedCode = cardBuffer;
+                    setCardId(scannedCode);
+                    setLastSubmitTime(currentTime);
+                    
+                    handleCheckin(scannedCode);
+                }
+                setCardBuffer('');
+            } else {
+                setCardBuffer(prev => prev + e.key);
             }
         };
 
-        window.addEventListener('keypress', handleKeyPress);
-        return () => window.removeEventListener('keypress', handleKeyPress);
-    }, [cardBuffer, lastKeyTime]);
+        if (!showModal) {
+            window.addEventListener('keypress', handleKeyPress);
+        }
+
+        return () => {
+            window.removeEventListener('keypress', handleKeyPress);
+        };
+    }, [cardBuffer, lastKeyTime, lastSubmitTime, showModal]);
 
     const fetchAssignments = async () => {
         if(selectedPosition === 0) return;
@@ -109,26 +119,17 @@ const QueueDisplay = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (isProcessing) {
-            setCardId('');
-            return;
-        }
-
-        // Lấy giá trị cardId hiện tại
-        const currentCardId = cardId || cardBuffer;
+    const handleCheckin = async (code) => {
+        if (isProcessing || isSubmitting.current) return;
         
-        if (!currentCardId) return;
-
         try {
+            isSubmitting.current = true;
             setIsProcessing(true);
             setError('');
             setCheckedInStaff(null);
-            console.log('currentCardId',currentCardId);
             
             const response = await axios.post('/api/admin/staff-checkin', {
-                card_id: currentCardId,
+                card_id: code,
                 gate_id: selectedPosition,
                 gate_shift_id: assignments[0]?.gate_shift_id
             });
@@ -147,11 +148,7 @@ const QueueDisplay = () => {
                 });
             }
             
-            setCardId('');
-            setCardBuffer('');
-            
         } catch (err) {
-            setCardId('');
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkin');
             
             if (err.response?.data?.data?.staff) {
@@ -161,7 +158,10 @@ const QueueDisplay = () => {
                 });
             }
         } finally {
+            setCardId('');
+            setCardBuffer('');
             setIsProcessing(false);
+            isSubmitting.current = false;
         }
     };
 
@@ -304,6 +304,13 @@ const QueueDisplay = () => {
                 </div>
             </div>
         );
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (cardId) {
+            handleCheckin(cardId);
+        }
     };
 
     return (
