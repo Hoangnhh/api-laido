@@ -55,6 +55,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.queue-display');
         })->name('admin.queue-display');
 
+        Route::get('/checkout-screen', function () {
+            return view('admin.checkout-screen');
+        })->name('admin.checkout-screen');
+
         Route::get('/tickets', function () {
             return view('admin.tickets');
         })->name('admin.tickets');
@@ -105,4 +109,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('admin.dashboard-data');
     Route::get('/system-configs', [SystemConfigController::class, 'index'])->name('admin.system-configs');
     Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
+    Route::post('/staff-checkout', [ShiftAssignmentController::class, 'staffCheckout']);
 });

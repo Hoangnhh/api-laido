@@ -21,7 +21,7 @@ class CheckedTicket extends Model
         'paid',
         'price',
         'commission',
-        'shift_gate_staff_id',
+        'gate_staff_shift_id',
         'staff_id',
         'extra_shift_id'
     ];

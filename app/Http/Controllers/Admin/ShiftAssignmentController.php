@@ -248,7 +248,7 @@ class ShiftAssignmentController extends Controller
     }
 
     /**
-     * Lấy thông tin dashboard phân ca
+     * L���y thông tin dashboard phân ca
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -597,5 +597,103 @@ class ShiftAssignmentController extends Controller
         }
     }
 
-    
+    /**
+     * Checkout cho nhân viên
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function staffCheckout(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'card_id' => 'required',
+            ]);
+
+            // Tìm nhân viên theo card_id
+            $staff = Staff::where('card_id', $request->card_id)
+                          ->where('status', Staff::STATUS_ACTIVE)
+                          ->with('group:id,name')
+                          ->first();
+            
+            if (!$staff) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Nhân viên không tồn tại',
+                    'data' => null
+                ]);
+            }
+
+            $staff->group_name = $staff->group ? $staff->group->name : 'Chưa phân nhóm';
+
+            // Tìm assignment đang CHECKIN của nhân viên
+            $assignment = GateStaffShift::where('staff_id', $staff->id)
+                                        ->where('status', GateStaffShift::STATUS_CHECKIN)
+                                        ->with(['gate:id,name', 'checkedTickets'])
+                                        ->orderBy('checkin_at', 'desc')
+                                        ->first();
+
+            if (!$assignment) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không tìm thấy ca làm việc đang checkin của nhân viên',
+                    'data' => ['staff' => $staff]
+                ]);
+            }
+
+            DB::beginTransaction();
+            try {
+                // Cập nhật trạng thái assignment
+                $assignment->update([
+                    'status' => GateStaffShift::STATUS_CHECKOUT,
+                    'checkout_at' => now()
+                ]);
+
+                // Format dữ liệu checked tickets
+                $checkedTickets = $assignment->checkedTickets->map(function($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'name' => $ticket->name,
+                        'code' => $ticket->code,
+                        'checkin_at' => $ticket->checkin_at->format('H:i:s'),
+                        'checkout_at' => $ticket->checkout_at != null ? $ticket->checkout_at->format('H:i:s') : '',
+                        'status' => $ticket->status
+                    ];
+                });
+
+                // Tính toán thời gian làm việc
+                $workingTime = abs(now()->diffInMinutes($assignment->checkin_at));
+                $hours = floor($workingTime / 60);
+                $minutes = $workingTime % 60;
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Checkout thành công',
+                    'data' => [
+                        'staff' => $staff,
+                        'shift_info' => [
+                            'gate_name' => $assignment->gate->name,
+                            'checkin_at' => $assignment->checkin_at->format('H:i:s'),
+                            'checkout_at' => now()->format('H:i:s'),
+                            'working_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, 0),
+                            'total_tickets' => $assignment->checked_ticket_num
+                        ],
+                        'checked_tickets' => $checkedTickets
+                    ]
+                ]);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Checkout thất bại - ' . $e->getMessage(),
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 } 

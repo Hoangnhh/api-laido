@@ -100,7 +100,7 @@ class TicketController extends Controller
                         'price' => $ticketData['price'],
                         'commission' => 0, // Chưa tính commission khi checkin
                         'staff_id' => $staffId,
-                        'shift_gate_staff_id' => $activeAssignment->id,
+                        'gate_staff_shift_id' => $activeAssignment->id,
                         'paid' => false
                     ]);
 

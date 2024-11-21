@@ -46,6 +46,11 @@ const Sidebar = () => {
             path: '/admin/queue-display'
         },
         { 
+            text: 'Màn hình Checkout', 
+            icon: faDisplay,
+            path: '/admin/checkout-screen'
+        },
+        { 
             text: 'Quản lý vị trí', 
             icon: faDesktop,
             path: '/admin/gate'

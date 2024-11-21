@@ -15,6 +15,7 @@ import Settings from './components/admin/Settings';
 import PaymentReport from './components/admin/reports/PaymentReport';
 import AddShiftGate from './components/admin/AddShiftGate';
 import QueueDisplay from './components/admin/QueueDisplay';
+import CheckoutScreen from './components/admin/CheckoutScreen';
 const theme = createTheme({
     palette: {
         primary: {
@@ -55,6 +56,8 @@ const App = () => {
                 return <PaymentReport />;
             case '/admin/queue-display':
                 return <QueueDisplay />;
+            case '/admin/checkout-screen':
+                return <CheckoutScreen />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

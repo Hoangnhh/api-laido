@@ -88,4 +88,9 @@ class GateStaffShift extends Model
         }
         return null;
     }
+
+    public function checkedTickets()
+    {
+        return $this->hasMany(CheckedTicket::class);
+    }
 } 

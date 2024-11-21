@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('paid')->default(false);
             $table->string('price', 20)->default('0');
             $table->integer('commisson')->default(0);
-            $table->foreignId('shift_gate_staff_id')->nullable();
+            $table->foreignId('gate_shift_staff_id')->nullable();
             $table->foreignId('staff_id')->constrained('staff');
             $table->foreignId('extra_shift_id')->nullable()->constrained('extra_shifts');
             $table->timestamps();
