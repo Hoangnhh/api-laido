@@ -248,7 +248,7 @@ class ShiftAssignmentController extends Controller
     }
 
     /**
-     * L���y thông tin dashboard phân ca
+     * Lấy thông tin dashboard phân ca
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -647,6 +647,18 @@ class ShiftAssignmentController extends Controller
                     'status' => GateStaffShift::STATUS_CHECKOUT,
                     'checkout_at' => now()
                 ]);
+
+                // Kiểm tra xem còn nhân viên nào đang CHECKIN trong ca không
+                $remainingCheckinStaff = GateStaffShift::where('gate_shift_id', $assignment->gate_shift_id)
+                                                      ->where('status', GateStaffShift::STATUS_CHECKIN)
+                                                      ->count();
+
+                // Nếu không còn ai CHECKIN, cập nhật trạng thái GateShift
+                if ($remainingCheckinStaff === 0) {
+                    GateShift::where('id', $assignment->gate_shift_id)->update([
+                        'queue_status' => GateShift::QUEUE_STATUS_COMPLETED
+                    ]);
+                }
 
                 // Format dữ liệu checked tickets
                 $checkedTickets = $assignment->checkedTickets->map(function($ticket) {
