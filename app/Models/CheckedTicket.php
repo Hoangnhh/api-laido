@@ -43,4 +43,12 @@ class CheckedTicket extends Model
     {
         return $this->belongsTo(ExtraShift::class);
     }
+
+    /**
+     * Get the gate staff shift that owns the checked ticket.
+     */
+    public function gateStaffShift()
+    {
+        return $this->belongsTo(GateStaffShift::class, 'gate_staff_shift_id');
+    }
 } 
