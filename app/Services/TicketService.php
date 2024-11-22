@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class TicketService
 {
-    private $baseUrl = 'http://103.183.113.201:7963';
+    private $baseUrl = 'http://api-test.invade.vn';
     
     /**
      * Gọi API sử dụng vé

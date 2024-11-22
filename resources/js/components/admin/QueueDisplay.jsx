@@ -351,13 +351,20 @@ const QueueDisplay = () => {
                             <input
                                 type="text"
                                 value={cardId}
-                                onChange={(e) => {console.log(e); setCardId(e.target.value.toUpperCase())}}
-                                placeholder="Quẹt thẻ hoặc nhập mã thẻ rồi nhấn Enter..."
+                                onChange={(e) => setCardId(e.target.value.toUpperCase())}
+                                placeholder="Quẹt thẻ hoặc nhập mã thẻ..."
                                 className="qd-search-input"
                                 ref={inputRef}
                                 autoComplete="off"
                                 disabled={isProcessing}
                             />
+                            <button 
+                                type="submit" 
+                                className="qd-search-button"
+                                disabled={isProcessing || !cardId}
+                            >
+                                <FontAwesomeIcon icon={faUserCheck} className="fa-icon" />
+                            </button>
                         </form>
                         
                         {isProcessing && (
