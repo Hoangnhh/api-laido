@@ -650,7 +650,7 @@ class ShiftAssignmentController extends Controller
 
                 // Kiểm tra xem còn nhân viên nào đang CHECKIN trong ca không
                 $remainingCheckinStaff = GateStaffShift::where('gate_shift_id', $assignment->gate_shift_id)
-                                                      ->where('status', GateStaffShift::STATUS_CHECKIN)
+                                                      ->whereIn('status', [GateStaffShift::STATUS_CHECKIN, GateStaffShift::STATUS_WAITING])
                                                       ->count();
 
                 // Nếu không còn ai CHECKIN, cập nhật trạng thái GateShift
