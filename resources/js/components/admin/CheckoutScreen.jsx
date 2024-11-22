@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AdminLayout from './Layout/AdminLayout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserClock, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserClock, faTicketAlt, faUserCheck } from '@fortawesome/free-solid-svg-icons';
 import '../../../css/CheckoutScreen.css';
 import axios from 'axios';
 
@@ -13,12 +13,58 @@ const CheckoutScreen = () => {
     const [shiftInfo, setShiftInfo] = useState(null);
     const [checkedTickets, setCheckedTickets] = useState([]);
     const inputRef = useRef(null);
+    const [cardBuffer, setCardBuffer] = useState('');
+    const [lastKeyTime, setLastKeyTime] = useState(Date.now());
+    const [lastSubmitTime, setLastSubmitTime] = useState(0);
+    const SCAN_TIMEOUT = 100; // 100ms timeout giữa các ký tự
+    const SUBMIT_DELAY = 500; // 500ms delay giữa các lần submit
+    const isSubmitting = useRef(false);
+    const [staffStats, setStaffStats] = useState({
+        total_staff: 0,
+        checked_out_staff: 0,
+        not_checked_out_staff: 0
+    });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!cardId || isProcessing) return;
+    useEffect(() => {
+        const handleKeyPress = (e) => {
+            const currentTime = Date.now();
+            
+            if (currentTime - lastKeyTime > SCAN_TIMEOUT) {
+                setCardBuffer('');
+            }
+            
+            setLastKeyTime(currentTime);
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                if (currentTime - lastSubmitTime < SUBMIT_DELAY) {
+                    setCardBuffer('');
+                    return;
+                }
+
+                if (cardBuffer && !isSubmitting.current) {
+                    const scannedCode = cardBuffer;
+                    setCardId(scannedCode);
+                    setLastSubmitTime(currentTime);
+                    
+                    handleCheckout(scannedCode);
+                }
+                setCardBuffer('');
+            } else {
+                setCardBuffer(prev => prev + e.key);
+            }
+        };
+
+        window.addEventListener('keypress', handleKeyPress);
+        return () => window.removeEventListener('keypress', handleKeyPress);
+    }, [cardBuffer, lastKeyTime, lastSubmitTime]);
+
+    const handleCheckout = async (code) => {
+        if (isProcessing || isSubmitting.current) return;
 
         try {
+            isSubmitting.current = true;
             setIsProcessing(true);
             setError('');
             setCheckedOutStaff(null);
@@ -26,13 +72,15 @@ const CheckoutScreen = () => {
             setCheckedTickets([]);
 
             const response = await axios.post('/api/admin/staff-checkout', {
-                card_id: cardId
+                card_id: code
             });
 
             if (response.data.status === 'success') {
                 setCheckedOutStaff(response.data.data.staff);
                 setShiftInfo(response.data.data.shift_info);
                 setCheckedTickets(response.data.data.checked_tickets);
+                
+                fetchStaffStats();
             } else {
                 setError(response.data.message);
             }
@@ -40,12 +88,40 @@ const CheckoutScreen = () => {
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkout');
         } finally {
             setCardId('');
+            setCardBuffer('');
             setIsProcessing(false);
+            isSubmitting.current = false;
             if (inputRef.current) {
                 inputRef.current.focus();
             }
         }
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (cardId) {
+            handleCheckout(cardId);
+        }
+    };
+
+    const fetchStaffStats = async () => {
+        try {
+            const response = await axios.get('/api/admin/shift-staff-stats');
+            if (response.data.status === 'success') {
+                setStaffStats(response.data.data);
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy thống kê nhân viên:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStaffStats();
+
+        const interval = setInterval(fetchStaffStats, 60000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <AdminLayout>
@@ -53,6 +129,24 @@ const CheckoutScreen = () => {
                 <h1 className="checkout-title">
                     CHECKOUT NHÂN VIÊN
                 </h1>
+                <div className="checkout-stats">
+                    <div className="checkout-stat-item">
+                        <div className="checkout-stat-label">Tổng số nhân viên trong ca</div>
+                        <div className="checkout-stat-value">{staffStats.total_staff}</div>
+                    </div>
+                    <div className="checkout-stat-item">
+                        <div className="checkout-stat-label">Nhân viên đã checkout</div>
+                        <div className="checkout-stat-value" style={{color: '#059669'}}>
+                            {staffStats.checked_out_staff}
+                        </div>
+                    </div>
+                    <div className="checkout-stat-item">
+                        <div className="checkout-stat-label">Nhân viên chưa checkout</div>
+                        <div className="checkout-stat-value" style={{color: '#ef4444'}}>
+                            {staffStats.not_checked_out_staff}
+                        </div>
+                    </div>
+                </div>
                 
                 <div className="checkout-container">
                     <div className="checkout-section checkout-search">
@@ -63,12 +157,19 @@ const CheckoutScreen = () => {
                                     type="text"
                                     value={cardId}
                                     onChange={(e) => setCardId(e.target.value.toUpperCase())}
-                                    placeholder="Quẹt thẻ hoặc nhập mã thẻ rồi nhấn Enter..."
+                                    placeholder="Quẹt thẻ hoặc nhập mã thẻ..."
                                     className="checkout-search-input"
                                     ref={inputRef}
                                     autoComplete="off"
                                     disabled={isProcessing}
                                 />
+                                <button 
+                                    type="submit" 
+                                    className="checkout-search-button"
+                                    disabled={isProcessing || !cardId}
+                                >
+                                    <FontAwesomeIcon icon={faUserCheck} className="fa-icon" />
+                                </button>
                             </form>
 
                             {isProcessing && (

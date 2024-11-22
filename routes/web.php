@@ -110,4 +110,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/system-configs', [SystemConfigController::class, 'index'])->name('admin.system-configs');
     Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
     Route::post('/staff-checkout', [ShiftAssignmentController::class, 'staffCheckout']);
+    Route::get('/shift-staff-stats', [DashboardController::class, 'getShiftStaffStats']);
 });

@@ -116,4 +116,39 @@ class DashboardController extends Controller
 
         return response()->json($data);
     }
+
+    public function getShiftStaffStats()
+    {
+        try {
+            // Lấy tất cả ca làm việc đang chạy hoặc đã checkin all
+            $activeShifts = GateShift::whereIn('queue_status', [
+                GateShift::QUEUE_STATUS_RUNNING, 
+                GateShift::QUEUE_STATUS_CHECKIN_ALL
+            ])->pluck('id');
+
+            // Thống kê nhân viên trong các ca active
+            $staffStats = GateStaffShift::whereIn('gate_shift_id', $activeShifts)
+                ->select(
+                    DB::raw('COUNT(*) as total_staff'),
+                    DB::raw('SUM(CASE WHEN status = "' . GateStaffShift::STATUS_CHECKOUT . '" THEN 1 ELSE 0 END) as checked_out_staff'),
+                    DB::raw('SUM(CASE WHEN status != "' . GateStaffShift::STATUS_CHECKOUT . '" THEN 1 ELSE 0 END) as not_checked_out_staff')
+                )
+                ->first();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'total_staff' => (int)$staffStats->total_staff,
+                    'checked_out_staff' => (int)$staffStats->checked_out_staff,
+                    'not_checked_out_staff' => (int)$staffStats->not_checked_out_staff
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy thông tin nhân viên: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 } 
