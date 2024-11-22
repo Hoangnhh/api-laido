@@ -18,6 +18,8 @@ class CheckedTicket extends Model
         'date',
         'checkin_at',
         'checkout_at',
+        'checkin_by',
+        'checkout_by',
         'paid',
         'price',
         'commission',

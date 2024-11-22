@@ -59,6 +59,8 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `date` DATE NOT NULL,
   `checkin_at` DATETIME NULL,
   `checkout_at` DATETIME NULL,
+  `checkin_by` VARCHAR(45) NULL,
+  `checkout_by` VARCHAR(45) NULL,
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
   `commission` INT NOT NULL DEFAULT 0,

@@ -97,6 +97,7 @@ class TicketController extends Controller
                         'status' => CheckedTicket::STATUS_CHECKIN,
                         'date' => Carbon::now(),
                         'checkin_at' => Carbon::now(),
+                        'checkin_by' => $request->username,
                         'price' => $ticketData['price'],
                         'commission' => 0, // Chưa tính commission khi checkin
                         'staff_id' => $staffId,
@@ -140,7 +141,8 @@ class TicketController extends Controller
                 $existingTicket->update([
                     'status' => CheckedTicket::STATUS_CHECKOUT,
                     'checkout_at' => Carbon::now(),
-                    'commission' => $commission
+                    'commission' => $commission,
+                    'checkout_by' => $request->username
                 ]);
 
                 return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
