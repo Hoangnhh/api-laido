@@ -268,7 +268,7 @@ class ShiftAssignmentController extends Controller
             }
 
             $shiftData = GateShift::where('date', $date)
-                ->where('status', 'ACTIVE')
+                ->where('status', GateShift::STATUS_ACTIVE)
                 ->with(['staffGroup:id,name', 'gate:id,name'])
                 ->withCount('gateStaffShifts')
                 ->get()
@@ -285,7 +285,7 @@ class ShiftAssignmentController extends Controller
 
                     // Đếm số người đã và chưa checkin
                     $checkedInCount = GateStaffShift::where('gate_shift_id', $shift->id)
-                        ->where('status', GateStaffShift::STATUS_CHECKIN)
+                        ->whereIn('status', [GateStaffShift::STATUS_CHECKIN, GateStaffShift::STATUS_CHECKOUT])
                         ->count();
 
                     $remainingCount = GateStaffShift::where('gate_shift_id', $shift->id)
