@@ -682,6 +682,7 @@ class ShiftAssignmentController extends Controller
                         'code' => $ticket->code,
                         'checkin_at' => $ticket->checkin_at->format('H:i:s'),
                         'checkout_at' => $ticket->checkout_at != null ? $ticket->checkout_at->format('H:i:s') : '',
+                        'is_checkout_with_other' => $ticket->is_checkout_with_other,
                         'status' => $ticket->status
                     ];
                 });
