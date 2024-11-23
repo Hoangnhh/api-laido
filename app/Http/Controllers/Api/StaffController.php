@@ -136,6 +136,7 @@ class StaffController extends Controller
                         'checkout_at' => $ticket->checkout_at,
                         'price' => $ticket->price,
                         'commission' => $ticket->commission,
+                        'is_checkout_with_other' => $ticket->is_checkout_with_other,
                         'paid' => $ticket->paid
                     ];
                 });
