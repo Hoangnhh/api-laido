@@ -239,6 +239,7 @@ const CheckoutScreen = () => {
                                                             <th>Giờ vào</th>
                                                             <th>Giờ ra</th>
                                                             <th>Trạng thái</th>
+                                                            <th></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -250,6 +251,7 @@ const CheckoutScreen = () => {
                                                                 <td>{ticket.checkin_at}</td>
                                                                 <td>{ticket.checkout_at}</td>
                                                                 <td>{ticket.status}</td>
+                                                                <td style={{color: ticket.is_checkout_with_other ? '#ef4444' : ''}}>{ticket.is_checkout_with_other ? 'Vé chia tiền' : ''}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
