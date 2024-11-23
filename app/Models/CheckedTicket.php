@@ -20,6 +20,7 @@ class CheckedTicket extends Model
         'checkout_at',
         'checkin_by',
         'checkout_by',
+        'is_checkout_with_other',
         'paid',
         'price',
         'commission',
@@ -33,7 +34,7 @@ class CheckedTicket extends Model
         'checkin_at' => 'datetime',
         'checkout_at' => 'datetime',
         'paid' => 'boolean',
-        'commisson' => 'integer'
+        'commisson' => 'integer',
     ];
 
     public function staff(): BelongsTo

@@ -61,6 +61,7 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `checkout_at` DATETIME NULL,
   `checkin_by` VARCHAR(45) NULL,
   `checkout_by` VARCHAR(45) NULL,
+  `is_checkout_with_other` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: Checkout bởi nhân viên chính\n1: Checkout bởi nhân viên khác',
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
   `commission` INT NOT NULL DEFAULT 0,

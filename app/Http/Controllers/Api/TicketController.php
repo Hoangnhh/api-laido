@@ -21,7 +21,9 @@ class TicketController extends Controller
 
     protected $ticketService;
     private $commission_configs = [
-        "ve nguoi lon" => 70000,
+        "ve_do_tuyen_huong_tich" => 70000,
+        "ve_do_tuyen_long_van" => 100000,
+        "ve_do_tuyen_tuyet_son" => 120000,
         "default" => 70000
     ];
 
@@ -83,6 +85,13 @@ class TicketController extends Controller
                 if (!$result['success']) {
                     return $this->errorResponse($result['message']);
                 }
+                
+                $ticketData = $result['data']['ticket'];
+                
+                // Lấy commission từ config theo tên dịch vụ đã xử lý
+                $commission = $this->calculateCommission($ticketData['service_name']);
+
+
                 // Thực hiện các thao tác trong transaction
                 DB::beginTransaction();
                 try {
@@ -90,7 +99,6 @@ class TicketController extends Controller
                     $activeAssignment->increment('checked_ticket_num');
 
                     // Tạo bản ghi checked_ticket cho checkin
-                    $ticketData = $result['data']['ticket'];
                     $createdCheckedTicket = CheckedTicket::create([
                         'code' => $ticketData['code'],
                         'name' => $ticketData['service_name'], 
@@ -99,7 +107,7 @@ class TicketController extends Controller
                         'checkin_at' => Carbon::now(),
                         'checkin_by' => $request->username,
                         'price' => $ticketData['price'],
-                        'commission' => 0, // Chưa tính commission khi checkin
+                        'commission' => $commission,
                         'staff_id' => $staffId,
                         'gate_staff_shift_id' => $activeAssignment->id,
                         'paid' => false
@@ -133,19 +141,47 @@ class TicketController extends Controller
                     );
                 }
                 
-                // Tính commission
-                $commission = $this->commission_configs[$existingTicket->name]
-                    ?? $this->commission_configs['default'];
+                // Lấy commission từ config theo tên dịch vụ đã xử lý
+                $commission = $this->calculateCommission($existingTicket->name);
 
-                // Cập nhật thông tin checkout và commission
-                $existingTicket->update([
-                    'status' => CheckedTicket::STATUS_CHECKOUT,
-                    'checkout_at' => Carbon::now(),
-                    'commission' => $commission,
-                    'checkout_by' => $request->username
-                ]);
+                // trường hợp checkout bởi chính nhân viên đã checkin
+                if($existingTicket->checkin_by == $request->username) {
+                    // Cập nhật thông tin checkout và commission
+                    $existingTicket->update([
+                        'status' => CheckedTicket::STATUS_CHECKOUT,
+                        'checkout_at' => Carbon::now(),
+                        'commission' => $existingTicket->commission + $commission,
+                        'checkout_by' => $request->username
+                    ]);
+                    return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
+                }else{
+                    // Cập nhật thông tin checkout và commission
+                    $existingTicket->update([
+                        'status' => CheckedTicket::STATUS_CHECKOUT,
+                        'is_checkout_with_other' => 1,
+                        'checkout_at' => Carbon::now(),
+                        'checkout_by' => $request->username,
+                    ]);
 
-                return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
+                    // Trường hợp checkout bởi nhân viên khác
+                    $createdCheckedTicket = CheckedTicket::create([
+                        'code' => $request->code,
+                        'name' => $existingTicket->name, 
+                        'status' => CheckedTicket::STATUS_CHECKOUT,
+                        'date' => Carbon::now(),
+                        'checkin_at' => $existingTicket->checkin_at,
+                        'checkin_by' => $existingTicket->checkin_by,
+                        'checkout_at' => Carbon::now(),
+                        'checkout_by' => $request->username,
+                        'price' => $existingTicket->price,
+                        'commission' => $commission,
+                        'staff_id' => $staffId,
+                        'gate_staff_shift_id' => $activeAssignment->id,
+                        'paid' => false,
+                        'is_checkout_with_other' => 1
+                    ]);
+                    return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
+                }
             } else {
                 return $this->errorResponse('Vé đã được sử dụng');
             }
@@ -153,5 +189,16 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse('Có lỗi xảy ra: ' . $e->getMessage(), 500);
         }
+    }
+
+    private function calculateCommission($ticketName) {
+        // Xử lý tên dịch vụ để lấy commission
+        $serviceName = mb_strtolower($ticketName); // Chuyển về chữ thường
+        $serviceName = preg_replace('/[^\p{L}\p{N}\s]/u', '', $serviceName); // Bỏ dấu câu
+        $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
+
+        $commission = $this->commission_configs[$serviceName]
+            ?? $this->commission_configs['default'];
+        return $commission/2;
     }
 } 
