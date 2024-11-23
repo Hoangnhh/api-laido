@@ -131,7 +131,6 @@ const QueueDisplay = () => {
             const response = await axios.post('/api/admin/staff-checkin', {
                 card_id: code,
                 gate_id: selectedPosition,
-                gate_shift_id: assignments[0]?.gate_shift_id
             });
 
             if (response.data.status === 'success') {

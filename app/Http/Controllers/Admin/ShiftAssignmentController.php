@@ -11,6 +11,7 @@ use App\Models\GateStaffShift;
 use App\Models\SystemConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Enums\SystemConfigKey;
 use Exception;
 use Carbon\Carbon;
 
@@ -456,9 +457,9 @@ class ShiftAssignmentController extends Controller
             $validated = $request->validate([
                 'card_id' => 'required',
                 'gate_id' => 'required|exists:gate,id',
-                'gate_shift_id' => 'required|exists:gate_shift,id'
             ]);
-
+            
+            
             // Sửa query lấy thông tin staff theo card_id
             $staff = Staff::where('card_id', $request->card_id)
                           ->where('status', Staff::STATUS_ACTIVE)
@@ -474,25 +475,41 @@ class ShiftAssignmentController extends Controller
             }
 
             $staff->group_name = $staff->group ? $staff->group->name : 'Chưa phân nhóm';
+            $systemConfigs = SystemConfig::getConfigs([SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value, SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value]);
 
-            // Lấy thông tin gate và kiểm tra trạng thái
-            $gate = Gate::where('id', $request->gate_id)
-                        ->where('status', Gate::STATUS_ACTIVE)
-                        ->first();
-
-            if (!$gate) {
+            $gateStaffShift = GateStaffShift::where('staff_id', $staff->id)
+                ->whereIn('status', [GateStaffShift::STATUS_WAITING, GateStaffShift::STATUS_CHECKIN])
+                ->orderBy('id')
+                ->first();
+                
+            if (!$gateStaffShift) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Cửa không tồn tại',
+                    'message' => 'Không tìm thấy ca làm việc của nhân viên',
                     'data' => ['staff' => $staff]
                 ]);
             }
 
+            // trường hợp không cho phép checkin tại tất cả cổng
+            if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value] == 0) {
+                if($gateStaffShift->gate_id != $request->gate_id){ 
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Không cho phép checkin tại cổng này',
+                        'data' => null
+                    ]);
+                }
+            }
+            
+
+            $request->merge(['gate_shift_id' => $gateStaffShift->gate_shift_id, 'gate_id' => $gateStaffShift->gate_id]);
+            
             // Lấy thông tin gateShift và kiểm tra trạng thái
             $gateShift = GateShift::where('id', $request->gate_shift_id)
-                                  ->where('status', GateShift::STATUS_ACTIVE)
-                                  ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
-                                  ->first();
+                ->where('status', GateShift::STATUS_ACTIVE)
+                ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
+                ->first();
+            
 
             if (!$gateShift) {
                 return response()->json([
@@ -532,9 +549,7 @@ class ShiftAssignmentController extends Controller
             }
 
             // Kiểm tra theo index nếu config cho phép
-            $enableCheckinByIndex = SystemConfig::getConfig('ENABLE_CHECKIN_BY_INDEX');
-            
-            if ($enableCheckinByIndex == 1) {
+            if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] == 1) {
                 // Kiểm tra xem có phải index nhỏ nhất trong danh sách chờ không
                 $minWaitingIndex = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
                                                 ->where('status', GateStaffShift::STATUS_WAITING)
@@ -582,7 +597,6 @@ class ShiftAssignmentController extends Controller
                         'index' => $assignment->index,
                         'status' => GateStaffShift::STATUS_CHECKIN,
                         'checkin_at' => now()->format('H:i:s'),
-                        'gate_name' => $gate->name
                     ]
                 ]
             ]);

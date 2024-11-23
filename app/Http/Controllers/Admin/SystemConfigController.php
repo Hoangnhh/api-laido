@@ -13,6 +13,7 @@ class SystemConfigController extends Controller
         SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value,
         SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value,
         SystemConfigKey::CHECKOUT_DELAY_MINUTE->value,
+        SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value,
     ];
     public function index()
     {
