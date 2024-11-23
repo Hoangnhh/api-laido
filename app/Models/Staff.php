@@ -30,7 +30,8 @@ class Staff extends Model
         'bank_account',
         'status',
         'vehical_size',
-        'phone'
+        'phone',
+        'fcm_token'
     ];
 
     protected $casts = [

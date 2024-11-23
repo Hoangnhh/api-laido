@@ -16,9 +16,12 @@ return new class extends Migration
             $table->date('date');
             $table->dateTime('checkin_at')->nullable();
             $table->dateTime('checkout_at')->nullable();
+            $table->string('checkin_by', 45)->nullable();
+            $table->string('checkout_by', 45)->nullable();
             $table->boolean('paid')->default(false);
             $table->string('price', 20)->default('0');
             $table->integer('commisson')->default(0);
+            $table->boolean('is_checkout_with_other')->default(false);
             $table->foreignId('gate_shift_staff_id')->nullable();
             $table->foreignId('staff_id')->constrained('staff');
             $table->foreignId('extra_shift_id')->nullable()->constrained('extra_shifts');

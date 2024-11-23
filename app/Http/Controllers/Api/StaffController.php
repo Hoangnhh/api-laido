@@ -187,4 +187,34 @@ class StaffController extends Controller
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
+
+    public function updateFcmToken(Request $request)
+    {
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:staff,id',
+                'token' => 'required|string'
+            ]);
+
+            $staff = Staff::where('id', $request->user_id)
+                ->where('status', Staff::STATUS_ACTIVE)
+                ->first();
+
+            if (!$staff) {
+                return $this->errorResponse('Không tìm thấy thông tin nhân viên', 404);
+            }
+
+            $staff->update([
+                'fcm_token' => $request->token
+            ]);
+
+            return $this->successResponse(
+                ['fcm_token' => $staff->token],
+                'Cập nhật FCM token thành công'
+            );
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
 } 

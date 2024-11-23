@@ -16,6 +16,7 @@ CREATE TABLE `admin-laido`.`staff` (
   `bank_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
   `vehical_size` INT NOT NULL DEFAULT 6,
+  `fcm_token` TEXT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
