@@ -50,16 +50,7 @@ class TicketController extends Controller
         $staffId = $request->user_id;
 
         try {
-            // Kiểm tra nhân viên có đang trong ca active và đã checkin chưa
-            $activeAssignment = GateStaffShift::where('staff_id', $staffId)
-                ->where('status', GateStaffShift::STATUS_CHECKIN)
-                ->with(['gateShift', 'gate', 'staff'])
-                ->first();
-
-            if (!$activeAssignment) {
-                return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
-            }
-
+            
             // Kiểm tra vé trong bảng checked_ticket
             $existingTicket = CheckedTicket::where('code', $request->code)->first();
             $systemConfigs = SystemConfig::getConfigs(
@@ -69,18 +60,27 @@ class TicketController extends Controller
                 ]
             );
 
-            $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
-            if($checkinTicketRangeTime > 0) {
-                $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
-                if ($timeDiff > $checkinTicketRangeTime) {
-                    return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
-                }
-            }
-
             // Nếu chưa có record hoặc đã checkout thì là checkin
             if (!$existingTicket) {
+                // Kiểm tra nhân viên có đang trong ca active và đã checkin chưa
+                $activeAssignment = GateStaffShift::where('staff_id', $staffId)
+                    ->where('status', GateStaffShift::STATUS_CHECKIN)
+                    ->with(['gateShift', 'gate', 'staff'])
+                    ->first();
+
+                if (!$activeAssignment) {
+                    return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
+                }
+
+                $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
+                if($checkinTicketRangeTime > 0) {
+                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
+                    if ($timeDiff > $checkinTicketRangeTime) {
+                        return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
+                    }
+                }
+
                 // Kiểm tra giới hạn số vé theo vehical_size
-                
                 
                 if ($systemConfigs[SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value] == 1) {
                     $currentTicketCount = $activeAssignment->checked_ticket_num;
@@ -169,6 +169,15 @@ class TicketController extends Controller
                     ]);
                     return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
                 }else{
+
+                    // Kiểm tra nhân viên có đang trong ca active và đã checkin chưa
+                    $activeAssignment = GateStaffShift::where('staff_id', $staffId)
+                        ->where('status', GateStaffShift::STATUS_CHECKIN)
+                        ->first();
+                    
+                    if(!$activeAssignment) {
+                        return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
+                    }
                     // Cập nhật thông tin checkout và commission
                     $existingTicket->update([
                         'status' => CheckedTicket::STATUS_CHECKOUT,
