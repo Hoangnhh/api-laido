@@ -25,7 +25,6 @@ class FirebaseService
 
             return $this->messaging->send($message);
         } catch (\Exception $e) {
-            \Log::error('Firebase Notification Error: ' . $e->getMessage());
             return false;
         }
     }
