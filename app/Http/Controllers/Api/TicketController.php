@@ -62,13 +62,27 @@ class TicketController extends Controller
 
             // Kiểm tra vé trong bảng checked_ticket
             $existingTicket = CheckedTicket::where('code', $request->code)->first();
+            $systemConfigs = SystemConfig::getConfigs(
+                [
+                    SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value, 
+                    SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value
+                ]
+            );
+
+            $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
+            if($checkinTicketRangeTime > 0) {
+                $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
+                if ($timeDiff > $checkinTicketRangeTime) {
+                    return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
+                }
+            }
 
             // Nếu chưa có record hoặc đã checkout thì là checkin
             if (!$existingTicket) {
                 // Kiểm tra giới hạn số vé theo vehical_size
-                $enableLimitByVehicalSize = SystemConfig::getConfig(SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value);
                 
-                if ($enableLimitByVehicalSize == 1) {
+                
+                if ($systemConfigs[SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value] == 1) {
                     $currentTicketCount = $activeAssignment->checked_ticket_num;
                     $vehicalSize = $activeAssignment->staff->vehical_size;
                     
@@ -195,6 +209,13 @@ class TicketController extends Controller
         // Xử lý tên dịch vụ để lấy commission
         $serviceName = mb_strtolower($ticketName); // Chuyển về chữ thường
         $serviceName = preg_replace('/[^\p{L}\p{N}\s]/u', '', $serviceName); // Bỏ dấu câu
+        $serviceName = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $serviceName);
+        $serviceName = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $serviceName);
+        $serviceName = preg_replace('/[ìíịỉĩ]/u', 'i', $serviceName);
+        $serviceName = preg_replace('/[òóọỏõôồốộổỗơờớợởỡ]/u', 'o', $serviceName);
+        $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
+        $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
+        $serviceName = preg_replace('/đ/u', 'd', $serviceName);
         $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
 
         $commission = $this->commission_configs[$serviceName]
