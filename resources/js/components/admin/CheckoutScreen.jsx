@@ -215,7 +215,7 @@ const CheckoutScreen = () => {
                                         <div className="checkout-shift-value">{shiftInfo.gate_name}</div>
                                     </div>
                                     <div className="checkout-shift-row">
-                                        <div className="checkout-shift-label">Tổng thời gian:</div>
+                                        <div className="checkout-shift-label">Thời gian làm việc:</div>
                                         <div className="checkout-shift-value">{shiftInfo.working_time}</div>
                                     </div>
                                     <div className="checkout-shift-row">

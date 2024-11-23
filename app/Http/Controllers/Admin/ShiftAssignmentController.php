@@ -704,7 +704,7 @@ class ShiftAssignmentController extends Controller
                             'checkin_at' => $assignment->checkin_at->format('H:i:s'),
                             'checkout_at' => now()->format('H:i:s'),
                             'working_time' => sprintf('%02d:%02d:%02d', $hours, $minutes, 0),
-                            'total_tickets' => $assignment->checked_ticket_num
+                            'total_tickets' => $checkedTickets->count()
                         ],
                         'checked_tickets' => $checkedTickets
                     ]
