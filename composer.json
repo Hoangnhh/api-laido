@@ -8,7 +8,7 @@
         "php": "^8.2",
         "firebase/php-jwt": "^6.10",
         "fruitcake/php-cors": "^1.3",
-        "kreait/firebase-php": "*",
+        "kreait/firebase-php": "^5.26",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9"
     },
