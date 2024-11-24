@@ -10,12 +10,11 @@ return new class extends Migration
     {
         Schema::create('extra_shifts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gate_id')->nullable()->constrained('gates');
+            $table->foreignId('gate_id')->nullable()->default(0);
             $table->date('date');
-            $table->foreignId('staff_id')->constrained('staff');
-            $table->dateTime('checkin_at')->nullable();
-            $table->dateTime('checkout_at')->nullable();
-            $table->string('status', 45)->default('WAITING');
+            $table->boolean('status')->default(1);
+            $table->string('create_by', 45);
+            $table->string('update_by', 45)->nullable();
             $table->timestamps();
         });
     }

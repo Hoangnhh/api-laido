@@ -72,22 +72,23 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   PRIMARY KEY (`id`))
 COMMENT = 'Thông tin vé đã quét';
 
-CREATE TABLE `admin-laido`.`extra_shift` (
-  `id` INT NOT NULL,
-  `gate_id` INT NULL,
-  `date` DATE NOT NULL,
-  `staff_id` INT NOT NULL,
-  `checkin_at` DATETIME NULL DEFAULT NULL,
-  `checkout_at` DATETIME NULL DEFAULT NULL,
-  `status` VARCHAR(45) NOT NULL DEFAULT 'WAITING',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`));
+CREATE TABLE `extra_shift` (
+  `id` int NOT NULL,
+  `gate_id` int DEFAULT '0',
+  `date` date NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `create_by` varchar(45) NOT NULL,
+  `update_by` varchar(45) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `id` int NOT NULL AUTO_INCREMENT,
   `date` DATE DEFAULT NULL,
-  `gate_shift_id` int NOT NULL,
+  `gate_shift_id` int NOT NULL DEFAULT 0,
+  `extra_shift_id` int DEFAULT 0,
   `index` int NOT NULL,
   `gate_id` varchar(45) NOT NULL,
   `staff_id` varchar(45) NOT NULL,
