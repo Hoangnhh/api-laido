@@ -36,6 +36,11 @@ Route::group(['middleware' => ['api']], function () {
             Route::group(['prefix' => 'ticket'], function () {
                 Route::get('use-ticket', [TicketController::class, 'useTicket']);
             });
+
+            // Notification routes
+            Route::group(['prefix' => 'notifications'], function () {
+                Route::post('token', [StaffController::class, 'updateFcmToken']);
+            });
         });
     });
 

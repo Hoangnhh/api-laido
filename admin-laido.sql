@@ -16,6 +16,7 @@ CREATE TABLE `admin-laido`.`staff` (
   `bank_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
   `vehical_size` INT NOT NULL DEFAULT 6,
+  `fcm_token` TEXT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
@@ -61,6 +62,7 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `checkout_at` DATETIME NULL,
   `checkin_by` VARCHAR(45) NULL,
   `checkout_by` VARCHAR(45) NULL,
+  `is_checkout_with_other` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: Checkout bởi nhân viên chính\n1: Checkout bởi nhân viên khác',
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
   `commission` INT NOT NULL DEFAULT 0,
