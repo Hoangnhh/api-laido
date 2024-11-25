@@ -20,7 +20,7 @@ class ExtraShiftController extends Controller
                 'date' => 'required|date',
                 'staffIds' => 'required|array',
                 'staffIds.*' => 'exists:staff,id',
-                'groupId' => 'required|exists:staff_groups,id'
+                'groupId' => 'required|exists:staff_group,id'
             ]);
 
             $date = Carbon::parse($request->date)->startOfDay();

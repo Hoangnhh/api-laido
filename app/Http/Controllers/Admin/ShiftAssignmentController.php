@@ -490,7 +490,6 @@ class ShiftAssignmentController extends Controller
                 'gate_id' => 'required|exists:gate,id',
             ]);
             
-            
             // Sửa query lấy thông tin staff theo card_id
             $staff = Staff::where('card_id', $request->card_id)
                           ->where('status', Staff::STATUS_ACTIVE)
@@ -517,9 +516,37 @@ class ShiftAssignmentController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không tìm thấy ca làm việc của nhân viên',
-                    'data' => ['staff' => $staff]
+                    'data' => [
+                        'staff' => $staff ,
+                        'assignment' => [
+                            'index' => $gateStaffShift->index,
+                        ]
+                    ]
                 ]);
             }
+
+            // ========== XỬ LÝ CHECKIN EXTRA SHIFT ==========
+            // Lấy danh sách ExtraShift của ngày hiện tại
+            $extraShifts = ExtraShift::where('date', Carbon::today()->format('Y-m-d'))
+                ->where('status', ExtraShift::STATUS_ACTIVE)
+                ->get();
+
+            if($extraShifts->where('staff_id', $staff->id)->count() > 0 && $gateStaffShift->status == GateStaffShift::STATUS_CHECKIN){
+                $gateStaffShift->update([
+                    'checkin_at' => now()
+                ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Checkin lượt bổ sung thành công',
+                    'data' => [
+                        'staff' => $staff,
+                        'assignment' => [
+                            'index' => $gateStaffShift->index,
+                        ]
+                    ]
+                ]);
+            }
+            // ========== END XỬ LÝ CHECKIN EXTRA SHIFT ==========
 
             // trường hợp không cho phép checkin tại tất cả cổng
             if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value] == 0) {
@@ -527,7 +554,12 @@ class ShiftAssignmentController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Không cho phép checkin tại cổng này',
-                        'data' => null
+                        'data' => [
+                            'staff' => $staff,
+                            'assignment' => [
+                                'index' => $gateStaffShift->index,
+                            ]
+                        ]
                     ]);
                 }
             }
@@ -535,20 +567,6 @@ class ShiftAssignmentController extends Controller
 
             $request->merge(['gate_shift_id' => $gateStaffShift->gate_shift_id, 'gate_id' => $gateStaffShift->gate_id]);
             
-            // Lấy thông tin gateShift và kiểm tra trạng thái
-            $gateShift = GateShift::where('id', $request->gate_shift_id)
-                ->where('status', GateShift::STATUS_ACTIVE)
-                ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
-                ->first();
-            
-
-            if (!$gateShift) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ca làm việc không tồn tại',
-                    'data' => ['staff' => $staff]
-                ]);
-            }
 
             // Lấy assignment và kiểm tra trạng thái
             $assignment = GateStaffShift::where('staff_id', $staff->id)
@@ -560,7 +578,12 @@ class ShiftAssignmentController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Nhân viên không trong hàng đợi',
-                    'data' => ['staff' => $staff]
+                    'data' => [
+                        'staff' => $staff,
+                        'assignment' => [
+                            'index' => $gateStaffShift->index,
+                        ]
+                    ]
                 ]);
             }
 
@@ -575,7 +598,32 @@ class ShiftAssignmentController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => $message,
-                    'data' => ['staff' => $staff]
+                    'data' => [
+                        'staff' => $staff,
+                        'assignment' => [
+                            'index' => $assignment->index,
+                        ]
+                    ]
+                ]);
+            }
+            
+            // Lấy thông tin gateShift và kiểm tra trạng thái
+            $gateShift = GateShift::where('id', $request->gate_shift_id)
+                ->where('status', GateShift::STATUS_ACTIVE)
+                ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
+                ->first();
+            
+
+            if (!$gateShift) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ca làm việc đã kết thúc',
+                    'data' => [
+                        'staff' => $staff,
+                        'assignment' => [
+                            'index' => $gateStaffShift->index,
+                        ]
+                    ]
                 ]);
             }
 
@@ -590,7 +638,12 @@ class ShiftAssignmentController extends Controller
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Chưa đến lượt checkin',
-                        'data' => ['staff' => $staff]
+                        'data' => [
+                            'staff' => $staff,
+                            'assignment' => [
+                                'index' => $assignment->index,
+                            ]
+                        ]
                     ]);
                 }
             }
@@ -603,7 +656,7 @@ class ShiftAssignmentController extends Controller
                 'checked_ticket_num' => 0
             ]);
 
-            if ($assignment->index > $gateShift->current_index) {
+            if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] == 0 && $assignment->index > $gateShift->current_index) {
                 $gateShift->update(['current_index' => $assignment->index]);
             }
 

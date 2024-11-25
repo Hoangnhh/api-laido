@@ -8,6 +8,7 @@ const QueueDisplay = () => {
     const [selectedPosition, setSelectedPosition] = useState(0);
     const [cardId, setCardId] = useState('');
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [assignments, setAssignments] = useState([]);
     const [checkedInAssignments, setCheckedInAssignments] = useState([]);
     const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
@@ -139,6 +140,7 @@ const QueueDisplay = () => {
                     success: true
                 });
                 fetchAssignments();
+                setSuccessMessage(response.data.message);
             } else {
                 setError(response.data.message);
                 setCheckedInStaff({
@@ -406,7 +408,7 @@ const QueueDisplay = () => {
 
                         {checkedInStaff?.success && (
                             <div className="qd-success">
-                                Checkin thành công!
+                                {successMessage}
                             </div>
                         )}
 

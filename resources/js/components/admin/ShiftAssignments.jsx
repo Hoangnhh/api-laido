@@ -678,7 +678,7 @@ const ShiftAssignments = () => {
                             className="sa-extra-shift-button"
                             style={{ textDecoration: 'none' }}
                         >
-                            Thêm ca bổ sung
+                            {extraShifts.length > 0 ? 'Cập nhật ca bổ sung' : 'Thêm ca bổ sung'}
                         </a>
                         <a 
                             href="/admin/add-shift-gate"

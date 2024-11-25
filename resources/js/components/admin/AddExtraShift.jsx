@@ -155,7 +155,7 @@ const AddExtraShift = () => {
             });
 
             if (response.data.status === 'success') {
-                showAlert('Tạo ca bổ sung thành công', 'success');
+                showAlert(response.data.message || 'Cập nhật ca bổ sung thành công', 'success');
                 // Reset form sau khi tạo thành công
                 setSelectedStaffs([]);
                 setSearchTerm('');
