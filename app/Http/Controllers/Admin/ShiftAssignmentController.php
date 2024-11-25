@@ -517,10 +517,7 @@ class ShiftAssignmentController extends Controller
                     'status' => 'error',
                     'message' => 'Không tìm thấy ca làm việc của nhân viên',
                     'data' => [
-                        'staff' => $staff ,
-                        'assignment' => [
-                            'index' => $gateStaffShift->index,
-                        ]
+                        'staff' => $staff
                     ]
                 ]);
             }
@@ -542,7 +539,7 @@ class ShiftAssignmentController extends Controller
                     'data' => [
                         'staff' => $staff,
                         'assignment' => [
-                            'index' => $gateStaffShift->index,
+                            'index' => $gateStaffShift->index || "000",
                         ]
                     ]
                 ]);
@@ -558,7 +555,7 @@ class ShiftAssignmentController extends Controller
                         'data' => [
                             'staff' => $staff,
                             'assignment' => [
-                                'index' => $gateStaffShift->index,
+                                'index' => $gateStaffShift->index || "000",
                             ]
                         ]
                     ]);
@@ -582,7 +579,7 @@ class ShiftAssignmentController extends Controller
                     'data' => [
                         'staff' => $staff,
                         'assignment' => [
-                            'index' => $gateStaffShift->index,
+                            'index' => $gateStaffShift->index || "000",
                         ]
                     ]
                 ]);
@@ -602,7 +599,7 @@ class ShiftAssignmentController extends Controller
                     'data' => [
                         'staff' => $staff,
                         'assignment' => [
-                            'index' => $assignment->index,
+                            'index' => $assignment->index || "000",
                         ]
                     ]
                 ]);
@@ -622,7 +619,7 @@ class ShiftAssignmentController extends Controller
                     'data' => [
                         'staff' => $staff,
                         'assignment' => [
-                            'index' => $gateStaffShift->index,
+                            'index' => $gateStaffShift->index || "000",
                         ]
                     ]
                 ]);
@@ -642,7 +639,7 @@ class ShiftAssignmentController extends Controller
                         'data' => [
                             'staff' => $staff,
                             'assignment' => [
-                                'index' => $assignment->index,
+                                'index' => $assignment->index || "000",
                             ]
                         ]
                     ]);
@@ -690,7 +687,7 @@ class ShiftAssignmentController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Checkin thất bại - ' . $e->getMessage(),
+                'message' => 'Checkin thất bại - ' . $e->getMessage() . ' - Line: ' . $e->getLine(),
                 'error' => $e->getMessage()
             ], 500);
         }
