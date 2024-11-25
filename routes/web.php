@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\StaffGroupController;
 use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 use App\Http\Controllers\Admin\SystemConfigController;
-
+use App\Http\Controllers\Admin\ExtraShiftController;
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
         if (Auth::check()) {
@@ -50,6 +50,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/add-shift-gate', function () {
             return view('admin.add-shift-gate');
         })->name('admin.add-shift-gate');
+
+        Route::get('/add-extra-shift', function () {
+            return view('admin.add-extra-shift');
+        })->name('admin.add-extra-shift');
 
         Route::get('/queue-display', function () {
             return view('admin.queue-display');
@@ -111,4 +115,6 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
     Route::post('/staff-checkout', [ShiftAssignmentController::class, 'staffCheckout']);
     Route::get('/shift-staff-stats', [DashboardController::class, 'getShiftStaffStats']);
+    Route::post('/create-extra-shift', [ExtraShiftController::class, 'createUpdateExtraShift']);
+    Route::get('/get-extra-staffs-by-group', [ExtraShiftController::class, 'getExtraStaffsByGroup']);
 });

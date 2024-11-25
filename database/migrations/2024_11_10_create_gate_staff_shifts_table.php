@@ -11,10 +11,9 @@ return new class extends Migration
         Schema::create('gate_staff_shifts', function (Blueprint $table) {
             $table->id();
             $table->dateTime('date')->nullable();
-            $table->unsignedBigInteger('gate_shift_id')->default(0);
-            $table->unsignedBigInteger('extra_shift_id')->default(0);
+            $table->unsignedBigInteger('gate_shift_id');
             $table->integer('index');
-            $table->string('gate_id');
+            $table->string('gate_id')->nullable();
             $table->string('staff_id');
             $table->string('status')->default('WAITING');
             $table->dateTime('checkin_at')->nullable();

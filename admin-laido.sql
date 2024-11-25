@@ -75,10 +75,12 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
 COMMENT = 'Thông tin vé đã quét';
 
 CREATE TABLE `extra_shift` (
-  `id` int NOT NULL,
-  `gate_id` int DEFAULT '0',
+  `id` int NOT NULL AUTO_INCREMENT,
   `date` date NOT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `staff_id` int DEFAULT '0',
+  `recheckin_times` int NOT NULL DEFAULT '0',
+  `recheckin_at` Text NULL,
+  `status` varchar(45) NOT NULL DEFAULT 'ACTIVE',
   `create_by` varchar(45) NOT NULL,
   `update_by` varchar(45) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -92,7 +94,7 @@ CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `gate_shift_id` int NOT NULL DEFAULT 0,
   `extra_shift_id` int DEFAULT 0,
   `index` int NOT NULL,
-  `gate_id` varchar(45) NOT NULL,
+  `gate_id` varchar(45) NULL,
   `staff_id` varchar(45) NOT NULL,
   `status` varchar(45) NOT NULL DEFAULT 'WAITING',
   `checkin_at` datetime DEFAULT NULL,

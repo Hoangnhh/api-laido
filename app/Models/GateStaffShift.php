@@ -21,7 +21,6 @@ class GateStaffShift extends Model
         'checkin_at',
         'checkout_at',
         'checked_ticket_num',
-        'extra_shift_id'
     ];
 
     protected $casts = [
@@ -93,10 +92,5 @@ class GateStaffShift extends Model
     public function checkedTickets()
     {
         return $this->hasMany(CheckedTicket::class);
-    }
-
-    public function extraShift(): BelongsTo
-    {
-        return $this->belongsTo(ExtraShift::class);
     }
 } 

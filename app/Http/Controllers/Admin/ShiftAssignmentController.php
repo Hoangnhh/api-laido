@@ -218,6 +218,7 @@ class ShiftAssignmentController extends Controller
                 ->where('status', Staff::STATUS_ACTIVE)
                 ->with(['gateStaffShifts' => function($query) use ($date) {
                     $query->where('date', $date)
+                        ->where('gate_shift_id', '!=', 0)
                         ->with('gate:id,name');
                 }])
                 ->get()

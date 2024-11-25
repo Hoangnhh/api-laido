@@ -9,10 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('extra_shifts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('gate_id')->nullable()->default(0);
+            $table->id()->autoIncrement();
             $table->date('date');
-            $table->boolean('status')->default(1);
+            $table->unsignedBigInteger('staff_id')->default(0);
+            $table->integer('recheckin_times')->default(0);
+            $table->text('recheckin_at')->nullable();
+            $table->string('status')->default('ACTIVE');
             $table->string('create_by', 45);
             $table->string('update_by', 45)->nullable();
             $table->timestamps();

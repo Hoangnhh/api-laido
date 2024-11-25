@@ -537,6 +537,13 @@ const ShiftAssignments = () => {
                     </div>
                     <div className="sa-shift-controls">
                         <a 
+                            href="/admin/add-extra-shift"
+                            className="sa-extra-shift-button"
+                            style={{ textDecoration: 'none' }}
+                        >
+                            Thêm ca bổ sung
+                        </a>
+                        <a 
                             href="/admin/add-shift-gate"
                             className="sa-shift-button"
                             style={{ textDecoration: 'none' }}

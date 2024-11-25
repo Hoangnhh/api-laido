@@ -16,6 +16,7 @@ import PaymentReport from './components/admin/reports/PaymentReport';
 import AddShiftGate from './components/admin/AddShiftGate';
 import QueueDisplay from './components/admin/QueueDisplay';
 import CheckoutScreen from './components/admin/CheckoutScreen';
+import AddExtraShift from './components/admin/AddExtraShift';
 const theme = createTheme({
     palette: {
         primary: {
@@ -48,6 +49,8 @@ const App = () => {
                 return <ShiftAssignments />;
             case '/admin/add-shift-gate':
                 return <AddShiftGate />;
+            case '/admin/add-extra-shift':
+                return <AddExtraShift />;
             case '/admin/tickets':
                 return <Tickets />;
             case '/admin/settings':
