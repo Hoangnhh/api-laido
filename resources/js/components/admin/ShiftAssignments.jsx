@@ -6,9 +6,6 @@ import {
     faSpinner,
     faTag,
     faArrowRight,
-    faCheckCircle,
-    faUserClock,
-    faBalanceScale,
     faChevronLeft,
     faChevronRight,
     faRotate,
@@ -508,16 +505,6 @@ const ShiftAssignments = () => {
         }
     };
 
-    // Hàm cân bằng 2 bên
-    const handleBalance = () => {
-        const totalRemaining = sourceInfo?.remaining_count + targetInfo?.remaining_count;
-        const balanceAmount = Math.floor(totalRemaining / 2);
-        const transferNeeded = sourceInfo?.remaining_count - balanceAmount;
-        
-        if (transferNeeded > 0) {
-            setTransferAmount(Math.min(transferNeeded, transferInfo.maxAmount));
-        }
-    };
 
     // Helper function để render nội dung cell
     const renderShiftCell = (gateId, groupId) => {
@@ -635,9 +622,9 @@ const ShiftAssignments = () => {
                 <div className="sa-shift-header">
                     <div className="sa-header-left">
                         <h1>Phân ca làm việc</h1>
-                        <div className="sa-date-navigation">
+                        <div className="sa-date-control">
                             <button 
-                                className="sa-date-nav-btn"
+                                className="sa-date-btn"
                                 onClick={() => {
                                     const newDate = dayjs(selectedDate).subtract(1, 'day');
                                     setDate(newDate);
@@ -647,24 +634,26 @@ const ShiftAssignments = () => {
                                 <FontAwesomeIcon icon={faChevronLeft} />
                             </button>
 
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    label="Chọn ngày"
-                                    value={selectedDate}
-                                    onChange={(newValue) => {
-                                        setDate(newValue);
-                                    }}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                        textField: {
-                                            size: 'small'
-                                        }
-                                    }}
-                                />
-                            </LocalizationProvider>
+                            <div className="sa-date-picker">
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        label="Chọn ngày"
+                                        value={selectedDate}
+                                        onChange={(newValue) => {
+                                            setDate(newValue);
+                                        }}
+                                        format="DD/MM/YYYY"
+                                        slotProps={{
+                                            textField: {
+                                                size: 'small'
+                                            }
+                                        }}
+                                    />
+                                </LocalizationProvider>
+                            </div>
 
                             <button 
-                                className="sa-date-nav-btn"
+                                className="sa-date-btn"
                                 onClick={() => {
                                     const newDate = dayjs(selectedDate).add(1, 'day');
                                     setDate(newDate);
@@ -675,7 +664,7 @@ const ShiftAssignments = () => {
                             </button>
 
                             <button 
-                                className="sa-date-nav-btn sa-refresh-btn"
+                                className="sa-date-btn sa-date-refresh"
                                 onClick={() => fetchDashboardData()}
                                 title="Làm mới dữ liệu"
                             >

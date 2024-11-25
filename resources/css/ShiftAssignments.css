@@ -1201,3 +1201,63 @@
 .sa-staff-list.source .sa-staff-item:hover:not(.disabled):not(.selected) {
     border-color: #e0e0e0;
 }
+
+.sa-date-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.sa-date-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.sa-date-btn:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+    color: #333;
+}
+
+.sa-date-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.sa-date-refresh {
+    margin-left: 4px;
+}
+
+.sa-date-refresh svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Style cho DatePicker */
+.sa-date-picker .MuiInputBase-root {
+    height: 32px;
+    min-width: 140px;
+}
+
+.sa-date-picker .MuiInputBase-input {
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+}
+
+.sa-date-picker .MuiOutlinedInput-notchedOutline {
+    border-color: #ddd !important;
+}
+
+.sa-date-picker .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #bbb !important;
+}
