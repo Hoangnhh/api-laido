@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Services\StaffService;
 use Illuminate\Http\Request;
-
+use App\Models\GateStaffShift;
 class StaffController extends Controller
 {
     protected $staffService;
@@ -206,4 +206,47 @@ class StaffController extends Controller
             return response()->json(['message' => 'Có lỗi xảy ra khi tìm kiếm nhân viên'], 500);
         }
     }
+
+    public function changeGate(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'staff_list' => 'required|array',
+                'staff_list.*' => 'exists:staff,id',
+                'from_gate_shift_id' => 'required|exists:gate_shift,id',
+                'target_gate_shift_id' => 'required|exists:gate_shift,id'
+            ]);
+
+            \DB::beginTransaction();
+            try {
+                // Cập nhật gate_shift_id cho các nhân viên được chọn
+                $updatedCount = GateStaffShift::where('gate_shift_id', $validated['from_gate_shift_id'])
+                    ->whereIn('staff_id', $validated['staff_list'])
+                    ->where('status', GateStaffShift::STATUS_WAITING) // Chỉ cho phép chuyển những nhân viên chưa check-in
+                    ->update([
+                        'gate_shift_id' => $validated['target_gate_shift_id']
+                    ]);
+
+                \DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Đã chuyển ' . $updatedCount . ' nhân viên sang cổng mới',
+                    'data' => [
+                        'updated_count' => $updatedCount
+                    ]
+                ]);
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi chuyển cổng cho nhân viên: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 } 

@@ -117,4 +117,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/shift-staff-stats', [DashboardController::class, 'getShiftStaffStats']);
     Route::post('/create-extra-shift', [ExtraShiftController::class, 'createUpdateExtraShift']);
     Route::get('/get-extra-staffs-by-group', [ExtraShiftController::class, 'getExtraStaffsByGroup']);
+    Route::post('/staff/change-gate', [StaffController::class, 'changeGate']);
 });

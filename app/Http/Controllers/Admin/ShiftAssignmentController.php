@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\SystemConfigKey;
 use Exception;
 use Carbon\Carbon;
-
+use App\Models\ExtraShift;
 class ShiftAssignmentController extends Controller
 {
     public function getData()
@@ -271,7 +271,11 @@ class ShiftAssignmentController extends Controller
 
             $shiftData = GateShift::where('date', $date)
                 ->where('status', GateShift::STATUS_ACTIVE)
-                ->with(['staffGroup:id,name', 'gate:id,name'])
+                ->with([
+                    'staffGroup:id,name', 
+                    'gate:id,name',
+                    'gateStaffShifts.staff:id,name,code'
+                ])
                 ->withCount('gateStaffShifts')
                 ->get()
                 ->map(function ($shift) {
@@ -294,6 +298,16 @@ class ShiftAssignmentController extends Controller
                         ->where('status', GateStaffShift::STATUS_WAITING)
                         ->count();
 
+                    // Lấy danh sách staff
+                    $staffList = $shift->gateStaffShifts->map(function ($gateStaffShift) {
+                        return [
+                            'id' => $gateStaffShift->staff->id,
+                            'name' => $gateStaffShift->staff->name,
+                            'code' => $gateStaffShift->staff->code,
+                            'status' => $gateStaffShift->status
+                        ];
+                    });
+
                     return [
                         'id' => $shift->id,
                         'gate_id' => $shift->gate->id,
@@ -306,7 +320,22 @@ class ShiftAssignmentController extends Controller
                         'current_index' => $currentIndex,
                         'checked_in_count' => $checkedInCount,
                         'remaining_count' => $remainingCount,
-                        'total_staff' => $checkedInCount + $remainingCount
+                        'total_staff' => $checkedInCount + $remainingCount,
+                        'staff_list' => $staffList
+                    ];
+                });
+            // Lấy danh sách ExtraShift trong ngày
+            $extraShifts = ExtraShift::where('date', $date)
+                ->where('status', ExtraShift::STATUS_ACTIVE)
+                ->with(['staff' => function($query) {
+                    $query->select('id', 'code', 'name', 'group_id');
+                }])
+                ->get()
+                ->map(function($extraShift) {
+                    return [
+                        'staff_code' => $extraShift->staff->code,
+                        'staff_name' => $extraShift->staff->name,
+                        'group_id' => $extraShift->staff->group_id,
                     ];
                 });
 
@@ -314,13 +343,14 @@ class ShiftAssignmentController extends Controller
                 'status' => 'success',
                 'date' => $date,
                 'shifts' => $shiftData,
+                'extra_shifts' => $extraShifts
             ]);
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Có lỗi xảy ra khi lấy thông tin dashboard',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage() . ' at line ' . $e->getLine()
             ], 500);
         }
     }
