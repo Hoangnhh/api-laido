@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\SystemConfigKey;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\Traits\ApiResponse;
 use App\Models\Staff;
@@ -10,6 +11,7 @@ use App\Models\GateShift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\CheckedTicket;
+use App\Models\SystemConfig;
 
 class StaffController extends Controller
 {
@@ -57,9 +59,11 @@ class StaffController extends Controller
                 $currentShift = $lastCheckoutShift;
             }
 
+            $checkinAllGate = SystemConfig::getConfig(SystemConfigKey::ENABLE_CHECKIN_ALL_GATE);
+
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
-            if ($currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
+            if ($checkinAllGate && $checkinAllGate == '0' && $currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
                 // Lấy gate_id và date từ gateShift hiện tại
                 $gateId = $currentShift->gateShift->gate_id;
                 $shiftDate = $currentShift->gateShift->date;
@@ -76,6 +80,8 @@ class StaffController extends Controller
                             });
                     })
                     ->count();
+            }else{
+                $queuePosition = -1;
             }
 
             return $this->successResponse([
