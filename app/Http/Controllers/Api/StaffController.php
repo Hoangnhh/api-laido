@@ -59,10 +59,16 @@ class StaffController extends Controller
                 $currentShift = $lastCheckoutShift;
             }
 
-            $systemConfigs = SystemConfig::getConfigs([SystemConfigKey::ENABLE_CHECKIN_BY_INDEX, SystemConfigKey::ENABLE_CHECKIN_ALL_GATE]);
+            $systemConfigs = SystemConfig::getConfigs(
+                [
+                    SystemConfigKey::ENABLE_CHECKIN_BY_INDEX, 
+                    SystemConfigKey::ENABLE_CHECKIN_ALL_GATE,
+                    SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE,
+                ]);
            
             $checkinByIndex = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] ?? '0';
             $checkinAllGate = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value] ?? '0';
+            $checkinTicketRangeMinute = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value] ?? '0';
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
             $queueMessage = '';
@@ -103,8 +109,10 @@ class StaffController extends Controller
                     'phone' => $staff->phone,
                     'name' => $staff->name,
                     'code' => $staff->code,
+                    'username' => $staff->username,
                     'vehicle_size' => $staff->vehical_size,
                     'age' => Carbon::parse($staff->birthday)->age,
+                    'birthday' => $staff->birthday,
                     'card_id' => $staff->card_id,
                     'address' => $staff->address,
                     'shift' => $currentShift ? [
@@ -112,6 +120,7 @@ class StaffController extends Controller
                         'index' => $currentShift->index,
                         'queue_position' => $queuePosition + 1, // Thêm 1 vào vị trí để hiển thị số thứ tự
                         'queue_message' => $queueMessage,
+                        'checkin_expired_at' => $currentShift->status == GateStaffShift::STATUS_CHECKIN && $currentShift->checkin_at ? Carbon::parse($currentShift->checkin_at)->addMinutes((int)$checkinTicketRangeMinute)->format('H:i:s d/m/Y ') : null,
                         'gate' => $currentShift->gateShift->gate->name,
                         'date' => $currentShift->gateShift->date,
                         'status' => $currentShift->status,
