@@ -120,7 +120,7 @@ class StaffController extends Controller
                         'index' => $currentShift->index,
                         'queue_position' => $queuePosition + 1, // Thêm 1 vào vị trí để hiển thị số thứ tự
                         'queue_message' => $queueMessage,
-                        'checkin_expired_at' => $currentShift->status == GateStaffShift::STATUS_CHECKIN && $currentShift->checkin_at ? Carbon::parse($currentShift->checkin_at)->addMinutes((int)$checkinTicketRangeMinute)->format('H:i:s d/m/Y ') : null,
+                        'checkin_expired_at' => $currentShift->status == GateStaffShift::STATUS_WAITING && $currentShift->checkin_at ? Carbon::parse($currentShift->checkin_at)->addMinutes((int)$checkinTicketRangeMinute)->format('H:i:s d/m/Y ') : null,
                         'gate' => $currentShift->gateShift->gate->name,
                         'date' => $currentShift->gateShift->date,
                         'status' => $currentShift->status,
