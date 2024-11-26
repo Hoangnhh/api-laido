@@ -233,6 +233,38 @@ const Sidebar = () => {
         }
     };
 
+    // Thêm hàm kiểm tra quyền truy cập
+    const hasPermission = (path) => {
+        if (!user) return false;
+        if (user.username === 'admin') return true;
+        return user.permission?.includes(path);
+    };
+
+    // Lọc và hiển thị menu items dựa trên quyền
+    const filteredMenuItems = menuItems.filter(item => {
+        if (user?.username === 'admin') return true;
+        if (item.children) {
+            // Lọc các submenu items có quyền truy cập
+            const allowedChildren = item.children.filter(child => 
+                hasPermission(child.path)
+            );
+            // Chỉ hiện menu cha nếu có ít nhất 1 menu con được phép truy cập
+            return allowedChildren.length > 0;
+        }
+        
+        return hasPermission(item.path);
+    }).map(item => {
+        if (item.children) {
+            return {
+                ...item,
+                children: item.children.filter(child => 
+                    user?.username === 'admin' || hasPermission(child.path)
+                )
+            };
+        }
+        return item;
+    });
+
     return (
         <>
             {isLoggingOut && <Loading message="Đang đăng xuất..." />}
@@ -270,7 +302,7 @@ const Sidebar = () => {
                     </button>
                 </div>
                 <nav className="sb-sidebar-menu">
-                    {menuItems.map((item) => (
+                    {filteredMenuItems.map((item) => (
                         item.children ? (
                             <div key={item.text} className="sb-menu-item-group">
                                 <div 

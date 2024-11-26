@@ -86,7 +86,11 @@ Route::prefix('admin')->group(function () {
             ->name('admin.staffs.update');
 
         Route::get('/current-user', function () {
-            return response()->json(auth()->user());
+            $user = auth()->user();
+            if ($user->permission != null) {
+                $user->permission = json_decode($user->permission);
+            }
+            return response()->json($user);
         });
     });
 
@@ -98,6 +102,7 @@ Route::prefix('admin')->group(function () {
 
 Route::prefix('api/admin')->group(function () {
     Route::apiResource('users', UserController::class);
+    Route::post('/users/{user}/permissions', [UserController::class, 'updatePermission']);
     Route::apiResource('staffs', StaffController::class);
     Route::apiResource('staff-groups', StaffGroupController::class);
     Route::apiResource('gates', GateController::class);

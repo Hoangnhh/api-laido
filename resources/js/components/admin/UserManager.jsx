@@ -20,16 +20,70 @@ import {
     Typography,
     Chip,
     Alert,
-    Snackbar
+    Snackbar,
+    Checkbox,
+    FormControlLabel,
+    List,
+    ListItem,
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faPlus,
     faPenToSquare,
     faTrash,
-    faMagnifyingGlass
+    faMagnifyingGlass,
+    faUserShield,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+
+const menuItems = [
+    { 
+        text: 'Trang chủ', 
+        path: '/admin/dashboard'
+    },
+    { 
+        text: 'Phân ca', 
+        path: '/admin/shift-assignments'
+    },
+    { 
+        text: 'Màn hình xếp hàng', 
+        path: '/admin/queue-display'
+    },
+    { 
+        text: 'Màn hình Checkout', 
+        path: '/admin/checkout-screen'
+    },
+    { 
+        text: 'Quản lý vị trí',
+        path: '/admin/gate'
+    },
+    { 
+        text: 'Quản lý người dùng', 
+        path: '/admin/users'
+    },
+    
+    { 
+        text: 'Quản lý nhóm nhân viên', 
+        path: '/admin/staff-group'
+    },
+    { 
+        text: 'Quản lý nhân viên', 
+        path: '/admin/staff'
+    },
+    {
+        text: 'Báo cáo thanh toán',
+        path: '/admin/payment-report'
+    },
+    { 
+        text: 'Danh sách vé sử dụng', 
+        path: '/admin/tickets'
+    },
+    { 
+        text: 'Cấu hình hệ thống', 
+        path: '/admin/settings'
+    },
+    
+];
 
 const UserManager = () => {
     const [users, setUsers] = useState([]);
@@ -49,6 +103,8 @@ const UserManager = () => {
         message: '',
         severity: 'success'
     });
+    const [openPermissionDialog, setOpenPermissionDialog] = useState(false);
+    const [selectedPermissions, setSelectedPermissions] = useState([]);
 
     // Fetch users data
     const fetchUsers = async () => {
@@ -133,6 +189,41 @@ const UserManager = () => {
 
     const handleCloseAlert = () => {
         setAlert({ ...alert, open: false });
+    };
+
+    const handleOpenPermissionDialog = (user) => {
+        setSelectedUser(user);
+        setSelectedPermissions(user.permission || []);
+        setOpenPermissionDialog(true);
+    };
+
+    const handleClosePermissionDialog = () => {
+        setOpenPermissionDialog(false);
+        setSelectedUser(null);
+    };
+
+    const handlePermissionChange = (path) => {
+        setSelectedPermissions(prev => {
+            if (prev.includes(path)) {
+                return prev.filter(p => p !== path);
+            }
+            return [...prev, path];
+        });
+    };
+
+    const handleSavePermissions = async () => {
+        try {
+            await axios.post(`/api/admin/users/${selectedUser.id}/permissions`, {
+                permissions: selectedPermissions
+            });
+            
+            showAlert('Cập nhật quyền truy cập thành công');
+            handleClosePermissionDialog();
+            fetchUsers();
+        } catch (error) {
+            const message = error.response?.data?.message || 'Lỗi khi cập nhật quyền truy cập';
+            showAlert(message, 'error');
+        }
     };
 
     return (
@@ -232,6 +323,12 @@ const UserManager = () => {
                                                 <FontAwesomeIcon icon={faPenToSquare} />
                                             </IconButton>
                                             <IconButton
+                                                color="info"
+                                                onClick={() => handleOpenPermissionDialog(user)}
+                                            >
+                                                <FontAwesomeIcon icon={faUserShield} />
+                                            </IconButton>
+                                            <IconButton
                                                 color="error"
                                                 onClick={() => handleDelete(user.id)}
                                             >
@@ -299,6 +396,36 @@ const UserManager = () => {
                         <Button onClick={handleCloseDialog}>Hủy</Button>
                         <Button variant="contained" onClick={handleSubmit}>
                             {selectedUser ? 'Cập nhật' : 'Thêm mới'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Dialog Permission */}
+                <Dialog open={openPermissionDialog} onClose={handleClosePermissionDialog}>
+                    <DialogTitle>
+                        Quản lý quyền truy cập
+                    </DialogTitle>
+                    <DialogContent>
+                        <List>
+                            {menuItems.map(item => (
+                                <ListItem key={item.path}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={selectedPermissions.includes(item.path)}
+                                                onChange={() => handlePermissionChange(item.path)}
+                                            />
+                                        }
+                                        label={item.text}
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClosePermissionDialog}>Hủy</Button>
+                        <Button variant="contained" onClick={handleSavePermissions}>
+                            Lưu
                         </Button>
                     </DialogActions>
                 </Dialog>

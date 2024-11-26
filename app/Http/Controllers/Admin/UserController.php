@@ -11,7 +11,15 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::latest()->get();
+        $users = User::where('username', '!=', 'admin')
+            ->latest()
+            ->get()
+            ->map(function($user) {
+                if ($user->permission != null) {
+                    $user->permission = json_decode($user->permission);
+                }
+                return $user;
+            });
         return response()->json($users);
     }
 
@@ -60,5 +68,12 @@ class UserController extends Controller
     {
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
+    }
+
+    public function updatePermission(Request $request, User $user)
+    {
+        $user->permission = json_encode($request->permissions);
+        $user->save();
+        return response()->json($user);
     }
 } 
