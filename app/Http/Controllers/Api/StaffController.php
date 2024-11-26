@@ -111,8 +111,8 @@ class StaffController extends Controller
                     'code' => $staff->code,
                     'username' => $staff->username,
                     'vehicle_size' => $staff->vehical_size,
-                    'age' => Carbon::parse($staff->birthday)->age,
-                    'birthday' => $staff->birthday,
+                    'age' => Carbon::parse($staff->birthdate)->age,
+                    'birthdate' => $staff->birthdate,
                     'card_id' => $staff->card_id,
                     'address' => $staff->address,
                     'shift' => $currentShift ? [
