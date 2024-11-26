@@ -81,7 +81,7 @@ class StaffController extends Controller
                     })
                     ->count();
             }else{
-                $queuePosition = -1;
+                $queuePosition = -2;
             }
 
             return $this->successResponse([
