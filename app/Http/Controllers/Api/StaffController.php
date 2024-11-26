@@ -60,9 +60,9 @@ class StaffController extends Controller
             }
 
             $systemConfigs = SystemConfig::getConfigs([SystemConfigKey::ENABLE_CHECKIN_BY_INDEX, SystemConfigKey::ENABLE_CHECKIN_ALL_GATE]);
-            $checkinByIndex = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX] ?? '0';
-            $checkinAllGate = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE] ?? '0';
-
+           
+            $checkinByIndex = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] ?? '0';
+            $checkinAllGate = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value] ?? '0';
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
             $queueMessage = '';

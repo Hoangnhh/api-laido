@@ -47,7 +47,7 @@ class SystemConfig extends Model
             ->where('status', self::STATUS_ACTIVE)
             ->get();
             
-        return $configs->pluck('value', 'key');
+        return $configs->pluck('value', 'key')->toArray();
     }
 
     /**
