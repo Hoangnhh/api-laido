@@ -59,11 +59,14 @@ class StaffController extends Controller
                 $currentShift = $lastCheckoutShift;
             }
 
-            $checkinAllGate = SystemConfig::getConfig(SystemConfigKey::ENABLE_CHECKIN_ALL_GATE);
+            $systemConfigs = SystemConfig::getConfigs([SystemConfigKey::ENABLE_CHECKIN_BY_INDEX, SystemConfigKey::ENABLE_CHECKIN_ALL_GATE]);
+            $checkinByIndex = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX] ?? '0';
+            $checkinAllGate = $systemConfigs[SystemConfigKey::ENABLE_CHECKIN_ALL_GATE] ?? '0';
 
             // Tính số người đứng trước trong hàng đợi
             $queuePosition = 0;
-            if ($checkinAllGate && $checkinAllGate == '0' && $currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
+            $queueMessage = '';
+            if ($checkinByIndex == '1' && $currentShift && $currentShift->status === GateStaffShift::STATUS_WAITING) {
                 // Lấy gate_id và date từ gateShift hiện tại
                 $gateId = $currentShift->gateShift->gate_id;
                 $shiftDate = $currentShift->gateShift->date;
@@ -80,8 +83,18 @@ class StaffController extends Controller
                             });
                     })
                     ->count();
+                if($queuePosition > 0){
+                    $queueMessage = "Còn " . $queuePosition . " người đứng trước bạn";
+                }else if($queuePosition == 0){
+                    $queueMessage = "Đã tới lượt bạn checkin";
+                }
             }else{
                 $queuePosition = -2;
+                if($checkinAllGate == '1'){
+                    $queueMessage = "Vui lòng tới cổng để checkin";
+                }else{
+                    $queueMessage = "Vui lòng tới " . $currentShift->gateShift->gate->name . " để checkin";
+                }
             }
 
             return $this->successResponse([
@@ -98,6 +111,7 @@ class StaffController extends Controller
                         'id' => $currentShift->id,
                         'index' => $currentShift->index,
                         'queue_position' => $queuePosition + 1, // Thêm 1 vào vị trí để hiển thị số thứ tự
+                        'queue_message' => $queueMessage,
                         'gate' => $currentShift->gateShift->gate->name,
                         'date' => $currentShift->gateShift->date,
                         'status' => $currentShift->status,
