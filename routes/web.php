@@ -138,4 +138,5 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/staff/change-gate', [StaffController::class, 'changeGate']);
     Route::post('/delete-gate-shift', [ShiftAssignmentController::class, 'deleteGateShift']);
     Route::get('/get-waiting-staffs', [ReportController::class, 'getWaitingList']);
+    Route::get('/get-staff-report', [ReportController::class, 'getStaffReport']);
 });
