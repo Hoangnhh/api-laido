@@ -46,7 +46,7 @@ const AddShiftGate = () => {
         severity: 'success'
     });
     const [selectedDate, setSelectedDate] = useState(dayjs());
-    const [pushNotification, setPushNotification] = useState(false);
+    const [pushNotification, setPushNotification] = useState(true);
 
     useEffect(() => {
         fetchInitialData();
