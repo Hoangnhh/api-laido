@@ -76,8 +76,8 @@ const CheckoutListReport = () => {
         ];
         ws['!cols'] = colWidths;
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách đã checkout');
-        XLSX.writeFile(wb, `danh_sach_lai_do_da_checkout_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, 'Lái đò đã kết ca');
+        XLSX.writeFile(wb, `lai_do_da_ket_ca_${filters.from_date}_${filters.to_date}.xlsx`);
     };
 
     // Tính toán dữ liệu cho trang hiện tại
@@ -129,7 +129,7 @@ const CheckoutListReport = () => {
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header>
-                            <h4>Danh sách Lái đò đã Checkout</h4>
+                            <h4>Lái đò đã kết ca</h4>
                         </Card.Header>
                         <Card.Body>
                             <Form>

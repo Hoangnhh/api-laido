@@ -95,17 +95,17 @@ const Sidebar = () => {
                     path: '/admin/used-tickets-list-report'
                 },
                 { 
-                    text: 'Lái đò chờ check-in', 
+                    text: 'Lái đò đang chờ', 
                     icon: faCircle,
                     path: '/admin/waiting-list-for-checkin-report'
                 },
                 { 
-                    text: 'Lái đò đã check-in', 
+                    text: 'Lái đò đang hoạt động', 
                     icon: faCircle,
                     path: '/admin/checkin-list-report'
                 },
                 { 
-                    text: 'Lái đò check-out', 
+                    text: 'Lái đò đã kết ca', 
                     icon: faCircle,
                     path: '/admin/checkout-list-report'
                 }

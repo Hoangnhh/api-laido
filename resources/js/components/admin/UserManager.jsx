@@ -82,6 +82,22 @@ const menuItems = [
         text: 'Cấu hình hệ thống', 
         path: '/admin/settings'
     },
+    { 
+        text: 'Vé đã sử dụng', 
+        path: '/admin/used-tickets-list-report'
+    },
+    { 
+        text: 'Lái đò đang chờ', 
+        path: '/admin/waiting-list-for-checkin-report'
+    },
+    { 
+        text: 'Lái đò đang hoạt động', 
+        path: '/admin/checkin-list-report'
+    },
+    { 
+        text: 'Lái đò đã kết ca', 
+        path: '/admin/checkout-list-report'
+    }
     
 ];
 

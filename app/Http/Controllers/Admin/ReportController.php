@@ -97,4 +97,6 @@ class ReportController extends Controller
             'data' => $result
         ]);
     }
+
+    
 }

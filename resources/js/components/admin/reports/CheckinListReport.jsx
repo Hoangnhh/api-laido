@@ -76,8 +76,8 @@ const CheckinListReport = () => {
         ];
         ws['!cols'] = colWidths;
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách đã checkin');
-        XLSX.writeFile(wb, `danh_sach_lai_do_da_checkin_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, 'Lái đò đang hoạt động');
+        XLSX.writeFile(wb, `lai_do_dang_hoat_dong_${filters.from_date}_${filters.to_date}.xlsx`);
     };
 
     // Tính toán dữ liệu cho trang hiện tại
@@ -171,7 +171,7 @@ const CheckinListReport = () => {
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header>
-                            <h4>Danh sách Lái đò đã Checkin</h4>
+                            <h4>Lái đò đang hoạt động</h4>
                         </Card.Header>
                         <Card.Body>
                             <Form>
