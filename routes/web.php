@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 use App\Http\Controllers\Admin\SystemConfigController;
 use App\Http\Controllers\Admin\ExtraShiftController;
+use App\Http\Controllers\Admin\ReportController;
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
         if (Auth::check()) {
@@ -136,4 +137,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-extra-staffs-by-group', [ExtraShiftController::class, 'getExtraStaffsByGroup']);
     Route::post('/staff/change-gate', [StaffController::class, 'changeGate']);
     Route::post('/delete-gate-shift', [ShiftAssignmentController::class, 'deleteGateShift']);
+    Route::get('/get-waiting-staffs', [ReportController::class, 'getWaitingList']);
 });

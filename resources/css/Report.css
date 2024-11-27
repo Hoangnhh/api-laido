@@ -1,13 +1,31 @@
 .rp-container {
     padding: 20px;
+    overflow: hidden;
 }
 
-.rp-sticky-header {
+.rp-header {
+    flex-shrink: 0;
+}
+
+.rp-data-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.rp-table {
+    margin-bottom: 0;
+}
+
+.table-responsive {
+    overflow-y: auto;
+}
+
+/* Đảm bảo header của bảng luôn hiển thị khi cuộn */
+.rp-table thead th {
     position: sticky;
     top: 0;
-    z-index: 100;
     background-color: #f8f9fa;
-    padding-top: 20px;
+    z-index: 1;
 }
 
 .rp-filter-section {
@@ -24,12 +42,6 @@
 .rp-filter-section .card-header h4 {
     margin-bottom: 0;
     color: #333;
-}
-
-.rp-data-grid {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .rp-table thead th {
