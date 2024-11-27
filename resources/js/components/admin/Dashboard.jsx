@@ -244,7 +244,6 @@ const Dashboard = () => {
                     <h1 className="db-title">Tổng quan hệ thống</h1>
                     <div className="db-date-filter">
                         <div className="db-date-input">
-                            <FontAwesomeIcon icon={faCalendar} />
                             <input
                                 type="date"
                                 name="fromDate"
@@ -254,7 +253,6 @@ const Dashboard = () => {
                         </div>
                         <span>đến</span>
                         <div className="db-date-input">
-                            <FontAwesomeIcon icon={faCalendar} />
                             <input
                                 type="date"
                                 name="toDate"

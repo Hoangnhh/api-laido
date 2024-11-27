@@ -1261,3 +1261,45 @@
 .sa-date-picker .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
     border-color: #bbb !important;
 }
+
+/* Style cho nút xóa */
+.sa-delete-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.sa-delete-button:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.sa-delete-button svg {
+    font-size: 14px;
+}
+
+/* Cập nhật lại style cho popup footer để căn chỉnh các nút */
+.sa-popup-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sa-popup-footer .sa-close-button {
+    margin-left: auto;
+}
+
+.sa-popup-footer .sa-delete-button {
+    margin-right: auto;
+}

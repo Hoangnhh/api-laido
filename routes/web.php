@@ -86,7 +86,7 @@ Route::prefix('admin')->group(function () {
             ->name('admin.staffs.update');
 
         Route::get('/current-user', function () {
-            $user = auth()->user();
+            $user = Auth::user();
             if ($user->permission != null) {
                 $user->permission = json_decode($user->permission);
             }
@@ -123,4 +123,5 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/create-extra-shift', [ExtraShiftController::class, 'createUpdateExtraShift']);
     Route::get('/get-extra-staffs-by-group', [ExtraShiftController::class, 'getExtraStaffsByGroup']);
     Route::post('/staff/change-gate', [StaffController::class, 'changeGate']);
+    Route::post('/delete-gate-shift', [ShiftAssignmentController::class, 'deleteGateShift']);
 });

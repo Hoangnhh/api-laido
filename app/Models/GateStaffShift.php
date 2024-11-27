@@ -11,6 +11,7 @@ class GateStaffShift extends Model
     const STATUS_WAITING = 'WAITING';
     const STATUS_CHECKIN = 'CHECKIN'; 
     const STATUS_CHECKOUT = 'CHECKOUT';
+    const STATUS_DELETED = 'DELETED';
     protected $fillable = [
         'date',
         'gate_shift_id',

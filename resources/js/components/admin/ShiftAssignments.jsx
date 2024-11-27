@@ -10,7 +10,8 @@ import {
     faChevronRight,
     faRotate,
     faUndo,
-    faSearch
+    faSearch,
+    faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from './Layout/AdminLayout';
 import axios from 'axios';
@@ -321,14 +322,24 @@ const ShiftAssignments = () => {
     const [showStaffPopup, setShowStaffPopup] = useState(false);
     const [selectedStaffList, setSelectedStaffList] = useState([]);
     const [popupTitle, setPopupTitle] = useState('');
+    const [currentGateShiftId, setCurrentGateShiftId] = useState(null);
 
     const StaffListPopup = React.memo(({ 
         show, 
         onClose, 
         staffList, 
-        title 
+        title,
+        gateShiftId,
+        onDelete,
+        canDelete = false
     }) => {
         if (!show) return null;
+
+        const handleDelete = () => {
+            if (window.confirm('Bạn có chắc chắn muốn xóa ca làm việc này?')) {
+                onDelete(gateShiftId);
+            }
+        };
 
         return (
             <div className="sa-popup-overlay">
@@ -346,6 +357,18 @@ const ShiftAssignments = () => {
                         ))}
                     </div>
                     <div className="sa-popup-footer">
+                        {canDelete && (
+                            <button 
+                                className="sa-delete-button" 
+                                onClick={handleDelete}
+                                style={{ 
+                                    backgroundColor: '#dc3545',
+                                    marginRight: 'auto'
+                                }}
+                            >
+                                <FontAwesomeIcon icon={faTrash} /> Xóa ca
+                            </button>
+                        )}
                         <button className="sa-close-button" onClick={onClose}>Đóng</button>
                     </div>
                 </div>
@@ -353,19 +376,19 @@ const ShiftAssignments = () => {
         );
     });
 
-    const handleStaffListClick = (type, data) => {
+    const handleStaffListClick = (type, data, gateShiftId = null) => {
         try {
             if (type === 'extra') {
-                // Sử dụng dữ liệu từ extraShifts
                 setSelectedStaffList(extraShifts.map(staff => ({
                     name: staff.staff_name,
                     code: staff.staff_code
                 })));
                 setPopupTitle('Danh sách nhân viên ca bổ sung');
+                setCurrentGateShiftId(null);
             } else {
-                // Lấy thông tin từ shiftData cho gate và shift cụ thể
                 setSelectedStaffList(data);
                 setPopupTitle(`Danh sách nhân viên`);
+                setCurrentGateShiftId(gateShiftId);
             }
             setShowStaffPopup(true);
         } catch (error) {
@@ -521,7 +544,7 @@ const ShiftAssignments = () => {
         return (
             <div 
                 className={`sa-shift-cell sa-active ${percentage <= 20 ? 'warning' : ''}`}
-                onClick={() => handleStaffListClick('normal', shiftInfo.staff_list)}
+                onClick={() => handleStaffListClick('normal', shiftInfo.staff_list, shiftInfo.id)}
                 draggable="true"
                 onDragStart={(e) => handleDragStart(e, gateId, groupId)}
                 onDragEnd={handleDragEnd}
@@ -594,6 +617,24 @@ const ShiftAssignments = () => {
         const value = e.target.value;
         setTempReason(value);
         setTransferReason(value);
+    };
+
+    const handleDeleteGateShift = async (gateShiftId) => {
+        try {
+            const response = await axios.post('/api/admin/delete-gate-shift', {
+                gate_shift_id: gateShiftId
+            });
+
+            if (response.data.status === 'success') {
+                showAlert('Xóa ca làm việc thành công', 'success');
+                setShowStaffPopup(false);
+                fetchDashboardData(selectedDate);
+            } else {
+                showAlert(response.data.message || 'Có lỗi xảy ra khi xóa ca làm việc', 'error');
+            }
+        } catch (error) {
+            showAlert(error.response?.data?.message || 'Có lỗi xảy ra khi xóa ca làm việc', 'error');
+        }
     };
 
     if (loading) {
@@ -796,6 +837,9 @@ const ShiftAssignments = () => {
                     onClose={() => setShowStaffPopup(false)}
                     staffList={selectedStaffList}
                     title={popupTitle}
+                    gateShiftId={currentGateShiftId}
+                    onDelete={handleDeleteGateShift}
+                    canDelete={currentGateShiftId !== null}
                 />
             </div>
         </AdminLayout>

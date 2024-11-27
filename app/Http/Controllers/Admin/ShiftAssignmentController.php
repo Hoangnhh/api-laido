@@ -15,6 +15,9 @@ use App\Enums\SystemConfigKey;
 use Exception;
 use Carbon\Carbon;
 use App\Models\ExtraShift;
+use App\Models\ActionLog;
+use Illuminate\Support\Facades\Auth;
+
 class ShiftAssignmentController extends Controller
 {
     public function getData()
@@ -805,4 +808,82 @@ class ShiftAssignmentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Xóa gate shift và các gate staff shift liên quan
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteGateShift(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'gate_shift_id' => 'required|exists:gate_shift,id'
+            ]);
+
+            $gateShift = GateShift::where('id', $request->gate_shift_id)
+                ->where('status', GateShift::STATUS_ACTIVE)
+                ->first();
+
+            if (!$gateShift) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không tìm thấy ca làm việc'
+                ]);
+            }
+
+            if ($gateShift->queue_status !== GateShift::QUEUE_STATUS_WAITING) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ca đang hoạt động, không được phép xóa'
+                ]);
+            }
+
+            DB::beginTransaction();
+            try {
+                // Lưu dữ liệu trước khi xóa để ghi log
+                $beforeData = [
+                    'gate_shift' => $gateShift->toArray(),
+                    'gate_staff_shifts' => GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
+                        ->get()
+                        ->toArray()
+                ];
+
+                // Update gate shift status
+                $gateShift->update(['status' => GateShift::STATUS_INACTIVE]);
+
+                // Xóa tất cả gate staff shifts liên quan
+                GateStaffShift::where('gate_shift_id', $request->gate_shift_id)->delete();
+
+                // Tạo log
+                ActionLog::create([
+                    'action' => ActionLog::ACTION_DELETE,
+                    'table' => 'gate_shift',
+                    'before_data' => $beforeData,
+                    'after_data' => null,
+                    'create_by' => Auth::user()->username
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Xóa ca làm việc thành công'
+                ]);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Xóa ca làm việc thất bại',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
 } 

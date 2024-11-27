@@ -9,6 +9,7 @@ use App\Models\GateStaffShift;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExtraShiftController extends Controller
 {
@@ -49,7 +50,7 @@ class ExtraShiftController extends Controller
                     ->each(function ($shift) {
                         $shift->update([
                             'status' => ExtraShift::STATUS_INACTIVE,
-                            'update_by' => auth()->user()->username
+                            'update_by' => Auth::user()->username
                         ]);
                     });
 
@@ -62,8 +63,8 @@ class ExtraShiftController extends Controller
                         ],
                         [
                             'status' => ExtraShift::STATUS_ACTIVE,
-                            'create_by' => auth()->user()->username,
-                            'update_by' => auth()->user()->username
+                            'create_by' => Auth::user()->username,
+                            'update_by' => Auth::user()->username
                         ]
                     );
                 }

@@ -114,3 +114,14 @@ CREATE TABLE `admin-laido`.`system_configs` (
   `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`))
 COMMENT = 'Lưu thông tin config của system';
+
+CREATE TABLE `admin-laido`.`action_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `action` VARCHAR(45) NOT NULL,
+  `table` VARCHAR(45) NULL,
+  `before_data` TEXT NULL,
+  `after_data` TEXT NULL,
+  `create_by` VARCHAR(45) NOT NULL,
+  `create_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+
