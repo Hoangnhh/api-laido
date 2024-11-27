@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GateStaffShift;
+use App\Models\CheckedTicket;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -98,5 +100,60 @@ class ReportController extends Controller
         ]);
     }
 
-    
+    public function getTicketReport(Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $ticketCode = $request->input('ticket_code');
+        $staffName = $request->input('staff_name');
+        $ticketStatus = $request->input('ticket_status');
+
+        $query = CheckedTicket::query()
+            ->select([
+                'checked_ticket.*',
+                'staff.name as staff_name',
+                'staff.code as staff_code',
+                'gate_staff_shift.date as shift_date',
+                DB::raw("DATE_FORMAT(checked_ticket.checkin_at, '%d/%m/%Y %H:%i') as checkin_at_formatted"),
+                DB::raw("DATE_FORMAT(checked_ticket.checkout_at, '%d/%m/%Y %H:%i') as checkout_at_formatted"),
+                DB::raw("DATE_FORMAT(checked_ticket.issue_date, '%d/%m/%Y %H:%i') as issue_date_formatted"),
+                DB::raw("DATE_FORMAT(checked_ticket.expired_date, '%d/%m/%Y %H:%i') as expired_date_formatted"),
+                DB::raw("CASE 
+                    WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKIN . "' THEN 'Chưa hoàn thành'
+                    WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKOUT . "' THEN 'Đã hoàn thành'
+                    ELSE 'Không xác định'
+                END as status_text")
+            ])
+            ->join('staff', 'checked_ticket.staff_id', '=', 'staff.id')
+            ->leftJoin('gate_staff_shift', 'checked_ticket.gate_staff_shift_id', '=', 'gate_staff_shift.id');
+
+        if ($fromDate) {
+            $query->whereDate('checked_ticket.date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('checked_ticket.date', '<=', $toDate);
+        }
+
+        if ($ticketCode) {
+            $query->where('checked_ticket.code', 'like', '%' . $ticketCode . '%');
+        }
+
+        if ($staffName) {
+            $query->where('staff.name', 'like', '%' . $staffName . '%');
+        }
+
+        if ($ticketStatus) {
+            $query->where('checked_ticket.status', $ticketStatus);
+        }
+
+        $result = $query->orderBy('checked_ticket.code', 'asc')
+                        ->orderBy('checked_ticket.date', 'asc')
+                        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
+        ]);
+    }
 }
