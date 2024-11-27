@@ -17,7 +17,8 @@ import {
     faBars,
     faAngleLeft,
     faSpinner,
-    faDisplay
+    faDisplay,
+    faCircle
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -68,12 +69,12 @@ const Sidebar = () => {
             children: [
                 { 
                     text: 'Quản lý nhóm nhân viên', 
-                    icon: faUsers,
+                    icon: faCircle,
                     path: '/admin/staff-group'
                 },
                 { 
                     text: 'Quản lý nhân viên', 
-                    icon: faUser,
+                    icon: faCircle,
                     path: '/admin/staff'
                 },
             ]
@@ -85,14 +86,30 @@ const Sidebar = () => {
             children: [
                 {
                     text: 'Báo cáo thanh toán',
-                    icon: faFileInvoiceDollar,
+                    icon: faCircle,
                     path: '/admin/payment-report'
                 },
                 { 
-                    text: 'Danh sách vé sử dụng', 
-                    icon: faTicket,
-                    path: '/admin/tickets'
+                    text: 'Vé đã sử dụng', 
+                    icon: faCircle,
+                    path: '/admin/used-tickets-list-report'
+                },
+                { 
+                    text: 'Lái đò chờ check-in', 
+                    icon: faCircle,
+                    path: '/admin/waiting-list-for-checkin-report'
+                },
+                { 
+                    text: 'Lái đò đã check-in', 
+                    icon: faCircle,
+                    path: '/admin/checkin-list-report'
+                },
+                { 
+                    text: 'Lái đò check-out', 
+                    icon: faCircle,
+                    path: '/admin/checkout-list-report'
                 }
+
             ]
         },
         { 

@@ -10,9 +10,12 @@ import StaffManager from './components/admin/StaffManager';
 import GateManager from './components/admin/GateManager';
 import StaffGroup from './components/admin/StaffGroup';
 import ShiftAssignments from './components/admin/ShiftAssignments';
-import Tickets from './components/admin/Tickets';
 import Settings from './components/admin/Settings';
 import PaymentReport from './components/admin/reports/PaymentReport';
+import WaitingListForCheckinReport from './components/admin/reports/WaitingListForCheckinReport';
+import CheckinListReport from './components/admin/reports/CheckinListReport';
+import CheckoutListReport from './components/admin/reports/CheckoutListReport';
+import UsedTicketsListReport from './components/admin/reports/UsedTicketsListReport';
 import AddShiftGate from './components/admin/AddShiftGate';
 import QueueDisplay from './components/admin/QueueDisplay';
 import CheckoutScreen from './components/admin/CheckoutScreen';
@@ -51,8 +54,6 @@ const App = () => {
                 return <AddShiftGate />;
             case '/admin/add-extra-shift':
                 return <AddExtraShift />;
-            case '/admin/tickets':
-                return <Tickets />;
             case '/admin/settings':
                 return <Settings />;
             case '/admin/payment-report':
@@ -61,6 +62,14 @@ const App = () => {
                 return <QueueDisplay />;
             case '/admin/checkout-screen':
                 return <CheckoutScreen />;
+            case '/admin/waiting-list-for-checkin-report':
+                return <WaitingListForCheckinReport />;
+            case '/admin/checkin-list-report':
+                return <CheckinListReport />;
+            case '/admin/checkout-list-report':
+                return <CheckoutListReport />;
+            case '/admin/used-tickets-list-report':
+                return <UsedTicketsListReport />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

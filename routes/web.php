@@ -63,10 +63,6 @@ Route::prefix('admin')->group(function () {
             return view('admin.checkout-screen');
         })->name('admin.checkout-screen');
 
-        Route::get('/tickets', function () {
-            return view('admin.tickets');
-        })->name('admin.tickets');
-
         Route::get('/settings', function () {
             return view('admin.settings');
         })->name('admin.settings');
@@ -74,6 +70,22 @@ Route::prefix('admin')->group(function () {
         Route::get('/payment-report', function () {
             return view('admin.payment-report');
         })->name('admin.payment-report');
+
+        Route::get('/waiting-list-for-checkin-report', function () {
+            return view('admin.waiting-list-for-checkin-report');
+        })->name('admin.waiting-list-for-checkin-report');
+
+        Route::get('/checkin-list-report', function () {
+            return view('admin.checkin-list-report');
+        })->name('admin.checkin-list-report');
+
+        Route::get('/checkout-list-report', function () {
+            return view('admin.checkout-list-report');
+        })->name('admin.checkout-list-report');
+
+        Route::get('/used-tickets-list-report', function () {
+            return view('admin.used-tickets-list-report');
+        })->name('admin.used-tickets-list-report');
 
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
