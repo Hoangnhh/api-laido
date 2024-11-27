@@ -65,12 +65,22 @@ class Staff extends Model
         $this->attributes['password'] = Hash::make($value);
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(StaffNotification::class);
+    }
+
     public function sendNotification($title, $body, $data = [])
     {
+        $this->notifications()->create([
+            'title' => $title,
+            'body' => $body,
+            'data' => $data
+        ]);
+
         if (!$this->fcm_token) {
             return false;
         }
-
         $firebaseService = app(FirebaseService::class);
         return $firebaseService->sendNotification($this->fcm_token, $title, $body, $data);
     }

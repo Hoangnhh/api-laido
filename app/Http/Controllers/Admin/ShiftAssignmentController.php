@@ -16,10 +16,18 @@ use Exception;
 use Carbon\Carbon;
 use App\Models\ExtraShift;
 use App\Models\ActionLog;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 
 class ShiftAssignmentController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function getData()
     {
         $gates = Gate::select('id', 'name')
@@ -57,7 +65,8 @@ class ShiftAssignmentController extends Controller
                 'gate_ids' => 'required|array',
                 'gate_ids.*' => 'exists:gate,id',
                 'staff_ids' => 'required|array',
-                'staff_ids.*' => 'exists:staff,id'
+                'staff_ids.*' => 'exists:staff,id',
+                'push_notification' => 'nullable|boolean'
             ]);
 
             // Kiểm tra thêm một lần nữa để đảm bảo
@@ -129,6 +138,7 @@ class ShiftAssignmentController extends Controller
                     'message' => 'Các nhân viên sau đã được phân ca trong ngày: ' . $assignedStaffs
                 ], 422);
             }
+            $gateShiftIds = [];
 
             DB::beginTransaction();
             try {
@@ -162,6 +172,7 @@ class ShiftAssignmentController extends Controller
                         'current_index' => $maxGroupIndex,
                         'status' => 'ACTIVE'
                     ]);
+                    $gateShiftIds[] = $gateShift->id;
 
                     $staffCountForGate = floor(count($request->staff_ids) / count($request->gate_ids))
                         + ($index < (count($request->staff_ids) % count($request->gate_ids)) ? 1 : 0);
@@ -177,10 +188,14 @@ class ShiftAssignmentController extends Controller
                             'status' => 'WAITING'
                         ]);
                         $staffIndex++;
+                        if ($request->push_notification) {
+                            $this->notificationService->pushShiftNoti($gateShift->id);
+                        }
                     }
                 }
 
                 DB::commit();
+                $this->notificationService->pushShiftNotiForMultiple($gateShiftIds);
 
                 return response()->json([
                     'status' => 'success',

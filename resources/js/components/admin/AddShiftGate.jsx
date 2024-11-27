@@ -13,7 +13,9 @@ import {
     Alert,
     Dialog,
     DialogTitle,
-    DialogContent
+    DialogContent,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../common/Loading';
@@ -44,6 +46,7 @@ const AddShiftGate = () => {
         severity: 'success'
     });
     const [selectedDate, setSelectedDate] = useState(dayjs());
+    const [pushNotification, setPushNotification] = useState(false);
 
     useEffect(() => {
         fetchInitialData();
@@ -201,7 +204,8 @@ const AddShiftGate = () => {
                 date: selectedDate.format('YYYY-MM-DD'),
                 staff_group_id: selectedGroup,
                 gate_ids: selectedGates,
-                staff_ids: selectedStaffs
+                staff_ids: selectedStaffs,
+                push_notification: pushNotification
             });
 
             if (response.data.status === 'success') {
@@ -214,6 +218,7 @@ const AddShiftGate = () => {
                 setSelectedStaffs([]);
                 setSelectedGates([]);
                 setAssignmentType('');
+                setPushNotification(false);
 
             } else {
                 showAlert(response.data.message || 'Có lỗi xảy ra khi tạo ca', 'error');
@@ -523,6 +528,17 @@ const AddShiftGate = () => {
                                     ))}
                                 </Select>
                             </FormControl>
+
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={pushNotification}
+                                        onChange={(e) => setPushNotification(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Gửi thông báo đến nhân viên"
+                            />
 
                             {(selectedStaffs.length > 0 && selectedGates.length > 0) && (
                                 <>
