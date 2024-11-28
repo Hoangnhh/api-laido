@@ -269,7 +269,7 @@ class StaffController extends Controller
 
             $notifications = $this->notificationService->getNotification($staffId, $perPage, $page);
 
-            return $this->successResponse($notifications->data ?? [], 'Lấy danh sách thông báo thành công');
+            return $this->successResponse($notifications['data'] ?? [], 'Lấy danh sách thông báo thành công');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
