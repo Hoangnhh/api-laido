@@ -83,7 +83,7 @@ class NotificationService
 
         // Chuyển đổi created_at sang định dạng d/m/Y
         foreach ($notifications['data'] as &$notification) {
-            $notification['created_at'] = Carbon::parse($notification['created_at'])->format('d/m/Y H:m');
+            $notification['created_at'] = Carbon::parse($notification['created_at'])->format('d/m/Y H:i');
         }
 
         return $notifications;
