@@ -88,4 +88,8 @@ class NotificationService
 
         return $notifications;
     }
+    public function readNotification(int $notificationId): void
+    {
+        StaffNotification::findOrFail($notificationId)->update(['read_at' => Carbon::now()]);
+    }
 } 

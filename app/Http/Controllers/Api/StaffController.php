@@ -275,5 +275,14 @@ class StaffController extends Controller
         }
     }
 
+    public function readNotification(Request $request)
+    {
+        try {
+            $this->notificationService->readNotification($request->notification_id);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
     
 } 
