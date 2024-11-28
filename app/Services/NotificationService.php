@@ -78,6 +78,6 @@ class NotificationService
     {
         return StaffNotification::where('staff_id', $staffId)
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate($perPage, ['*'], 'page', $page)->toArray();
     }
 } 
