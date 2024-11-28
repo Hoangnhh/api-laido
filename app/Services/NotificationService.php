@@ -8,6 +8,7 @@ use App\Enums\NotificationContent;
 use App\Models\GateStaffShift;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\StaffNotification;
 
 class NotificationService
 {
@@ -71,5 +72,12 @@ class NotificationService
             'gate' => $gateStaffShift->gate->name,
             'index' => $gateStaffShift->index
         ];
+    }
+
+    public function getNotification(int $staffId, int $perPage = 10, int $page = 1)
+    {
+        return StaffNotification::where('staff_id', $staffId)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
     }
 } 

@@ -12,9 +12,17 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\CheckedTicket;
 use App\Models\SystemConfig;
+use App\Services\NotificationService;
 
 class StaffController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     use ApiResponse;
 
     public function getInfo(Request $request)
@@ -246,4 +254,27 @@ class StaffController extends Controller
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
+
+    public function getNotification(Request $request)
+    {
+        try {
+            $request->validate([
+                'staff_id' => 'required|exists:staff,id',
+                'per_page' => 'required|integer',
+                'page' => 'required|integer'
+            ]);
+
+            $staffId = $request->staff_id;
+            $perPage = $request->per_page;
+            $page = $request->page;
+
+            $notifications = $this->notificationService->getNotification($staffId, $perPage, $page);
+
+            return $this->successResponse($notifications, 'Lấy danh sách thông báo thành công');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    
 } 
