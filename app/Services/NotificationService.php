@@ -7,22 +7,25 @@ use App\Models\Staff;
 use App\Enums\NotificationContent;
 use App\Models\GateStaffShift;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
 
-    public function pushShiftNoti(int $gateShiftId): void
+    public function pushShiftNoti(int $gateStaffShiftId): void
     {
-        $gateShift = GateShift::with(['gateStaffShifts.staff', 'gate'])->findOrFail($gateShiftId);
-        
-        $type = NotificationContent::NEW_SHIFT_ASSIGNED;
-        $params = $this->prepareShiftParams($gateShift);
+        try {
+            $gateStaffShift = GateStaffShift::with(['staff', 'gate'])->findOrFail($gateStaffShiftId);
+            
+            $type = NotificationContent::NEW_SHIFT_ASSIGNED;
+            $params = $this->prepareShiftParams($gateStaffShift);
 
-        foreach ($gateShift->gateStaffShifts as $staffShift) {
-            $staffShift->staff->sendNotification(
+            $gateStaffShift->staff->sendNotification(
                 $type->getTitle(),
                 $type->getBody($params)
             );
+        } catch (\Exception $e) {
+            Log::error('Error pushing shift notification: ' . $e->getMessage());
         }
     }
 
@@ -44,42 +47,29 @@ class NotificationService
         }
     }
 
-    public function pushShiftNotiForMultiple(array $gateShiftIds): void
+    public function pushShiftNotiForMultiple(array $gateStaffShiftIds): void
     {
-        $gateShifts = GateShift::with(['gateStaffShifts.staff', 'gate'])
-            ->whereIn('id', $gateShiftIds)
+        $gateStaffShifts = GateStaffShift::with(['staff', 'gate'])
+            ->whereIn('id', $gateStaffShiftIds)
             ->get();
 
-        foreach ($gateShifts as $gateShift) {
+        foreach ($gateStaffShifts as $gateStaffShift) {
             $type = NotificationContent::NEW_SHIFT_ASSIGNED;
-            $params = $this->prepareShiftParams($gateShift);
-            $data = $this->prepareShiftData($gateShift, $type);
+            $params = $this->prepareShiftParams($gateStaffShift);
 
-            foreach ($gateShift->gateStaffShifts as $staffShift) {
-                $staffShift->staff->sendNotification(
-                    $type->getTitle(),
-                    $type->getBody($params),
-                    $data
-                );
-            }
+            $gateStaffShift->staff->sendNotification(
+                $type->getTitle(),
+                $type->getBody($params)
+            );
         }
     }
 
-    private function prepareShiftParams(GateShift $gateShift): array
+    private function prepareShiftParams(GateStaffShift $gateStaffShift): array
     {
         return [
-            'date' => Carbon::parse($gateShift->date)->format('d/m/Y'),
-            'gate' => $gateShift->gate->name,
-            'index' => $gateShift->index
-        ];
-    }
-
-    private function prepareShiftData(GateShift $gateShift, NotificationContent $type): array
-    {
-        return [
-            'gate_shift_id' => $gateShift->id,
-            'gate_id' => $gateShift->gate_id,
-            'type' => $type->value
+            'date' => Carbon::parse($gateStaffShift->date)->format('d/m/Y'),
+            'gate' => $gateStaffShift->gate->name,
+            'index' => $gateStaffShift->index
         ];
     }
 } 
