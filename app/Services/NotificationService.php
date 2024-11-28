@@ -76,8 +76,16 @@ class NotificationService
 
     public function getNotification(int $staffId, int $perPage = 10, int $page = 1)
     {
-        return StaffNotification::where('staff_id', $staffId)
+        $notifications = StaffNotification::where('staff_id', $staffId)
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page)->toArray();
+            ->paginate($perPage, ['*'], 'page', $page)
+            ->toArray();
+
+        // Chuyển đổi created_at sang định dạng d/m/Y
+        foreach ($notifications['data'] as &$notification) {
+            $notification['created_at'] = Carbon::parse($notification['created_at'])->format('d/m/Y H:m');
+        }
+
+        return $notifications;
     }
 } 
