@@ -259,12 +259,11 @@ class StaffController extends Controller
     {
         try {
             $request->validate([
-                'staff_id' => 'required|exists:staff,id',
                 'per_page' => 'required|integer',
                 'page' => 'required|integer'
             ]);
 
-            $staffId = $request->staff_id;
+            $staffId = $request->user_id;
             $perPage = $request->per_page;
             $page = $request->page;
 
