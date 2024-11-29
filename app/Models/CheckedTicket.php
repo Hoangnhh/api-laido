@@ -18,10 +18,15 @@ class CheckedTicket extends Model
         'date',
         'checkin_at',
         'checkout_at',
+        'checkin_by',
+        'checkout_by',
+        'issue_date',
+        'expired_date',
+        'is_checkout_with_other',
         'paid',
         'price',
-        'commisson',
-        'shift_gate_staff_id',
+        'commission',
+        'gate_staff_shift_id',
         'staff_id',
         'extra_shift_id'
     ];
@@ -31,7 +36,7 @@ class CheckedTicket extends Model
         'checkin_at' => 'datetime',
         'checkout_at' => 'datetime',
         'paid' => 'boolean',
-        'commisson' => 'integer'
+        'commisson' => 'integer',
     ];
 
     public function staff(): BelongsTo
@@ -42,5 +47,13 @@ class CheckedTicket extends Model
     public function extraShift(): BelongsTo
     {
         return $this->belongsTo(ExtraShift::class);
+    }
+
+    /**
+     * Get the gate staff shift that owns the checked ticket.
+     */
+    public function gateStaffShift()
+    {
+        return $this->belongsTo(GateStaffShift::class, 'gate_staff_shift_id');
     }
 } 

@@ -1,8 +1,6 @@
 /* Container */
 .db-container {
-    padding: 24px;
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 20px;
 }
 
 /* Title */
@@ -18,168 +16,61 @@
 /* Stats Grid */
 .db-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 /* Stat Cards */
 .db-stat-card {
     background: white;
-    border-radius: 16px;
-    padding: 24px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.db-stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    gap: 15px;
 }
 
 .db-stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 24px;
-    transition: all 0.3s ease;
-}
-
-.db-stat-card:hover .db-stat-icon {
-    transform: scale(1.1);
-}
-
-/* Màu sắc cho các card */
-.db-total-staff .db-stat-icon {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-
-.db-assigned-staff .db-stat-icon {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.db-checkin-staff .db-stat-icon {
-    background: #fff3e0;
-    color: #ef6c00;
-}
-
-.db-waiting-staff .db-stat-icon {
-    background: #fce4ec;
-    color: #ad1457;
+    color: #4a90e2;
 }
 
 .db-stat-content h3 {
-    font-size: 15px;
-    color: #546e7a;
     margin: 0;
-    font-weight: 500;
+    font-size: 14px;
+    color: #666;
 }
 
 .db-stat-content p {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1a237e;
-    margin: 8px 0 0;
+    margin: 5px 0 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
 }
 
 /* Chart Section */
 .db-chart-section {
+    margin-top: 30px;
     background: white;
-    border-radius: 16px;
-    padding: 24px;
-    margin: 32px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
 }
 
 .db-section-title {
-    font-size: 20px;
-    color: #1a237e;
-    margin-bottom: 24px;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid #e3f2fd;
 }
 
-.db-chart {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 20px;
+.db-chart-container {
     height: 300px;
-    padding: 40px 10px 20px;
-    margin: 20px 0;
     position: relative;
-}
-
-.db-chart::after {
-    content: '';
-    position: absolute;
-    bottom: 40px;
-    left: 0;
-    right: 0;
-    border-bottom: 1px dashed #e0e0e0;
-}
-
-.db-chart-bar {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 60px;
-    position: relative;
-}
-
-.db-bar-container {
-    height: 200px;
-    width: 100%;
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: 10px;
-    position: relative;
-}
-
-.db-bar {
-    width: 40px;
-    background: linear-gradient(180deg, #2196f3 0%, #1976d2 100%);
-    border-radius: 8px 8px 0 0;
-    transition: all 0.3s ease;
-    position: relative;
-    margin: 0 auto;
-    min-height: 4px;
-}
-
-.db-bar:hover {
-    background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 100%);
-    transform: scaleY(1.02);
-}
-
-.db-bar-value {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1976d2;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    z-index: 2;
-}
-
-.db-hour {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
 }
 
 /* Recent Tickets Section */
@@ -271,44 +162,12 @@
         gap: 16px;
     }
 
-    .db-chart {
-        height: 250px;
-        gap: 15px;
-        padding-top: 50px;
-        justify-content: flex-start;
-    }
-
-    .db-chart-bar {
-        min-width: 50px;
-    }
-
-    .db-bar {
-        width: 30px;
-    }
-
-    .db-bar-value {
-        top: -30px;
-        font-size: 11px;
-        padding: 1px 6px;
-        background: rgba(25, 118, 210, 0.9);
+    .db-chart-container {
+        height: 300px;
     }
 
     .db-chart-section {
-        margin-top: 40px;
-    }
-
-    .db-bar-container {
-        padding-top: 40px;
-    }
-
-    .db-chart {
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .db-chart::-webkit-scrollbar {
-        display: none;
+        padding: 15px;
     }
 
     .db-ticket-item {
@@ -326,4 +185,48 @@
     .db-ticket-time {
         align-self: flex-start;
     }
-} 
+}
+
+.db-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.db-date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.db-date-input {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.db-charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .db-charts-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .db-chart-container {
+        height: 250px;
+    }
+    
+    .db-chart-section {
+        padding: 15px;
+    }
+}
+  

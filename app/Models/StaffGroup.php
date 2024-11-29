@@ -11,7 +11,8 @@ class StaffGroup extends Model
 
     protected $fillable = [
         'name',
-        'status'
+        'status',
+        'name'
     ];
 
     public function staffs(): HasMany

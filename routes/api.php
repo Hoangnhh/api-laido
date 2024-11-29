@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Middleware\VerifyJWTToken;
 use Illuminate\Support\Facades\Route;
 
@@ -27,11 +28,21 @@ Route::group(['middleware' => ['api']], function () {
             // Staff routes
             Route::group(['prefix' => 'staff'], function () {
                 Route::get('get-staff-info', [StaffController::class, 'getInfo']);
+                Route::get('get-checked-tickets', [StaffController::class, 'getCheckedTickets']);
+                Route::get('get-dashboard-info', [StaffController::class, 'getDashboardInfo']);
+                Route::get('get-notification', [StaffController::class, 'getNotification']);
+                Route::get('read-notification', [StaffController::class, 'readNotification']);
+                Route::get('read-all-notification', [StaffController::class, 'readAllNotification']);
             });
 
             // Ticket routes
             Route::group(['prefix' => 'ticket'], function () {
                 Route::get('use-ticket', [TicketController::class, 'useTicket']);
+            });
+
+            // Notification routes
+            Route::group(['prefix' => 'notifications'], function () {
+                Route::post('token', [StaffController::class, 'updateFcmToken']);
             });
         });
     });

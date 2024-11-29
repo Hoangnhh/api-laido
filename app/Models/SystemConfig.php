@@ -36,6 +36,19 @@ class SystemConfig extends Model
             
         return $config ? $config->value : null;
     }
+    /**
+     * Lấy giá trị config theo key
+     * @param string $key
+     * @return mixed|null
+     */
+    public static function getConfigs($keys)
+    {
+        $configs = self::whereIn('key', $keys)
+            ->where('status', self::STATUS_ACTIVE)
+            ->get();
+            
+        return $configs->pluck('value', 'key')->toArray();
+    }
 
     /**
      * Set giá trị config

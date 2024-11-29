@@ -9,13 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('extra_shifts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('gate_id')->nullable()->constrained('gates');
+            $table->id()->autoIncrement();
             $table->date('date');
-            $table->foreignId('staff_id')->constrained('staff');
-            $table->dateTime('checkin_at')->nullable();
-            $table->dateTime('checkout_at')->nullable();
-            $table->string('status', 45)->default('WAITING');
+            $table->unsignedBigInteger('staff_id')->default(0);
+            $table->integer('recheckin_times')->default(0);
+            $table->text('recheckin_at')->nullable();
+            $table->string('status')->default('ACTIVE');
+            $table->string('create_by', 45);
+            $table->string('update_by', 45)->nullable();
             $table->timestamps();
         });
     }

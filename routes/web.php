@@ -10,7 +10,8 @@ use App\Http\Controllers\Admin\StaffGroupController;
 use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 use App\Http\Controllers\Admin\SystemConfigController;
-
+use App\Http\Controllers\Admin\ExtraShiftController;
+use App\Http\Controllers\Admin\ReportController;
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
         if (Auth::check()) {
@@ -51,13 +52,17 @@ Route::prefix('admin')->group(function () {
             return view('admin.add-shift-gate');
         })->name('admin.add-shift-gate');
 
+        Route::get('/add-extra-shift', function () {
+            return view('admin.add-extra-shift');
+        })->name('admin.add-extra-shift');
+
         Route::get('/queue-display', function () {
             return view('admin.queue-display');
         })->name('admin.queue-display');
 
-        Route::get('/tickets', function () {
-            return view('admin.tickets');
-        })->name('admin.tickets');
+        Route::get('/checkout-screen', function () {
+            return view('admin.checkout-screen');
+        })->name('admin.checkout-screen');
 
         Route::get('/settings', function () {
             return view('admin.settings');
@@ -66,6 +71,22 @@ Route::prefix('admin')->group(function () {
         Route::get('/payment-report', function () {
             return view('admin.payment-report');
         })->name('admin.payment-report');
+
+        Route::get('/waiting-list-for-checkin-report', function () {
+            return view('admin.waiting-list-for-checkin-report');
+        })->name('admin.waiting-list-for-checkin-report');
+
+        Route::get('/checkin-list-report', function () {
+            return view('admin.checkin-list-report');
+        })->name('admin.checkin-list-report');
+
+        Route::get('/checkout-list-report', function () {
+            return view('admin.checkout-list-report');
+        })->name('admin.checkout-list-report');
+
+        Route::get('/used-tickets-list-report', function () {
+            return view('admin.used-tickets-list-report');
+        })->name('admin.used-tickets-list-report');
 
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
@@ -78,7 +99,11 @@ Route::prefix('admin')->group(function () {
             ->name('admin.staffs.update');
 
         Route::get('/current-user', function () {
-            return response()->json(auth()->user());
+            $user = Auth::user();
+            if ($user->permission != null) {
+                $user->permission = json_decode($user->permission);
+            }
+            return response()->json($user);
         });
     });
 
@@ -90,6 +115,7 @@ Route::prefix('admin')->group(function () {
 
 Route::prefix('api/admin')->group(function () {
     Route::apiResource('users', UserController::class);
+    Route::post('/users/{user}/permissions', [UserController::class, 'updatePermission']);
     Route::apiResource('staffs', StaffController::class);
     Route::apiResource('staff-groups', StaffGroupController::class);
     Route::apiResource('gates', GateController::class);
@@ -105,4 +131,13 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('admin.dashboard-data');
     Route::get('/system-configs', [SystemConfigController::class, 'index'])->name('admin.system-configs');
     Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
+    Route::post('/staff-checkout', [ShiftAssignmentController::class, 'staffCheckout']);
+    Route::get('/shift-staff-stats', [DashboardController::class, 'getShiftStaffStats']);
+    Route::post('/create-extra-shift', [ExtraShiftController::class, 'createUpdateExtraShift']);
+    Route::get('/get-extra-staffs-by-group', [ExtraShiftController::class, 'getExtraStaffsByGroup']);
+    Route::post('/staff/change-gate', [StaffController::class, 'changeGate']);
+    Route::post('/delete-gate-shift', [ShiftAssignmentController::class, 'deleteGateShift']);
+    Route::get('/get-waiting-staffs', [ReportController::class, 'getWaitingList']);
+    Route::get('/get-staff-report', [ReportController::class, 'getStaffReport']);
+    Route::get('/get-ticket-report', [ReportController::class, 'getTicketReport']);
 });

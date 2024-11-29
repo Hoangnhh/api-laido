@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class TicketService
 {
-    private $baseUrl = 'http://103.183.113.201:7963';
+    private $baseUrl = 'http://api-test.invade.vn';
     
     /**
      * Gọi API sử dụng vé
@@ -23,11 +23,8 @@ class TicketService
             $encodedCode = base64_encode($code);
             
             // Gọi API
-            $response = Http::timeout(30)
-                ->get("{$this->baseUrl}/mobile/using-ticket", [
-                    'code' => $encodedCode,
-                    'device' => $device
-                ]);
+            $response = Http::timeout(10)
+                ->post("{$this->baseUrl}/mobile/using-ticket?code=".$encodedCode."&device=".$device, []);
 
             $responseData = $response->json();
 

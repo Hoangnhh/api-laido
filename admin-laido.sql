@@ -16,6 +16,7 @@ CREATE TABLE `admin-laido`.`staff` (
   `bank_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
   `vehical_size` INT NOT NULL DEFAULT 6,
+  `fcm_token` TEXT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
@@ -57,37 +58,45 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `name` VARCHAR(45) NULL,
   `status` VARCHAR(45) NULL DEFAULT 'CHECKIN',
   `date` DATE NOT NULL,
+  `issue_date` DATETIME NULL,
+  `expired_date` DATETIME NULL,
   `checkin_at` DATETIME NULL,
   `checkout_at` DATETIME NULL,
+  `checkin_by` VARCHAR(45) NULL,
+  `checkout_by` VARCHAR(45) NULL,
+  `is_checkout_with_other` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: Checkout bởi nhân viên chính\n1: Checkout bởi nhân viên khác',
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
-  `commisson` INT NOT NULL DEFAULT 0,
-  `shift_gate_staff_id` INT NULL AFTER `updated_at`,
-`staff_id` INT NOT NULL AFTER `shift_gate_staff_id`,
-`extra_shift_id` INT NULL AFTER `staff_id`,
+  `commission` INT NOT NULL DEFAULT 0,
+  `gate_staff_shift_id` INT NULL ,
+  `staff_id` INT NOT NULL,
+  `extra_shift_id` INT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`))
 COMMENT = 'Thông tin vé đã quét';
 
-CREATE TABLE `admin-laido`.`extra_shift` (
-  `id` INT NOT NULL,
-  `gate_id` INT NULL,
-  `date` DATE NOT NULL,
-  `staff_id` INT NOT NULL,
-  `checkin_at` DATETIME NULL DEFAULT NULL,
-  `checkout_at` DATETIME NULL DEFAULT NULL,
-  `status` VARCHAR(45) NOT NULL DEFAULT 'WAITING',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`));
+CREATE TABLE `extra_shift` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `staff_id` int DEFAULT '0',
+  `recheckin_times` int NOT NULL DEFAULT '0',
+  `recheckin_at` Text NULL,
+  `status` varchar(45) NOT NULL DEFAULT 'ACTIVE',
+  `create_by` varchar(45) NOT NULL,
+  `update_by` varchar(45) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `id` int NOT NULL AUTO_INCREMENT,
   `date` DATE DEFAULT NULL,
-  `gate_shift_id` int NOT NULL,
+  `gate_shift_id` int NOT NULL DEFAULT 0,
+  `extra_shift_id` int DEFAULT 0,
   `index` int NOT NULL,
-  `gate_id` varchar(45) NOT NULL,
+  `gate_id` varchar(45) NULL,
   `staff_id` varchar(45) NOT NULL,
   `status` varchar(45) NOT NULL DEFAULT 'WAITING',
   `checkin_at` datetime DEFAULT NULL,
@@ -107,3 +116,14 @@ CREATE TABLE `admin-laido`.`system_configs` (
   `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`))
 COMMENT = 'Lưu thông tin config của system';
+
+CREATE TABLE `admin-laido`.`action_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `action` VARCHAR(45) NOT NULL,
+  `table` VARCHAR(45) NULL,
+  `before_data` TEXT NULL,
+  `after_data` TEXT NULL,
+  `create_by` VARCHAR(45) NOT NULL,
+  `create_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+

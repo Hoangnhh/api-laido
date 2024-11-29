@@ -11,6 +11,7 @@ class GateStaffShift extends Model
     const STATUS_WAITING = 'WAITING';
     const STATUS_CHECKIN = 'CHECKIN'; 
     const STATUS_CHECKOUT = 'CHECKOUT';
+    const STATUS_DELETED = 'DELETED';
     protected $fillable = [
         'date',
         'gate_shift_id',
@@ -20,7 +21,7 @@ class GateStaffShift extends Model
         'status',
         'checkin_at',
         'checkout_at',
-        'checked_ticket_num'
+        'checked_ticket_num',
     ];
 
     protected $casts = [
@@ -87,5 +88,10 @@ class GateStaffShift extends Model
             return $this->checkout_at->diffInMinutes($this->checkin_at);
         }
         return null;
+    }
+
+    public function checkedTickets()
+    {
+        return $this->hasMany(CheckedTicket::class);
     }
 } 

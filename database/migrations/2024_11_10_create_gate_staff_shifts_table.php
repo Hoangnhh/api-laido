@@ -13,7 +13,7 @@ return new class extends Migration
             $table->dateTime('date')->nullable();
             $table->unsignedBigInteger('gate_shift_id');
             $table->integer('index');
-            $table->string('gate_id');
+            $table->string('gate_id')->nullable();
             $table->string('staff_id');
             $table->string('status')->default('WAITING');
             $table->dateTime('checkin_at')->nullable();

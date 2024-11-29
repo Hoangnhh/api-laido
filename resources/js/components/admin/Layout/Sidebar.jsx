@@ -17,7 +17,8 @@ import {
     faBars,
     faAngleLeft,
     faSpinner,
-    faDisplay
+    faDisplay,
+    faCircle
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -46,6 +47,11 @@ const Sidebar = () => {
             path: '/admin/queue-display'
         },
         { 
+            text: 'Màn hình Checkout', 
+            icon: faDisplay,
+            path: '/admin/checkout-screen'
+        },
+        { 
             text: 'Quản lý vị trí', 
             icon: faDesktop,
             path: '/admin/gate'
@@ -63,12 +69,12 @@ const Sidebar = () => {
             children: [
                 { 
                     text: 'Quản lý nhóm nhân viên', 
-                    icon: faUsers,
+                    icon: faCircle,
                     path: '/admin/staff-group'
                 },
                 { 
                     text: 'Quản lý nhân viên', 
-                    icon: faUser,
+                    icon: faCircle,
                     path: '/admin/staff'
                 },
             ]
@@ -80,14 +86,30 @@ const Sidebar = () => {
             children: [
                 {
                     text: 'Báo cáo thanh toán',
-                    icon: faFileInvoiceDollar,
+                    icon: faCircle,
                     path: '/admin/payment-report'
                 },
                 { 
-                    text: 'Danh sách vé sử dụng', 
-                    icon: faTicket,
-                    path: '/admin/tickets'
+                    text: 'Vé đã sử dụng', 
+                    icon: faCircle,
+                    path: '/admin/used-tickets-list-report'
+                },
+                { 
+                    text: 'Lái đò đang chờ', 
+                    icon: faCircle,
+                    path: '/admin/waiting-list-for-checkin-report'
+                },
+                { 
+                    text: 'Lái đò đang hoạt động', 
+                    icon: faCircle,
+                    path: '/admin/checkin-list-report'
+                },
+                { 
+                    text: 'Lái đò đã kết ca', 
+                    icon: faCircle,
+                    path: '/admin/checkout-list-report'
                 }
+
             ]
         },
         { 
@@ -228,6 +250,38 @@ const Sidebar = () => {
         }
     };
 
+    // Thêm hàm kiểm tra quyền truy cập
+    const hasPermission = (path) => {
+        if (!user) return false;
+        if (user.username === 'admin') return true;
+        return user.permission?.includes(path);
+    };
+
+    // Lọc và hiển thị menu items dựa trên quyền
+    const filteredMenuItems = menuItems.filter(item => {
+        if (user?.username === 'admin') return true;
+        if (item.children) {
+            // Lọc các submenu items có quyền truy cập
+            const allowedChildren = item.children.filter(child => 
+                hasPermission(child.path)
+            );
+            // Chỉ hiện menu cha nếu có ít nhất 1 menu con được phép truy cập
+            return allowedChildren.length > 0;
+        }
+        
+        return hasPermission(item.path);
+    }).map(item => {
+        if (item.children) {
+            return {
+                ...item,
+                children: item.children.filter(child => 
+                    user?.username === 'admin' || hasPermission(child.path)
+                )
+            };
+        }
+        return item;
+    });
+
     return (
         <>
             {isLoggingOut && <Loading message="Đang đăng xuất..." />}
@@ -265,7 +319,7 @@ const Sidebar = () => {
                     </button>
                 </div>
                 <nav className="sb-sidebar-menu">
-                    {menuItems.map((item) => (
+                    {filteredMenuItems.map((item) => (
                         item.children ? (
                             <div key={item.text} className="sb-menu-item-group">
                                 <div 

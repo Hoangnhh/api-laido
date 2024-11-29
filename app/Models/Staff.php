@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
+use App\Services\FirebaseService;
 
 class Staff extends Model
 {
@@ -30,7 +31,8 @@ class Staff extends Model
         'bank_account',
         'status',
         'vehical_size',
-        'phone'
+        'phone',
+        'fcm_token'
     ];
 
     protected $casts = [
@@ -61,5 +63,25 @@ class Staff extends Model
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(StaffNotification::class);
+    }
+
+    public function sendNotification($title, $body, $data = [])
+    {
+        $this->notifications()->create([
+            'title' => $title,
+            'body' => $body,
+            'data' => $data
+        ]);
+
+        if (!$this->fcm_token) {
+            return false;
+        }
+        $firebaseService = app(FirebaseService::class);
+        return $firebaseService->sendNotification($this->fcm_token, $title, $body, $data);
     }
 } 

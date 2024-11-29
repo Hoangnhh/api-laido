@@ -1,0 +1,49 @@
+.rp-container {
+    padding: 20px;
+    overflow: hidden;
+}
+
+.rp-header {
+    flex-shrink: 0;
+}
+
+.rp-data-grid {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+.rp-table {
+    margin-bottom: 0;
+}
+
+.table-responsive {
+    overflow-y: auto;
+}
+
+.rp-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+
+.rp-pagination {
+    margin-bottom: 0;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-primary {
+    color: #007bff !important;
+}

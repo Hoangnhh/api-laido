@@ -8,35 +8,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ExtraShift extends Model
 {
+    const STATUS_ACTIVE = 'ACTIVE';
+    const STATUS_INACTIVE = 'INACTIVE';
+
     protected $table = 'extra_shift';
 
     protected $fillable = [
-        'gate_id',
         'date',
         'staff_id',
-        'checkin_at',
-        'checkout_at',
-        'status'
+        'recheckin_times',
+        'recheckin_at',
+        'status',
+        'create_by',
+        'update_by'
     ];
 
     protected $casts = [
         'date' => 'date',
-        'checkin_at' => 'datetime',
-        'checkout_at' => 'datetime'
     ];
-
-    public function gate(): BelongsTo
-    {
-        return $this->belongsTo(Gate::class);
-    }
 
     public function staff(): BelongsTo
     {
         return $this->belongsTo(Staff::class);
     }
 
-    public function checkedTickets(): HasMany
-    {
-        return $this->hasMany(CheckedTicket::class);
-    }
 } 
