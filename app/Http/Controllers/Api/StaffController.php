@@ -177,6 +177,14 @@ class StaffController extends Controller
                         'paid' => $ticket->paid
                     ];
                 });
+            // Ẩn 4 số giữa của code vé
+            $tickets = $tickets->map(function($ticket) {
+                $code = $ticket['code'];
+                if (strlen($code) == 10) {
+                    $ticket['code'] = substr($code, 0, 3) . '****' . substr($code, 7);
+                }
+                return $ticket;
+            });
 
             return $this->successResponse([
                 'tickets' => $tickets,
