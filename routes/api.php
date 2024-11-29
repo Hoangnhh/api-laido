@@ -32,6 +32,7 @@ Route::group(['middleware' => ['api']], function () {
                 Route::get('get-dashboard-info', [StaffController::class, 'getDashboardInfo']);
                 Route::get('get-notification', [StaffController::class, 'getNotification']);
                 Route::get('read-notification', [StaffController::class, 'readNotification']);
+                Route::get('read-all-notification', [StaffController::class, 'readAllNotification']);
             });
 
             // Ticket routes

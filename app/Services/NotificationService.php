@@ -92,4 +92,8 @@ class NotificationService
     {
         StaffNotification::findOrFail($notificationId)->update(['read_at' => Carbon::now()]);
     }
+    public function readAllNotification(int $staffId): void
+    {
+        StaffNotification::where('staff_id', $staffId)->update(['read_at' => Carbon::now()]);
+    }
 } 
