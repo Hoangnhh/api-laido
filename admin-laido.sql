@@ -65,6 +65,7 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `checkin_by` VARCHAR(45) NULL,
   `checkout_by` VARCHAR(45) NULL,
   `is_checkout_with_other` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: Checkout bởi nhân viên chính\n1: Checkout bởi nhân viên khác',
+  `payment_id` INT NULL,
   `paid` TINYINT(1) NOT NULL DEFAULT 0,
   `price` VARCHAR(20) NOT NULL DEFAULT 0,
   `commission` INT NOT NULL DEFAULT 0,
@@ -125,5 +126,19 @@ CREATE TABLE `admin-laido`.`action_logs` (
   `after_data` TEXT NULL,
   `create_by` VARCHAR(45) NOT NULL,
   `create_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+
+CREATE TABLE `admin-laido`.`payment` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `staff_id` INT NOT NULL,
+  `date` DATETIME NOT NULL,
+  `amount` INT NOT NULL DEFAULT 0,
+  `received_account` VARCHAR(45) NULL,
+  `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
+  `transaction_code` VARCHAR(45) NULL,
+  `created_by` VARCHAR(45) NOT NULL,
+  `updated_by` VARCHAR(45) NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`));
 

@@ -23,6 +23,7 @@ class CheckedTicket extends Model
         'issue_date',
         'expired_date',
         'is_checkout_with_other',
+        'payment_id',
         'paid',
         'price',
         'commission',
@@ -55,5 +56,10 @@ class CheckedTicket extends Model
     public function gateStaffShift()
     {
         return $this->belongsTo(GateStaffShift::class, 'gate_staff_shift_id');
+    }
+
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 } 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('checkout_at')->nullable();
             $table->string('checkin_by', 45)->nullable();
             $table->string('checkout_by', 45)->nullable();
+            $table->foreignId('payment_id')->nullable();
             $table->boolean('paid')->default(false);
             $table->string('price', 20)->default('0');
             $table->integer('commisson')->default(0);
