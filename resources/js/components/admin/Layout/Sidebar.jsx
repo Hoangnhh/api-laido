@@ -5,20 +5,17 @@ import {
     faUsers,
     faCalendarAlt,
     faGear,
-    faTicket,
     faRightFromBracket,
     faDesktop,
-    faUser,
     faUserCircle,
     faChartLine,
-    faFileInvoiceDollar,
     faChevronDown,
     faChevronRight,
     faBars,
     faAngleLeft,
-    faSpinner,
     faDisplay,
-    faCircle
+    faCircle,
+    faMoneyBillWave
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -111,6 +108,11 @@ const Sidebar = () => {
                 }
 
             ]
+        },
+        { 
+            text: 'Thanh toán', 
+            icon: faMoneyBillWave,
+            path: '/admin/accounts-payable'
         },
         { 
             text: 'Cấu hình hệ thống', 

@@ -88,6 +88,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.used-tickets-list-report');
         })->name('admin.used-tickets-list-report');
 
+        Route::get('/accounts-payable', function () {
+            return view('admin.accounts-payable');
+        })->name('admin.accounts-payable');
+
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
             ->name('admin.staffs.toggle-status');

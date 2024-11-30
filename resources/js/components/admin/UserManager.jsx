@@ -95,6 +95,10 @@ const menuItems = [
         path: '/admin/checkin-list-report'
     },
     { 
+        text: 'Thanh toán', 
+        path: '/admin/accounts-payable'
+    },
+    { 
         text: 'Lái đò đã kết ca', 
         path: '/admin/checkout-list-report'
     }

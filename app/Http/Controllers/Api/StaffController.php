@@ -301,5 +301,50 @@ class StaffController extends Controller
         }
     }
 
+    public function getShiftReport(Request $request)
+    {
+        try {
+            $userId = $request->user_id;
+            $fromDate = $request->from_date ?? now()->toDateString();
+            $toDate = $request->to_date ?? $fromDate;
+
+            $shifts = GateStaffShift::with(['gate', 'checkedTickets'])
+                ->whereHas('gateShift', function($query) {
+                    $query->where('status', GateShift::STATUS_ACTIVE);
+                })
+                ->where('staff_id', $userId)
+                ->whereDate('date', '>=', $fromDate)
+                ->whereDate('date', '<=', $toDate)
+                ->orderBy('date', 'desc')
+                ->get()
+                ->map(function ($shift) {
+                    return [
+                        'id' => $shift->id,
+                        'staff_id' => $shift->staff_id,
+                        'gate_shift_id' => $shift->gate_shift_id,
+                        'index' => $shift->index,
+                        'status' => $shift->status,
+                        'gate_name' => $shift->gate->name,
+                        'date' => Carbon::parse($shift->gateShift->date)->format('d/m/Y'),
+                        'checked_tickets' => $shift->checked_ticket_num,
+                        'total_commission' => $shift->checkedTickets->sum('commission'),
+                        'checkin_at' => $shift->checkin_at ? Carbon::parse($shift->checkin_at)->format('d/m/Y H:i') : null,
+                        'checkout_at' => $shift->checkout_at ? Carbon::parse($shift->checkout_at)->format('d/m/Y H:i') : null,
+                        'created_at' => Carbon::parse($shift->created_at)->format('d/m/Y H:i'),
+                        'updated_at' => Carbon::parse($shift->updated_at)->format('d/m/Y H:i')
+                    ];
+                });
+
+            return $this->successResponse([
+                'shifts' => $shifts,
+                'total' => $shifts->count()
+            ], 'Lấy danh sách ca làm việc thành công');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+    
+
     
 } 
