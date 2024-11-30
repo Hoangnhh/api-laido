@@ -133,6 +133,7 @@ CREATE TABLE `admin-laido`.`payment` (
   `staff_id` INT NOT NULL,
   `date` DATETIME NOT NULL,
   `amount` INT NOT NULL DEFAULT 0,
+  `payment_method` VARCHAR(45) NOT NULL DEFAULT 'BANK_TRANSFER',
   `received_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
   `transaction_code` VARCHAR(45) NULL,

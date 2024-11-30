@@ -13,6 +13,7 @@ class Payment extends Model
         'date',
         'amount',
         'received_account',
+        'payment_method',
         'status',
         'transaction_code',
         'created_by',
@@ -25,6 +26,9 @@ class Payment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+    // Định nghĩa phương thức thanh toán
+    const PAYMENT_METHOD_BANK_TRANSFER = 'BANK_TRANSFER';
+    const PAYMENT_METHOD_CASH = 'CASH';
 
     // Định nghĩa các trạng thái
     const STATUS_ACTIVE = 'ACTIVE';

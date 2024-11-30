@@ -14,6 +14,7 @@ return new class extends Migration
             $table->dateTime('date');
             $table->integer('amount')->default(0);
             $table->string('received_account', 45)->nullable();
+            $table->string('payment_method', 45)->default('BANK_TRANSFER');
             $table->string('status', 45)->default('ACTIVE');
             $table->string('transaction_code', 45)->nullable();
             $table->string('created_by', 45);
