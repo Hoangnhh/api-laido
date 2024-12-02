@@ -14,6 +14,7 @@ class Payment extends Model
         'amount',
         'received_account',
         'payment_method',
+        'note',
         'status',
         'transaction_code',
         'created_by',

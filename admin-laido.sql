@@ -136,6 +136,7 @@ CREATE TABLE `admin-laido`.`payment` (
   `payment_method` VARCHAR(45) NOT NULL DEFAULT 'BANK_TRANSFER',
   `received_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
+  `note` TEXT NULL,
   `transaction_code` VARCHAR(45) NULL,
   `created_by` VARCHAR(45) NOT NULL,
   `updated_by` VARCHAR(45) NULL,
