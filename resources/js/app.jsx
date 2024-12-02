@@ -20,7 +20,7 @@ import AddShiftGate from './components/admin/AddShiftGate';
 import QueueDisplay from './components/admin/QueueDisplay';
 import CheckoutScreen from './components/admin/CheckoutScreen';
 import AddExtraShift from './components/admin/AddExtraShift';
-import AccountsPayable from './components/admin/AccountsPayable';
+import StaffPayment from './components/admin/StaffPayment';
 const theme = createTheme({
     palette: {
         primary: {
@@ -72,7 +72,7 @@ const App = () => {
             case '/admin/used-tickets-list-report':
                 return <UsedTicketsListReport />;
             case '/admin/accounts-payable':
-                return <AccountsPayable />;
+                return <StaffPayment />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

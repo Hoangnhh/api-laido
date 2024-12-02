@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\GateController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 use App\Http\Controllers\Admin\SystemConfigController;
 use App\Http\Controllers\Admin\ExtraShiftController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -144,4 +145,6 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-waiting-staffs', [ReportController::class, 'getWaitingList']);
     Route::get('/get-staff-report', [ReportController::class, 'getStaffReport']);
     Route::get('/get-ticket-report', [ReportController::class, 'getTicketReport']);
+    Route::get('/get-staff-payments', [PaymentController::class, 'getStaffPayments']);
+    Route::get('/get-payment-summary', [PaymentController::class, 'getPaymentSummary']);
 });

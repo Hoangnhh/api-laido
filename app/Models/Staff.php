@@ -84,4 +84,9 @@ class Staff extends Model
         $firebaseService = app(FirebaseService::class);
         return $firebaseService->sendNotification($this->fcm_token, $title, $body, $data);
     }
+
+    public function payment(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 } 

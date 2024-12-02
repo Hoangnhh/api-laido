@@ -1,0 +1,42 @@
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+}
+
+.summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.summary-item {
+    flex: 1;
+    padding: 10px;
+    margin: 0 5px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.summary-item:nth-child(1) {
+    background-color: #e0f7fa; /* Màu xanh nhạt */
+}
+
+.summary-item:nth-child(2) {
+    background-color: #e8f5e9; /* Màu xanh lá nhạt */
+}
+
+.summary-item:nth-child(3) {
+    background-color: #fff3e0; /* Màu cam nhạt */
+}
+
+.text-success {
+    color: green;
+}
+
+.text-danger {
+    color: red;
+}

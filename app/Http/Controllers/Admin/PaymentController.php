@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\CheckedTicket;
-use App\Models\GateStaffShift;
+use Illuminate\Support\Facades\DB;
 use App\Models\Staff;
 use App\Models\Payment;
 
@@ -16,43 +15,59 @@ class PaymentController extends Controller
         try {
             $perPage = $request->input('per_page', 10);
             $search = $request->input('search', '');
+            $status = $request->input('status', null);
 
             $staffs = Staff::query()
-                ->with(['checkedTickets', 'payments'])
+                ->with(['checkedTickets', 'payment'])
                 ->where(function($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('code', 'like', "%{$search}%")
                         ->orWhere('phone', 'like', "%{$search}%");
                 })
                 ->where('status', Staff::STATUS_ACTIVE)
+                ->when($status === 'pending', function($query) {
+                    $query->whereHas('checkedTickets', function($query) {
+                        $query->where('paid', false);
+                    });
+                })
+                ->when($status === 'paid', function($query) {
+                    $query->whereHas('payment', function($query) {
+                        $query->where('status', Payment::STATUS_ACTIVE);
+                    })->whereDoesntHave('checkedTickets', function($query) {
+                        $query->where('paid', false);
+                    });
+                })
+                ->withCount([
+                    'checkedTickets as total_commission' => function($query) {
+                        $query->select(DB::raw('COALESCE(SUM(commission), 0)'))
+                              ->where('paid', false);
+                    },
+                    'payment as total_paid' => function($query) {
+                        $query->select(DB::raw('COALESCE(SUM(amount), 0)'))
+                              ->where('status', Payment::STATUS_ACTIVE);
+                    }
+                ])
+                ->having('total_commission', '>', 0)
                 ->orderBy('code', 'asc')
-                ->withCount(['checkedTickets as total_commission' => function($query) {
-                    $query->select(\DB::raw('COALESCE(SUM(commission), 0)'));
-                }])
-                ->withCount(['payments as total_paid' => function($query) {
-                    $query->select(\DB::raw('COALESCE(SUM(amount), 0)'))
-                        ->where('status', Payment::STATUS_ACTIVE);
-                }])
                 ->paginate($perPage);
 
-            $staffs->getCollection()->transform(function ($staff) {
-                return [
-                    'id' => $staff->id,
-                    'code' => $staff->code,
-                    'name' => $staff->name,
-                    'phone' => $staff->phone,
-                    'bank_name' => $staff->bank_name,
-                    'bank_account' => $staff->bank_account,
-                    'total_commission' => $staff->total_commission,
-                    'total_paid' => $staff->total_paid,
-                    'remaining_balance' => $staff->total_commission - $staff->total_paid
-                ];
-            });
+            $data = $staffs->toArray();
+            $currentPage = $staffs->currentPage();
+            $lastPage = $staffs->lastPage();
+            $total = $staffs->total();
+            if (isset($data['data'])) {
+                $data = $data['data'];
+            } else {
+                $data = [];
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách thành công',
-                'data' => $staffs
+                'data' => $data,
+                'current_page' => $currentPage,
+                'last_page' => $lastPage,
+                'total' => $total
             ]);
 
         } catch (\Exception $e) {
@@ -61,5 +76,29 @@ class PaymentController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getPaymentSummary()
+    {
+        $totalPaid = Payment::where('status', Payment::STATUS_ACTIVE)
+            ->sum('amount');
+
+        $totalUnpaid = Staff::with(['checkedTickets' => function($query) {
+            $query->where('paid', false);
+        }])->get()->sum(function($staff) {
+            return $staff->checkedTickets->sum('commission');
+        });
+
+        $totalUnpaidNum = Staff::with(['checkedTickets' => function($query) {
+            $query->where('paid', false);
+        }])->get()->sum(function($staff) {
+            return $staff->checkedTickets->count();
+        });
+
+        return response()->json([
+            'total_paid' => $totalPaid,
+            'total_unpaid' => $totalUnpaid,
+            'total_unpaid_num' => $totalUnpaidNum
+        ]);
     }
 } 
