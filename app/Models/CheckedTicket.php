@@ -62,4 +62,14 @@ class CheckedTicket extends Model
     {
         return $this->belongsTo(Payment::class);
     }
+
+    public function checkinBy(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'checkin_by');
+    }
+
+    public function checkoutBy(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'checkout_by');
+    }
 } 

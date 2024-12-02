@@ -4,6 +4,7 @@ import { Card, Row, Col, Form, Button, Table, Pagination } from 'react-bootstrap
 import axios from 'axios';
 import '../../../css/StaffPayment.css';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
+import PaymentPopup from './popup/PaymentPopup'; // Import component mới
 
 const StaffPayment = () => {
     const [filters, setFilters] = useState({
@@ -21,10 +22,16 @@ const StaffPayment = () => {
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const [totalItems, setTotalItems] = useState(0);
     const pageSizeOptions = [20,50, 100,200];
+    const [showPopup, setShowPopup] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
 
     useEffect(() => {
         fetchSummary();
     }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [filters.payment_status]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -156,9 +163,19 @@ const StaffPayment = () => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     };
 
+    const handleShowPopup = (item) => {
+        setSelectedItem(item);
+        setShowPopup(true);
+    };
+
+    const handleClosePopup = () => {
+        setShowPopup(false);
+        setSelectedItem(null);
+    };
+
     return (
         <AdminLayout>
-            <div className="sp-container d-flex flex-column vh-100">
+            <div className="sp-container d-flex flex-column">
                 <div className="sp-header mb-3">
                     <Row className="align-items-center">
                         <Col>
@@ -183,7 +200,7 @@ const StaffPayment = () => {
                                     type="text"
                                     value={filters.search}
                                     onChange={(e) => setFilters({...filters, search: e.target.value})}
-                                    placeholder="Tìm kiếm theo tên"
+                                    placeholder="Tìm kiếm"
                                 />
                             </Form.Group>
                         </Col>
@@ -223,6 +240,7 @@ const StaffPayment = () => {
                                                 <th>Tên NV</th>
                                                 <th>CCCD</th>
                                                 <th>Số tài khoản</th>
+                                                <th>SL Vé</th>
                                                 <th>Tổng tiền</th>
                                                 <th>Đã thanh toán</th>
                                                 <th>Chưa thanh toán</th>
@@ -244,20 +262,25 @@ const StaffPayment = () => {
                                                         <td>{item.name}</td>
                                                         <td className="text-center">{item.card_id}</td>
                                                         <td>{item.bank_account} {item.bank_name}</td>
-                                                        <td className={`text-center ${totalCommission > 0 ? 'text-success' : 'text-danger'}`}>
+                                                        <td className="text-center">{item.checked_tickets.length}</td>
+                                                        <td className={`text-right ${totalCommission > 0 ? 'text-success' : 'text-danger'}`}>
                                                             {formatCurrency(totalCommission)}
                                                         </td>
-                                                        <td className={`text-center ${totalPaid > 0 ? 'text-success' : 'text-danger'}`}>
+                                                        <td className={`text-right ${totalPaid > 0 ? 'text-success' : 'text-danger'}`}>
                                                             {formatCurrency(totalPaid)}
                                                         </td>
-                                                        <td className={`text-center ${unpaid > 0 ? 'text-danger' : 'text-success'}`}>
+                                                        <td className={`text-right ${unpaid > 0 ? 'text-danger' : 'text-success'}`}>
                                                             {formatCurrency(unpaid)}
                                                         </td>
                                                         <td className={`text-center ${status === 'Đã thanh toán' ? 'text-success' : 'text-danger'}`}>
                                                             {status}
                                                         </td>
                                                         <td className="text-center">
-                                                            <Button variant="success" size="sm">
+                                                            <Button 
+                                                                variant="success" 
+                                                                size="sm" 
+                                                                onClick={() => handleShowPopup(item)}
+                                                            >
                                                                 <FaMoneyCheckAlt />
                                                             </Button>
                                                         </td>
@@ -298,6 +321,15 @@ const StaffPayment = () => {
                     </Card.Body>
                 </Card>
             </div>
+            {selectedItem && (
+                <PaymentPopup 
+                    show={showPopup} 
+                    onClose={handleClosePopup} 
+                    checkedTickets={selectedItem.checked_tickets} 
+                    payment={selectedItem.payment}
+                    info={selectedItem}
+                />
+            )}
         </AdminLayout>
     );
 };
