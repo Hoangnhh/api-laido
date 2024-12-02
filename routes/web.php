@@ -149,4 +149,5 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-payment-summary', [PaymentController::class, 'getPaymentSummary']);
     Route::post('/get-checked-tickets-by-staff', [PaymentController::class, 'getCheckedTicketsByStaff']);
     Route::post('/get-staff-payment', [PaymentController::class, 'getStaffPayment']);
+    Route::post('/create-payment', [PaymentController::class, 'createPayment']);
 });

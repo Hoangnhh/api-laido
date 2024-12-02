@@ -40,8 +40,3 @@
 .text-danger {
     color: red;
 }
-
-.sp-data-grid {
-    max-height: 80vh !important; /* Chiều cao tối đa là 95% của chiều cao viewport */
-    overflow-y: auto;
-}

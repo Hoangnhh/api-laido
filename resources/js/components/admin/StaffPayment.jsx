@@ -252,8 +252,8 @@ const StaffPayment = () => {
                                             {data.map((item, index) => {
                                                 const totalCommission = parseFloat(item.total_commission || 0);
                                                 const totalPaid = parseFloat(item.total_paid || 0);
-                                                const unpaid = totalCommission - totalPaid;
-                                                const status = totalPaid >= totalCommission ? 'Đã thanh toán' : 'Chưa thanh toán';
+                                                const total = totalCommission + totalPaid;
+                                                const status = totalCommission == 0 ? 'Đã thanh toán' : 'Chưa thanh toán';
 
                                                 return (
                                                     <tr key={index}>
@@ -262,15 +262,15 @@ const StaffPayment = () => {
                                                         <td>{item.name}</td>
                                                         <td className="text-center">{item.card_id}</td>
                                                         <td>{item.bank_account} {item.bank_name}</td>
-                                                        <td className="text-center">{item.checked_tickets.length}</td>
-                                                        <td className={`text-right ${totalCommission > 0 ? 'text-success' : 'text-danger'}`}>
-                                                            {formatCurrency(totalCommission)}
+                                                        <td className="text-center">{item.checked_ticket_count}</td>
+                                                        <td className={`text-right ${total > 0 ? 'text-success' : 'text-danger'}`}>
+                                                            {formatCurrency(total)}
                                                         </td>
                                                         <td className={`text-right ${totalPaid > 0 ? 'text-success' : 'text-danger'}`}>
                                                             {formatCurrency(totalPaid)}
                                                         </td>
-                                                        <td className={`text-right ${unpaid > 0 ? 'text-danger' : 'text-success'}`}>
-                                                            {formatCurrency(unpaid)}
+                                                        <td className={`text-right ${totalCommission > 0 ? 'text-danger' : 'text-success'}`}>
+                                                            {formatCurrency(totalCommission)}
                                                         </td>
                                                         <td className={`text-center ${status === 'Đã thanh toán' ? 'text-success' : 'text-danger'}`}>
                                                             {status}
@@ -325,8 +325,6 @@ const StaffPayment = () => {
                 <PaymentPopup 
                     show={showPopup} 
                     onClose={handleClosePopup} 
-                    checkedTickets={selectedItem.checked_tickets} 
-                    payment={selectedItem.payment}
                     info={selectedItem}
                 />
             )}

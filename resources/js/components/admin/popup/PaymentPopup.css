@@ -1,0 +1,234 @@
+.ppopup-modal .modal-header {
+    display: none;
+}
+
+.ppopup-tab-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.ppopup-tab-container .nav-tabs {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.ppopup-close-button {
+    padding: 6px 12px;
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.ppopup-payment-info {
+    min-width: 300px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.ppopup-payment-info h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #343a40;
+}
+
+.ppopup-payment-info p {
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.ppopup-payment-info .form-group {
+    margin-bottom: 15px;
+}
+
+.ppopup-payment-info .form-control,
+.ppopup-payment-info .form-select {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s ease;
+}
+
+.ppopup-payment-info .form-control:focus,
+.ppopup-payment-info .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.ppopup-filters-container {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.ppopup-filters-container .form-label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.ppopup-filters-container .form-control,
+.ppopup-filters-container .form-select {
+    font-size: 14px;
+    padding: 6px 12px;
+}
+
+.ppopup-text-success {
+    color: #198754;
+}
+
+.ppopup-text-danger {
+    color: #dc3545;
+}
+
+.ppopup-text-muted {
+    color: #6c757d !important;
+}
+
+.ppopup-small {
+    font-size: 85%;
+}
+
+table td {
+    vertical-align: middle;
+}
+
+tr[style*="default"] {
+    background-color: #f8f9fa;
+}
+
+tr[style*="default"]:hover {
+    background-color: #f8f9fa !important;
+}
+
+.ppopup-loading-container {
+    padding: 40px;
+    text-align: center;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.ppopup-loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 15px;
+}
+
+.ppopup-no-data-container {
+    padding: 40px;
+    text-align: center;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.ppopup-no-data-icon {
+    font-size: 40px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.ppopup-no-data-message {
+    color: #6c757d;
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+.ppopup-filters-container .btn {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ppopup-filters-container .form-group {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ppopup-payment-actions {
+    margin-top: 20px;
+}
+
+.ppopup-success-message {
+    padding: 10px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;
+    text-align: center;
+    font-size: 14px;
+    animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.ppopup-table-container {
+    max-height: 80vh;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.ppopup-table-wrapper {
+    overflow-y: auto;
+    max-height: calc(80vh - 45px); /* 45px là chiều cao của header */
+}
+
+.ppopup-table {
+    margin-bottom: 0;
+    border: none;
+}
+
+.ppopup-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.ppopup-table tbody tr:first-child td {
+    border-top: none;
+}
+
+/* Đảm bảo border của header không bị mất khi scroll */
+.ppopup-table thead th::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.ppopup-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #495057;
+    border: none;
+    background: none;
+    transition: background-color 0.3s ease;
+}
+
+.ppopup-tabs .nav-link.active {
+    background-color: #e9ecef;
+    border-radius: 4px;
+    color: #007bff;
+}
+
+.ppopup-tabs .nav-link:hover {
+    background-color: #f8f9fa;
+}
