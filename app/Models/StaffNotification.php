@@ -12,12 +12,14 @@ class StaffNotification extends Model
         'title',
         'body',
         'data',
-        'read_at'
+        'read_at',
+        'token'
     ];
 
     protected $casts = [
         'data' => 'array',
-        'read_at' => 'datetime'
+        'read_at' => 'datetime',
+        'token' => 'string'
     ];
 
     public function staff(): BelongsTo
