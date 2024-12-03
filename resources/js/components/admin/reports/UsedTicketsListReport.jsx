@@ -148,21 +148,11 @@ const UsedTicketsListReport = () => {
 
     const getStatusStyle = (status, checkoutTime) => {
         if (status === 'CHECKOUT') {
-            return 'text-center text-success'; // Đã checkout - màu xanh
+            return 'text-center text-success';
         }
         
         if (status === 'CHECKIN') {
-            const now = new Date();
-            const checkinTime = new Date(checkoutTime);
-            const diffHours = Math.abs(now - checkinTime) / 36e5; // Chuyển đổi thành giờ
-            
-            if (diffHours > 24) {
-                return 'text-center text-danger'; // Quá 24h - màu đỏ
-            }
-            if (diffHours > 12) {
-                return 'text-center text-warning'; // Quá 12h - màu vàng
-            }
-            return 'text-center text-primary'; // Dưới 12h - màu xanh dương
+            return 'text-center text-primary'; 
         }
         
         return 'text-center'; // Mặc định
