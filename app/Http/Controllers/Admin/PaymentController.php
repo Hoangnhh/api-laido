@@ -10,9 +10,13 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Staff;
 use App\Models\Payment;
 use Carbon\Carbon;
-
+use App\Services\NotificationService;
 class PaymentController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function getStaffPayments(Request $request)
     {
         try {
@@ -122,7 +126,7 @@ class PaymentController extends Controller
             if ($status != "") {
                 $checkedTickets->where('paid', $status == '1');
             }
-            
+
             if ($search != "") {
                 $checkedTickets->where('code', 'like', "%{$search}%");
             }
@@ -312,6 +316,8 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id
             ]);
             DB::commit();
+
+            $this->notificationService->pushPaymentNoti($payment->id);
 
             return response()->json([
                 'success' => true,

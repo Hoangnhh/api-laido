@@ -6,6 +6,7 @@ use App\Models\GateShift;
 use App\Models\Staff;
 use App\Enums\NotificationContent;
 use App\Models\GateStaffShift;
+use App\Models\Payment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\StaffNotification;
@@ -47,6 +48,50 @@ class NotificationService
             );
         }
     }
+    public function pushPaymentNoti(int $paymentId): void
+    {
+        try {
+            $payment = Payment::findOrFail($paymentId);
+            $ticketCount = $payment->checkedTickets()->count();
+            
+            $type = NotificationContent::NEW_PAYMENT;   
+            $paymentMethod = match($payment->payment_method) {
+                Payment::PAYMENT_METHOD_CASH => 'Tiền mặt',
+                Payment::PAYMENT_METHOD_BANK_TRANSFER => 'Chuyển khoản',
+            };
+            $params = [
+                'code' => $payment->code,
+                'amount' => $payment->amount,
+                'ticket_count' => $ticketCount,
+                'payment_method' => $paymentMethod
+            ];
+
+            $payment->staff->sendNotification(
+                $type->getTitle(),
+                $type->getBody($params)
+            );
+        } catch (\Exception $e) {
+            Log::error('Error pushing shift notification: ' . $e->getMessage());
+        }
+    }
+
+    public function pushPaymentCancelNoti(int $paymentId): void
+    {
+        try {
+            $payment = Payment::findOrFail($paymentId);
+            $type = NotificationContent::PAYMENT_CANCELLED;
+            $params = [
+                'code' => $payment->code
+            ];
+
+            $payment->staff->sendNotification(
+                $type->getTitle(),
+                $type->getBody($params)
+            );
+        } catch (\Exception $e) {
+            Log::error('Error pushing payment cancel notification: ' . $e->getMessage());
+        }
+    }
 
     public function pushShiftNotiForMultiple(array $gateStaffShiftIds): void
     {
@@ -73,6 +118,7 @@ class NotificationService
             'index' => $gateStaffShift->index
         ];
     }
+    
 
     public function getNotification(int $staffId, int $perPage = 10, int $page = 1)
     {
