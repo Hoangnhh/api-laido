@@ -193,10 +193,34 @@ class PaymentController extends Controller
                 $payment['date'] = Carbon::parse($payment['date'])->format('d/m/Y');
                 
                 // Lấy danh sách checked_ticket cho payment này
-                $checkedTickets = CheckedTicket::where('payment_id', $payment['id'])->get()->toArray();
-                foreach ($checkedTickets as &$ticket) {
-                    $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
-                }
+                // Lấy thông tin staff
+                $staff = Staff::find($payment['staff_id']);
+                
+                // Lấy danh sách vé đã check và xác định hướng di chuyển
+                $checkedTickets = CheckedTicket::where('payment_id', $payment['id'])
+                    ->get()
+                    ->map(function($ticket) use ($staff) {
+                        $ticket = $ticket->toArray();
+                        $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
+                        
+                        // Xác định chiều vé dựa trên người check
+                        $isCheckinByStaff = isset($ticket['checkin_by']) && $ticket['checkin_by'] === $staff->username;
+                        $isCheckoutByStaff = isset($ticket['checkout_by']) && $ticket['checkout_by'] === $staff->username;
+                        
+                        if ($isCheckinByStaff && $isCheckoutByStaff) {
+                            $ticket['direction'] = '2 Chiều';
+                        } elseif ($isCheckinByStaff) {
+                            $ticket['direction'] = 'Chiều vào';
+                        } elseif ($isCheckoutByStaff) {
+                            $ticket['direction'] = 'Chiều ra';
+                        } else {
+                            $ticket['direction'] = 'Không xác định';
+                        }
+                        
+                        return $ticket;
+                    })
+                    ->toArray();
+                    
                 $payment['checked_tickets'] = $checkedTickets;
             }
 
