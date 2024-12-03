@@ -116,6 +116,8 @@ class TicketController extends Controller
                     $createdCheckedTicket = CheckedTicket::create([
                         'code' => $ticketData['code'],
                         'name' => $ticketData['service_name'], 
+                        'issue_date' => $ticketData['issue_date'],
+                        'expired_date' => $ticketData['expired_date'],
                         'status' => CheckedTicket::STATUS_CHECKIN,
                         'date' => Carbon::now(),
                         'checkin_at' => Carbon::now(),
@@ -158,38 +160,28 @@ class TicketController extends Controller
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($existingTicket->name);
 
-                // trường hợp checkout bởi chính nhân viên đã checkin
-                if($existingTicket->checkin_by == $request->username) {
-                    // Cập nhật thông tin checkout và commission
-                    $existingTicket->update([
-                        'status' => CheckedTicket::STATUS_CHECKOUT,
-                        'checkout_at' => Carbon::now(),
-                        'commission' => $existingTicket->commission + $commission,
-                        'checkout_by' => $request->username
-                    ]);
-                    return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
-                }else{
+                // Kiểm tra nhân viên có đang trong ca active và đã checkin chưa
+                $activeAssignment = GateStaffShift::where('staff_id', $staffId)
+                    ->where('status', GateStaffShift::STATUS_CHECKIN)
+                    ->first();
+                
+                if(!$activeAssignment) {
+                    return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
+                }
 
-                    // Kiểm tra nhân viên có đang trong ca active và đã checkin chưa
-                    $activeAssignment = GateStaffShift::where('staff_id', $staffId)
-                        ->where('status', GateStaffShift::STATUS_CHECKIN)
-                        ->first();
-                    
-                    if(!$activeAssignment) {
-                        return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
-                    }
-                    // Cập nhật thông tin checkout và commission
-                    $existingTicket->update([
-                        'status' => CheckedTicket::STATUS_CHECKOUT,
-                        'is_checkout_with_other' => 1,
-                        'checkout_at' => Carbon::now(),
-                        'checkout_by' => $request->username,
-                    ]);
+                // Cập nhật thông tin checkout cho vé hiện tại
+                $existingTicket->update([
+                    'status' => CheckedTicket::STATUS_CHECKOUT,
+                    'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
+                    'checkout_at' => Carbon::now(),
+                    'checkout_by' => $request->username,
+                ]);
 
-                    // Trường hợp checkout bởi nhân viên khác
+                // Nếu vé đã thanh toán hoặc người checkout khác người checkin thì tạo vé mới
+                if($existingTicket->paid || $existingTicket->checkin_by != $request->username) {
                     $createdCheckedTicket = CheckedTicket::create([
                         'code' => $request->code,
-                        'name' => $existingTicket->name, 
+                        'name' => $existingTicket->name,
                         'status' => CheckedTicket::STATUS_CHECKOUT,
                         'date' => Carbon::now(),
                         'checkin_at' => $existingTicket->checkin_at,
@@ -201,10 +193,17 @@ class TicketController extends Controller
                         'staff_id' => $staffId,
                         'gate_staff_shift_id' => $activeAssignment->id,
                         'paid' => false,
-                        'is_checkout_with_other' => 1
+                        'is_checkout_with_other' => $existingTicket->checkin_by != $request->username
                     ]);
+
                     return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
                 }
+
+                // Trường hợp checkout bởi chính nhân viên đã checkin và vé chưa thanh toán
+                $existingTicket->increment('commission', $commission);
+                return $this->successResponse($existingTicket->toArray(), 'Checkout thành công');
+
+                
             } else {
                 return $this->errorResponse('Vé đã được sử dụng');
             }
