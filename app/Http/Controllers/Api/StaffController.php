@@ -11,6 +11,7 @@ use App\Models\GateShift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\CheckedTicket;
+use App\Models\Payment;
 use App\Models\SystemConfig;
 use App\Services\NotificationService;
 
@@ -221,11 +222,20 @@ class StaffController extends Controller
             // Tổng tiền còn lại chưa thanh toán
             $totalRemaining = $totalCommission - $totalPaid;
 
+            // Lấy danh sách thanh toán trong khoảng thời gian
+            $payments = Payment::where('staff_id', $userId)
+                ->whereDate('date', '>=', $fromDate)
+                ->whereDate('date', '<=', $toDate)
+                ->where('status', Payment::STATUS_ACTIVE)
+                ->orderBy('date', 'desc')
+                ->get();
+
             return $this->successResponse([
                 'total_tickets' => $totalTickets,
                 'total_commission' => $totalCommission,
                 'total_paid' => $totalPaid,
-                'total_remaining' => $totalRemaining
+                'total_remaining' => $totalRemaining,
+                'payments' => $payments->toArray()
             ], 'Lấy thông tin dashboard thành công');
 
         } catch (\Exception $e) {
