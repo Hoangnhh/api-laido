@@ -36,7 +36,7 @@ enum NotificationContent: string
             self::NEW_PAYMENT => sprintf(
                 'Mã thanh toán %s với thông tin: Tổng số tiền %s, Cho %s vé bằng hình thức %s',
                 $params['code'] ?? '',
-                $params['amount'] ?? '',
+                number_format($params['amount'] ?? 0, 0, ',', '.'),
                 $params['ticket_count'] ?? '',
                 $params['payment_method'] ?? ''
             ),
