@@ -11,6 +11,8 @@ use App\Models\Staff;
 use App\Models\Payment;
 use Carbon\Carbon;
 use App\Services\NotificationService;
+use App\Models\ActionLog;
+
 class PaymentController extends Controller
 {
     public function __construct(
@@ -187,6 +189,7 @@ class PaymentController extends Controller
             $toDate = date('Y-m-d 23:59:59', strtotime($toDate));
 
             $payments = Payment::where('staff_id', $staffId)
+                ->where('status', Payment::STATUS_ACTIVE)
                 ->whereBetween('created_at', [$fromDate, $toDate])
                 ->when($paymentMethod != "", function($query) use ($paymentMethod) {
                     $query->where('payment_method', $paymentMethod);
@@ -324,6 +327,58 @@ class PaymentController extends Controller
                 'message' => 'Tạo thanh toán thành công',
                 'data' => $payment
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deletePayment(Request $request)
+    {
+        $paymentId = $request->input('payment_id');
+        $reason = $request->input('reason');
+
+        try {
+            $payment = Payment::find($paymentId);
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thanh toán'
+                ], 404);
+            }
+
+            DB::beginTransaction();
+
+            ActionLog::create([
+                'action' => ActionLog::ACTION_DELETE,
+                'table' => 'payment',
+                'before_data' => $payment->toArray(),
+                'after_data' => null,
+                'create_by' => Auth::user()->username
+            ]);
+
+            CheckedTicket::where('payment_id', $payment->id)->update([
+                'paid' => false,
+                'payment_id' => null
+            ]);
+
+            $payment->update([
+                'status' => Payment::STATUS_INACTIVE,
+                'delete_reason' => $reason,
+                'updated_by' => Auth::user()->username
+            ]);
+
+            DB::commit();
+
+            $this->notificationService->pushPaymentCancelNoti($payment->id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa thanh toán thành công'
+            ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

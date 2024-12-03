@@ -81,7 +81,7 @@ class NotificationService
             $payment = Payment::findOrFail($paymentId);
             $type = NotificationContent::PAYMENT_CANCELLED;
             $params = [
-                'code' => $payment->code
+                'code' => $payment->transaction_code
             ];
 
             $payment->staff->sendNotification(

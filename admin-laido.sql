@@ -138,6 +138,7 @@ CREATE TABLE `admin-laido`.`payment` (
   `received_account` VARCHAR(45) NULL,
   `status` VARCHAR(45) NOT NULL DEFAULT 'ACTIVE',
   `note` TEXT NULL,
+  `delete_reason` TEXT NULL,
   `transaction_code` VARCHAR(45) NULL,
   `created_by` VARCHAR(45) NOT NULL,
   `updated_by` VARCHAR(45) NULL,

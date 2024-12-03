@@ -246,3 +246,14 @@ tr[style*="default"]:hover {
 .ppopup-tabs {
     margin-bottom: 0;
 }
+
+/* Thêm khoảng cách giữa các button */
+.ppopup-table td.text-center .btn {
+    margin-right: 5px;  /* Khoảng cách giữa các button */
+    display: inline-block;  /* Hiển thị inline */
+}
+
+/* Button cuối cùng không cần margin-right */
+.ppopup-table td.text-center .btn:last-child {
+    margin-right: 0;
+}

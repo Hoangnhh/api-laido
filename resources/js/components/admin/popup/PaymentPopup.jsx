@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Tabs, Tab, Table, Card, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faEye,faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import './PaymentPopup.css';
 import axios from 'axios';
 
@@ -54,6 +54,9 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [showTicketDetails, setShowTicketDetails] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteReason, setDeleteReason] = useState('');
+    const [selectedPaymentForDelete, setSelectedPaymentForDelete] = useState(null);
 
     useEffect(() => {
         if (show && info?.id) {
@@ -209,6 +212,41 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
         setShowTicketDetails(false);
     };
 
+    const handleShowDeleteModal = (payment) => {
+        setSelectedPaymentForDelete(payment);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setSelectedPaymentForDelete(null);
+        setDeleteReason('');
+        setShowDeleteModal(false);
+    };
+
+    const handleDeletePayment = async () => {
+        if (!deleteReason.trim()) {
+            alert('Vui lòng nhập lý do xóa.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('/api/admin/delete-payment', {
+                payment_id: selectedPaymentForDelete.id,
+                reason: deleteReason
+            });
+
+            if (response.data.success) {
+                setShowDeleteModal(false);
+                fetchPaymentHistory(); // Refresh danh sách lịch sử thanh toán
+            } else {
+                alert('Có lỗi xảy ra khi xóa thanh toán.');
+            }
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+            alert('Có lỗi xảy ra khi xóa thanh toán.');
+        }
+    };
+
     const TicketDetailsModal = () => {
         if (!selectedPayment) return null;
 
@@ -272,6 +310,45 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseTicketDetails}>
                         Đóng
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    };
+
+    const DeletePaymentModal = () => {
+        if (!selectedPaymentForDelete) return null;
+
+        return (
+            <Modal 
+                show={showDeleteModal} 
+                onHide={handleCloseDeleteModal}
+                size="md"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Xóa thanh toán #{selectedPaymentForDelete.transaction_code}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Bạn có chắc chắn muốn xóa thanh toán này không?</p>
+                    <Form.Group>
+                        <Form.Label>Lý do xóa</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            maxLength={200}
+                            value={deleteReason}
+                            onChange={(e) => setDeleteReason(e.target.value)}
+                            placeholder="Nhập lý do xóa (tối đa 200 ký tự)"
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                        Hủy
+                    </Button>
+                    <Button variant="danger" onClick={handleDeletePayment}>
+                        Xóa
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -682,11 +759,18 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                                                             </td>
                                                             <td className="text-center">
                                                                 <Button 
-                                                                    variant="info"
+                                                                    variant="info" 
                                                                     size="sm"
                                                                     onClick={() => handleShowTicketDetails(payment)}
                                                                 >
                                                                     <FontAwesomeIcon icon={faEye} />
+                                                                </Button>
+                                                                <Button 
+                                                                    variant="danger" 
+                                                                    size="sm"
+                                                                    onClick={() => handleShowDeleteModal(payment)}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faTrashAlt} />
                                                                 </Button>
                                                             </td>
                                                         </tr>
@@ -718,6 +802,7 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
             </Modal>
             
             <TicketDetailsModal />
+            <DeletePaymentModal />
         </>
     );
 };
