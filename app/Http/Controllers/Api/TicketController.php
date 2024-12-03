@@ -116,8 +116,8 @@ class TicketController extends Controller
                     $createdCheckedTicket = CheckedTicket::create([
                         'code' => $ticketData['code'],
                         'name' => $ticketData['service_name'], 
-                        'issue_date' => $ticketData['issue_date'],
-                        'expired_date' => $ticketData['expired_date'],
+                        'issue_date' => $ticketData['issuedDate'] ?? '',
+                        'expired_date' => $ticketData['expirationDate'] ?? '',
                         'status' => CheckedTicket::STATUS_CHECKIN,
                         'date' => Carbon::now(),
                         'checkin_at' => Carbon::now(),
