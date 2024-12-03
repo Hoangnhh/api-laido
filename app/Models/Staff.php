@@ -75,7 +75,8 @@ class Staff extends Model
         $this->notifications()->create([
             'title' => $title,
             'body' => $body,
-            'data' => $data
+            'data' => $data,
+            'token' => $this->fcm_token
         ]);
 
         if (!$this->fcm_token) {
