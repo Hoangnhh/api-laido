@@ -171,6 +171,8 @@ const StaffPayment = () => {
     const handleClosePopup = () => {
         setShowPopup(false);
         setSelectedItem(null);
+        fetchData();
+        fetchSummary();
     };
 
     return (

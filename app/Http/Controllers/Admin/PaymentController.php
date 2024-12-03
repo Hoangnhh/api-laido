@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CheckedTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Staff;
 use App\Models\Payment;
 use Carbon\Carbon;
@@ -171,12 +172,33 @@ class PaymentController extends Controller
             $staffId = $request->input('staff_id');
             $fromDate = $request->input('from_date');
             $toDate = $request->input('to_date');
+            $paymentMethod = $request->input('payment_method');
+            $search = $request->input('search');
+            
             $fromDate = date('Y-m-d 00:00:00', strtotime($fromDate));
             $toDate = date('Y-m-d 23:59:59', strtotime($toDate));
 
             $payments = Payment::where('staff_id', $staffId)
                 ->whereBetween('created_at', [$fromDate, $toDate])
+                ->when($paymentMethod != "", function($query) use ($paymentMethod) {
+                    $query->where('payment_method', $paymentMethod);
+                })
+                ->when($search != "", function($query) use ($search) {
+                    $query->where('transaction_code', 'like', "%{$search}%")
+                        ->orWhere('received_account', 'like', "%{$search}%");
+                })
                 ->get();
+            $payments = $payments->toArray();
+            foreach ($payments as &$payment) {
+                $payment['date'] = Carbon::parse($payment['date'])->format('d/m/Y');
+                
+                // Lấy danh sách checked_ticket cho payment này
+                $checkedTickets = CheckedTicket::where('payment_id', $payment['id'])->get()->toArray();
+                foreach ($checkedTickets as &$ticket) {
+                    $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
+                }
+                $payment['checked_tickets'] = $checkedTickets;
+            }
 
             return response()->json([
                 'success' => true,
@@ -230,6 +252,19 @@ class PaymentController extends Controller
             
             DB::beginTransaction();
 
+            // Kiểm tra các ticket đã thanh toán
+            $paidTickets = CheckedTicket::whereIn('id', $ticketIds)
+                ->where('paid', true)
+                ->get();
+
+            if ($paidTickets->count() > 0) {
+                $paidTicketCodes = $paidTickets->pluck('code')->implode(', ');
+                return response()->json([
+                    'success' => false,
+                    'message' => "Các vé sau đã được thanh toán: $paidTicketCodes"
+                ], 400);
+            }
+
             $transactionCode = $this->generateTransactionCode();
             $payment = Payment::create([
                 'staff_id' => $staffId,
@@ -241,7 +276,7 @@ class PaymentController extends Controller
                 'note' => $note,
                 'status' => Payment::STATUS_ACTIVE,
                 'payment_method' => $paymentMethod,
-                'created_by' => auth()->user()->username,
+                'created_by' => Auth::user()->username,
             ]);
 
             CheckedTicket::whereIn('id', $ticketIds)->update([
