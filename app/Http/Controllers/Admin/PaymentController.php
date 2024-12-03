@@ -114,13 +114,17 @@ class PaymentController extends Controller
             $status = $request->input('status');
             $fromDate = date('Y-m-d 00:00:00', strtotime($fromDate));
             $toDate = date('Y-m-d 23:59:59', strtotime($toDate));
-            
+            $search = $request->input('search');
             $staff = Staff::find($staffId);
             $checkedTickets = CheckedTicket::where('staff_id', $staffId)
                 ->with('payment')
                 ->whereBetween('created_at', [$fromDate, $toDate]);
             if ($status != "") {
                 $checkedTickets->where('paid', $status == '1');
+            }
+            
+            if ($search != "") {
+                $checkedTickets->where('code', 'like', "%{$search}%");
             }
 
             $checkedTickets = $checkedTickets->get()->toArray();

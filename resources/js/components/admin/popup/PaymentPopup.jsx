@@ -76,7 +76,8 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                 staff_id: info.id,
                 from_date: filters.fromDate,
                 to_date: filters.toDate,
-                status: filters.status
+                status: filters.status,
+                search: filters.search
             });
             if (response.data.success) {
                 setAllTickets(response.data.data);
