@@ -227,7 +227,7 @@ class StaffController extends Controller
                 ->whereDate('date', '>=', $fromDate)
                 ->whereDate('date', '<=', $toDate)
                 ->where('status', Payment::STATUS_ACTIVE)
-                ->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
 
             return $this->successResponse([
