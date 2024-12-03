@@ -60,7 +60,7 @@ class NotificationService
                 Payment::PAYMENT_METHOD_BANK_TRANSFER => 'Chuyển khoản',
             };
             $params = [
-                'code' => $payment->code,
+                'code' => $payment->transaction_code,
                 'amount' => $payment->amount,
                 'ticket_count' => $ticketCount,
                 'payment_method' => $paymentMethod
