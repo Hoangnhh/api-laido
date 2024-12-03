@@ -531,7 +531,7 @@ class ShiftAssignmentController extends Controller
 
             $gateStaffShift = GateStaffShift::where('staff_id', $staff->id)
                 ->whereIn('status', [GateStaffShift::STATUS_WAITING, GateStaffShift::STATUS_CHECKIN])
-                ->orderBy('id')
+                ->orderBy('date')
                 ->first();
                 
             if (!$gateStaffShift) {

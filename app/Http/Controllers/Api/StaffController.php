@@ -43,7 +43,7 @@ class StaffController extends Controller
             // Lấy ca làm việc hiện tại hoặc ca tiếp theo của nhân viên
             $shift = GateStaffShift::join('gate_shift', 'gate_staff_shift.gate_shift_id', '=', 'gate_shift.id')
                 ->where('gate_staff_shift.staff_id', $userId)
-                ->whereIn('gate_shift.queue_status', [GateShift::QUEUE_STATUS_WAITING, GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_CHECKIN_ALL])
+                ->whereIn('gate_staff_shift.status', [GateStaffShift::STATUS_WAITING, GateStaffShift::STATUS_CHECKIN])
                 ->where('gate_shift.status', GateShift::STATUS_ACTIVE)
                 ->orderBy('gate_shift.date', 'asc')
                 ->with(['gateShift.gate:id,name', 'gateShift:id,date,gate_id'])
