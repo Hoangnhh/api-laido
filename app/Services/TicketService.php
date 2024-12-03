@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -72,8 +73,9 @@ class TicketService
                     'ticket' => [
                         'code' => $ticket['serviceCode'],
                         'service_name' => $ticket['serviceRateName'],
+                        'issued_date' => $ticket['issuedDate'] ? Carbon::parse($ticket['issuedDate'])->format('Y-m-d') : null,
                         'status' => $ticket['statusStr'],
-                        'expiration_date' => $ticket['expirationDate'],
+                        'expired_date' => $ticket['expirationDate'] ? Carbon::parse($ticket['expirationDate'])->format('Y-m-d') : null,
                         'price' => $ticket['price'],
                         'last_using_time' => $ticket['lastUsingTime'],
                         'last_using_device' => $ticket['lastUsingACM'],
