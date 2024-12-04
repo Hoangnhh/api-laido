@@ -116,8 +116,8 @@ class ReportController extends Controller
                 'gate_staff_shift.date as shift_date',
                 DB::raw("DATE_FORMAT(checked_ticket.checkin_at, '%d/%m/%Y %H:%i') as checkin_at_formatted"),
                 DB::raw("DATE_FORMAT(checked_ticket.checkout_at, '%d/%m/%Y %H:%i') as checkout_at_formatted"),
-                DB::raw("DATE_FORMAT(checked_ticket.issue_date, '%d/%m/%Y %H:%i') as issue_date_formatted"),
-                DB::raw("DATE_FORMAT(checked_ticket.expired_date, '%d/%m/%Y %H:%i') as expired_date_formatted"),
+                DB::raw("DATE_FORMAT(checked_ticket.issue_date, '%d/%m/%Y') as issue_date_formatted"),
+                DB::raw("DATE_FORMAT(checked_ticket.expired_date, '%d/%m/%Y') as expired_date_formatted"),
                 DB::raw("CASE 
                     WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKIN . "' THEN 'Chưa hoàn thành'
                     WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKOUT . "' THEN 'Đã hoàn thành'

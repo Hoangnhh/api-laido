@@ -277,7 +277,7 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                                     <th>Ngày</th>
                                     <th>Tên</th>
                                     <th>Chiều</th>
-                                    <th className="text-end">Tiền đò</th>
+                                    <th className="text-end">Hoa hồng</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -449,7 +449,7 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                                                             <th>Chiều</th>
                                                             <th>Trạng thái</th>
                                                             <th>Thanh toán</th>
-                                                            <th className="text-right">Tiền đò</th>
+                                                            <th className="text-right">Hoa hồng</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>

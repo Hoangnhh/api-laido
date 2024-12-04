@@ -92,6 +92,8 @@ const CheckoutListReport = () => {
 
     const renderPaginationItems = () => {
         let items = [];
+        
+        // Nút Previous
         items.push(
             <Pagination.Prev 
                 key="prev"
@@ -100,7 +102,24 @@ const CheckoutListReport = () => {
             />
         );
 
-        for (let number = 1; number <= totalPages; number++) {
+        // Hiển thị trang đầu
+        items.push(
+            <Pagination.Item
+                key={1}
+                active={1 === currentPage}
+                onClick={() => handlePageChange(1)}
+            >
+                1
+            </Pagination.Item>
+        );
+
+        // Thêm ellipsis đầu nếu cần
+        if (currentPage > 4) {
+            items.push(<Pagination.Ellipsis key="ellipsis-start" />);
+        }
+
+        // Hiển thị các trang xung quanh trang hiện tại
+        for (let number = Math.max(2, currentPage - 2); number <= Math.min(totalPages - 1, currentPage + 2); number++) {
             items.push(
                 <Pagination.Item
                     key={number}
@@ -112,6 +131,25 @@ const CheckoutListReport = () => {
             );
         }
 
+        // Thêm ellipsis cuối nếu cần
+        if (currentPage < totalPages - 3) {
+            items.push(<Pagination.Ellipsis key="ellipsis-end" />);
+        }
+
+        // Hiển thị trang cuối nếu có nhiều hơn 1 trang
+        if (totalPages > 1) {
+            items.push(
+                <Pagination.Item
+                    key={totalPages}
+                    active={totalPages === currentPage}
+                    onClick={() => handlePageChange(totalPages)}
+                >
+                    {totalPages}
+                </Pagination.Item>
+            );
+        }
+
+        // Nút Next
         items.push(
             <Pagination.Next
                 key="next"
