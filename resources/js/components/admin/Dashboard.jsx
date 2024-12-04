@@ -91,6 +91,10 @@ const Dashboard = () => {
                 },
                 grid: {
                     color: 'rgba(0, 0, 0, 0.05)'
+                },
+                suggestedMax: function(context) {
+                    const maxValue = Math.max(...context.chart.data.datasets[0].data);
+                    return maxValue + (maxValue * 0.1);
                 }
             },
             x: {
@@ -138,6 +142,41 @@ const Dashboard = () => {
         if (!data?.chart_data) return null;
 
         const dates = Object.keys(data.chart_data);
+        const lineOptions = {
+            ...chartOptions,
+            plugins: {
+                ...chartOptions.plugins,
+                datalabels: {
+                    display: true,
+                    color: '#000',
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 4,
+                    font: {
+                        size: 11,
+                        weight: 'bold'
+                    },
+                    formatter: (value) => value
+                },
+                tooltip: {
+                    ...chartOptions.plugins.tooltip,
+                    callbacks: {
+                        title: function(context) {
+                            const date = new Date(context[0].label);
+                            return date.toLocaleDateString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        },
+                        label: function(context) {
+                            return `Số vé: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            }
+        };
+
         return {
             data: {
                 labels: dates,
@@ -152,7 +191,7 @@ const Dashboard = () => {
                     pointHoverRadius: 6
                 }]
             },
-            options: chartOptions
+            options: lineOptions
         };
     };
 
@@ -169,7 +208,7 @@ const Dashboard = () => {
                     color: '#000',
                     anchor: 'end',
                     align: 'top',
-                    offset: 8,
+                    offset: 4,
                     font: {
                         size: 11,
                         weight: 'bold'
@@ -294,7 +333,7 @@ const Dashboard = () => {
                         <h2 className="db-section-title">Số lượng lái đò hoạt động theo ngày</h2>
                         <div className="db-chart-container">
                             {data && (
-                                <Bar 
+                                <Line 
                                     data={prepareActiveStaffChart().data} 
                                     options={prepareActiveStaffChart().options}
                                 />
