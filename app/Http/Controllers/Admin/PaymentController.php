@@ -136,6 +136,7 @@ class PaymentController extends Controller
             $checkedTickets = $checkedTickets->get()->toArray();
             foreach ($checkedTickets as &$ticket) {
                 // Format date
+                $ticket['date1'] = $ticket['date'];
                 $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
                 switch ($ticket['status']) {
                     case CheckedTicket::STATUS_CHECKIN:

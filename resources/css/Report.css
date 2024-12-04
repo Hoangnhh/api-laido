@@ -47,3 +47,18 @@
 .text-primary {
     color: #007bff !important;
 }
+
+.modal-body .table-responsive {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.modal-body .table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    z-index: 1;
+}
+
+.modal-body .table {
+    margin-bottom: 0;
+}

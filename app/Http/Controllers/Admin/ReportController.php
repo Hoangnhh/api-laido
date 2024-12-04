@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\GateStaffShift;
 use App\Models\CheckedTicket;
 use App\Models\Staff;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -155,5 +156,111 @@ class ReportController extends Controller
             'success' => true,
             'data' => $result
         ]);
+    }
+
+    public function getPaymentReport(Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $paymentCode = $request->input('payment_code');
+        $staffCode = $request->input('staff_code');
+
+        $query = Payment::query()
+            ->select([
+                'payment.id',
+                'payment.transaction_code as payment_code',
+                'payment.amount',
+                'payment.payment_method',
+                'payment.date',
+                DB::raw("DATE_FORMAT(payment.date, '%d/%m/%Y') as payment_date"),
+                'staff.code as staff_code',
+                'staff.username as staff_username',
+                'staff.name as staff_name',
+                'payment.created_by'
+            ])
+            ->join('staff', 'payment.staff_id', '=', 'staff.id')
+            ->where('payment.status', Payment::STATUS_ACTIVE);
+
+        if ($fromDate) {
+            $query->whereDate('payment.date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('payment.date', '<=', $toDate);
+        }
+
+        if ($paymentCode) {
+            $query->where('payment.transaction_code', 'like', '%' . $paymentCode . '%');
+        }
+
+        if ($staffCode) {
+            $query->where('staff.code', 'like', '%' . $staffCode . '%');
+        }
+
+        $result = $query->orderBy('payment.date', 'desc')
+                        ->orderBy('payment.transaction_code', 'asc')
+                        ->get()
+                        ->map(function ($payment) {
+                            $payment->payment_method = $this->formatPaymentMethod($payment->payment_method);
+
+                            // Lấy danh sách vé trực tiếp từ database
+                            $tickets = CheckedTicket::select([
+                                'checked_ticket.code as ticket_code',
+                                'checked_ticket.name as ticket_name',
+                                'checked_ticket.commission',
+                                'checked_ticket.checkin_by',
+                                'checked_ticket.checkout_by',
+                                DB::raw("DATE_FORMAT(checked_ticket.date, '%d/%m/%Y') as ticket_date")
+                            ])
+                            ->where('checked_ticket.payment_id', $payment->id)
+                            ->get()
+                            ->map(function ($ticket, $index) use ($payment) {
+                                // Xác định chiều vé
+                                $direction = 'Không xác định';
+                                $isCheckinByStaff = isset($ticket->checkin_by) && 
+                                    $ticket->checkin_by === $payment->staff_username;
+                                $isCheckoutByStaff = isset($ticket->checkout_by) && 
+                                    $ticket->checkout_by === $payment->staff_username;
+                                if ($isCheckinByStaff && $isCheckoutByStaff) {
+                                    $direction = '2 Chiều';
+                                } elseif ($isCheckinByStaff) {
+                                    $direction = 'Chiều vào';
+                                } elseif ($isCheckoutByStaff) {
+                                    $direction = 'Chiều ra';
+                                }
+                            
+                                return [
+                                    'stt' => $index + 1,
+                                    'ticket_code' => $ticket->ticket_code,
+                                    'ticket_date' => $ticket->ticket_date,
+                                    'ticket_name' => $ticket->ticket_name,
+                                    'direction' => $direction,
+                                    'commission' => $ticket->commission
+                                ];
+                            });
+                            
+                            $payment->tickets = $tickets;
+                            $payment->total_commission = $tickets->sum('commission');
+                            
+                            // Xóa id khỏi response
+                            unset($payment->id);
+                            
+                            return $payment;
+                        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
+        ]);
+    }
+
+    private function formatPaymentMethod($method)
+    {
+        $methods = [
+            Payment::PAYMENT_METHOD_BANK_TRANSFER => 'Chuyển khoản',
+            Payment::PAYMENT_METHOD_CASH => 'Tiền mặt'
+        ];
+
+        return $methods[$method] ?? $method;
     }
 }
