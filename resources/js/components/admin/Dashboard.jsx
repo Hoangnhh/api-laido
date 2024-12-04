@@ -23,6 +23,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import "../../../css/dashboard.css";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
     CategoryScale,
@@ -32,7 +33,8 @@ ChartJS.register(
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ChartDataLabels
 );
 
 const Dashboard = () => {
@@ -160,38 +162,20 @@ const Dashboard = () => {
         const dates = Object.keys(data.chart_data);
         const barOptions = {
             ...chartOptions,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            if (value < 0) return '';
-                            return value;
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    ticks: {
-                        callback: function(value) {
-                            const date = new Date(this.getLabelForValue(value));
-                            return date.toLocaleDateString('vi-VN', {
-                                day: '2-digit',
-                                month: '2-digit'
-                            });
-                        },
-                        maxRotation: 0
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
-            },
             plugins: {
                 ...chartOptions.plugins,
+                datalabels: {
+                    display: true,
+                    color: '#000',
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 8,
+                    font: {
+                        size: 11,
+                        weight: 'bold'
+                    },
+                    formatter: (value) => value
+                },
                 tooltip: {
                     ...chartOptions.plugins.tooltip,
                     callbacks: {
@@ -310,7 +294,7 @@ const Dashboard = () => {
                         <h2 className="db-section-title">Số lượng lái đò hoạt động theo ngày</h2>
                         <div className="db-chart-container">
                             {data && (
-                                <Line 
+                                <Bar 
                                     data={prepareActiveStaffChart().data} 
                                     options={prepareActiveStaffChart().options}
                                 />
