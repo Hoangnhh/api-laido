@@ -137,7 +137,9 @@ class PaymentController extends Controller
             foreach ($checkedTickets as &$ticket) {
                 // Format date
                 $ticket['date1'] = $ticket['date'];
-                $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
+                $ticket['date'] = Carbon::parse($ticket['date'])
+                    ->setTimezone('Asia/Ho_Chi_Minh')
+                    ->format('d/m/Y');
                 switch ($ticket['status']) {
                     case CheckedTicket::STATUS_CHECKIN:
                         $ticket['status'] = 'Chưa hoàn thành';
@@ -202,7 +204,9 @@ class PaymentController extends Controller
                 ->get();
             $payments = $payments->toArray();
             foreach ($payments as &$payment) {
-                $payment['date'] = Carbon::parse($payment['date'])->format('d/m/Y');
+                $payment['date'] = Carbon::parse($payment['date'])
+                    ->setTimezone('Asia/Ho_Chi_Minh')
+                    ->format('d/m/Y');
                 
                 // Lấy danh sách checked_ticket cho payment này
                 // Lấy thông tin staff
@@ -213,7 +217,9 @@ class PaymentController extends Controller
                     ->get()
                     ->map(function($ticket) use ($staff) {
                         $ticket = $ticket->toArray();
-                        $ticket['date'] = Carbon::parse($ticket['date'])->format('d/m/Y');
+                        $ticket['date'] = Carbon::parse($ticket['date'])
+                            ->setTimezone('Asia/Ho_Chi_Minh')
+                            ->format('d/m/Y');
                         
                         // Xác định chiều vé dựa trên người check
                         $isCheckinByStaff = isset($ticket['checkin_by']) && $ticket['checkin_by'] === $staff->username;
