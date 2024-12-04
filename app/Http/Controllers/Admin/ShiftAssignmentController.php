@@ -681,7 +681,7 @@ class ShiftAssignmentController extends Controller
             }
 
             // Kiểm tra số lượng nhân viên WAITING
-            $waitingStaffCount = GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
+            $waitingStaffCount = GateStaffShift::where('gate_shift_id', $gateShift->id)
                                                ->where('status', GateStaffShift::STATUS_WAITING)
                                                ->count();
 
