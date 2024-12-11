@@ -151,4 +151,64 @@ class DashboardController extends Controller
             ], 500);
         }
     }
+
+    public function getCheckedTicketsByGate(Request $request)
+    {
+        try {
+            // Validate và xử lý ngày tháng
+            $fromDate = $request->input('from_date') 
+                ? Carbon::parse($request->input('from_date'))->startOfDay()
+                : Carbon::today()->startOfDay();
+            
+            $toDate = $request->input('to_date')
+                ? Carbon::parse($request->input('to_date'))->endOfDay()
+                : Carbon::today()->endOfDay();
+
+            // Kiểm tra khoảng thời gian hợp lệ
+            if ($fromDate->gt($toDate)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ngày bắt đầu không thể lớn hơn ngày kết thúc'
+                ], 422);
+            }
+
+            // Bắt đầu từ bảng gates
+            $query = DB::table('gate')
+                ->leftJoin('gate_shift', 'gate.id', '=', 'gate_shift.gate_id')
+                ->leftJoin('gate_staff_shift', 'gate_shift.id', '=', 'gate_staff_shift.gate_shift_id')
+                ->leftJoin('checked_ticket', function($join) use ($fromDate, $toDate) {
+                    $join->on('gate_staff_shift.id', '=', 'checked_ticket.gate_staff_shift_id')
+                        ->whereBetween('checked_ticket.checkin_at', [$fromDate, $toDate]);
+                })
+                ->select(
+                    'gate.id as gate_id',
+                    'gate.name as gate_name',
+                    DB::raw('COUNT(checked_ticket.id) as total_tickets')
+                )
+                ->groupBy('gate.id', 'gate.name');
+
+            // Lọc theo gate_ids nếu có
+            if ($request->has('gate_ids') && !empty($request->gate_ids)) {
+                $gateIds = is_array($request->gate_ids) ? $request->gate_ids : [$request->gate_ids];
+                $query->whereIn('gate.id', $gateIds);
+            }
+
+            $result = $query->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+                'date_range' => [
+                    'from' => $fromDate->format('Y-m-d'),
+                    'to' => $toDate->format('Y-m-d')
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy thống kê vé: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 } 

@@ -6,7 +6,7 @@ import {
     faShip,
     faTicket,
     faSpinner,
-    faCalendar
+    faCalendar,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminLayout from './Layout/AdminLayout';
 import axios from 'axios';
@@ -40,6 +40,7 @@ ChartJS.register(
 const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [gateStats, setGateStats] = useState([]);
     
     const [dateRange, setDateRange] = useState(() => {
         const today = new Date();
@@ -65,8 +66,23 @@ const Dashboard = () => {
         }
     };
 
+    const fetchGateStats = async () => {
+        try {
+            const response = await axios.get('/api/admin/get-checked-tickets-by-gate', {
+                params: {
+                    from_date: dateRange.fromDate,
+                    to_date: dateRange.toDate
+                }
+            });
+            setGateStats(response.data.data);
+        } catch (error) {
+            console.error('Error fetching gate stats:', error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchGateStats();
     }, [dateRange]);
 
     const handleDateChange = (e) => {
@@ -351,6 +367,23 @@ const Dashboard = () => {
                                 />
                             )}
                         </div>
+                    </div>
+                </div>
+
+                <div className="db-section">
+                    <h2 className="db-section-title">Thống kê theo cổng</h2>
+                    <div className="db-gate-stats-grid">
+                        {gateStats.map((gate, index) => (
+                            <div key={index} className="db-stat-card">
+                                <div className="db-stat-icon">
+                                    <FontAwesomeIcon icon={faShip} />
+                                </div>
+                                <div className="db-stat-content">
+                                    <h3>Cổng {gate.gate_id}</h3>
+                                    <p>{gate.total_tickets} vé</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -24,12 +24,7 @@
 .qd-position-selector {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    white-space: nowrap;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 6px 12px;
-    border-radius: 6px;
+    gap: 10px;
 }
 
 .qd-position-selector span {
@@ -1136,4 +1131,28 @@
     background-color: #f1f5f9;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+.qd-ticket-count {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.qd-ticket-label {
+    font-size: 14px;
+    color: #ffffff;
+    margin-right: 8px;
+}
+
+.qd-ticket-number {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 3px;
 }

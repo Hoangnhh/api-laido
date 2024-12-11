@@ -27,15 +27,18 @@ const QueueDisplay = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [lastSubmitTime, setLastSubmitTime] = useState(0);
     const SUBMIT_DELAY = 500; // 500ms delay giữa các lần submit
+    const [checkedTicketsCount, setCheckedTicketsCount] = useState(0);
 
     const inputRef = useRef(null);
     const isSubmitting = useRef(false);
 
     useEffect(() => {
         fetchAssignments();
+        fetchCheckedTicketsCount();
         
         const intervalId = setInterval(() => {
             fetchAssignments();
+            fetchCheckedTicketsCount();
         }, 30000);
 
         return () => clearInterval(intervalId);
@@ -116,7 +119,7 @@ const QueueDisplay = () => {
             }
 
         } catch (err) {
-            console.error('Lỗi khi lấy danh sách phân ca:', err);
+            console.error('L���i khi lấy danh sách phân ca:', err);
         }
     };
 
@@ -314,6 +317,26 @@ const QueueDisplay = () => {
         }
     };
 
+    const fetchCheckedTicketsCount = async () => {
+        if (selectedPosition === 0) return;
+        
+        try {
+            const response = await axios.get('/api/admin/get-checked-tickets-by-gate', {
+                params: {
+                    gate_ids: [selectedPosition],
+                    from_date: new Date().toISOString().split('T')[0]
+                }
+            });
+            
+            const gateStats = response.data.data;
+            if (gateStats && gateStats.length > 0) {
+                setCheckedTicketsCount(gateStats[0].total_tickets);
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy số lượng vé:', error);
+        }
+    };
+
     return (
         <div className="qd-wrapper">
             <h1 className="qd-title">
@@ -331,6 +354,12 @@ const QueueDisplay = () => {
                                 <option key={pos} value={pos}>Cửa số {pos}</option>
                             ))}
                         </select>
+                        {selectedPosition !== 0 && (
+                            <div className="qd-ticket-count">
+                                <span className="qd-ticket-label">Số vé đã checkin:</span>
+                                <span className="qd-ticket-number">{checkedTicketsCount}</span>
+                            </div>
+                        )}
                         <button 
                             className={`qd-sound-toggle ${isMuted ? 'muted' : ''}`}
                             onClick={() => setIsMuted(!isMuted)}
