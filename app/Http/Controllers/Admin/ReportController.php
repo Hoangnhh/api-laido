@@ -7,6 +7,7 @@ use App\Models\GateStaffShift;
 use App\Models\CheckedTicket;
 use App\Models\Staff;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -57,6 +58,8 @@ class ReportController extends Controller
         $toDate = $request->input('to_date');
         $staffGroupId = $request->input('staff_group_id');
         $status = $request->input('status');
+        $fromDate = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+        $toDate = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
 
         $query = GateStaffShift::query()
             ->select([
@@ -81,12 +84,14 @@ class ReportController extends Controller
             $query->where('gate_staff_shift.status', $status);
         }
 
-        if ($fromDate) {
-            $query->whereDate('gate_staff_shift.date', '>=', $fromDate);
-        }
-
-        if ($toDate) {
-            $query->whereDate('gate_staff_shift.date', '<=', $toDate);
+        if($fromDate && $toDate) {
+            if($status == GateStaffShift::STATUS_CHECKIN) {
+                $query->whereBetween('gate_staff_shift.checkin_at', [$fromDate, $toDate]);
+            } elseif($status == GateStaffShift::STATUS_CHECKOUT) {
+                $query->whereBetween('gate_staff_shift.checkout_at', [$fromDate, $toDate]);
+            }else{
+                $query->whereBetween('gate_staff_shift.date', [$fromDate, $toDate]);
+            }
         }
 
         if ($staffGroupId) {

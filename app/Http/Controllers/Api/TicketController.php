@@ -26,6 +26,9 @@ class TicketController extends Controller
         "ve_do_tuyen_tuyet_son" => 120000,
         "default" => 70000
     ];
+    private $ignore_checkin_time = [
+        "ve_do_tuyen_long_van" => 70000,
+    ];
 
     public function __construct(TicketService $ticketService)
     {
@@ -72,16 +75,7 @@ class TicketController extends Controller
                     return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
                 }
 
-                $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
-                if($checkinTicketRangeTime > 0) {
-                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
-                    if ($timeDiff > $checkinTicketRangeTime) {
-                        return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
-                    }
-                }
-
                 // Kiểm tra giới hạn số vé theo vehical_size
-                
                 if ($systemConfigs[SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value] == 1) {
                     $currentTicketCount = $activeAssignment->checked_ticket_num;
                     $vehicalSize = $activeAssignment->staff->vehical_size;
@@ -105,6 +99,13 @@ class TicketController extends Controller
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($ticketData['service_name']);
 
+                $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
+                if($checkinTicketRangeTime > 0 && !$this->isIgnoreCheckinTime($ticketData['service_name'])) {
+                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
+                    if ($timeDiff > $checkinTicketRangeTime) {
+                        return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
+                    }
+                }
 
                 // Thực hiện các thao tác trong transaction
                 DB::beginTransaction();
@@ -229,5 +230,20 @@ class TicketController extends Controller
         $commission = $this->commission_configs[$serviceName]
             ?? $this->commission_configs['default'];
         return $commission/2;
+    }
+    private function isIgnoreCheckinTime($ticketName) {
+        // Xử lý tên dịch vụ để lấy commission
+        $serviceName = mb_strtolower($ticketName); // Chuyển về chữ thường
+        $serviceName = preg_replace('/[^\p{L}\p{N}\s]/u', '', $serviceName); // Bỏ dấu câu
+        $serviceName = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $serviceName);
+        $serviceName = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $serviceName);
+        $serviceName = preg_replace('/[ìíịỉĩ]/u', 'i', $serviceName);
+        $serviceName = preg_replace('/[òóọỏõôồốộổỗơờớợởỡ]/u', 'o', $serviceName);
+        $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
+        $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
+        $serviceName = preg_replace('/đ/u', 'd', $serviceName);
+        $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
+
+        return in_array($serviceName, $this->ignore_checkin_time);
     }
 } 

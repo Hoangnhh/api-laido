@@ -325,16 +325,6 @@ const Dashboard = () => {
 
                     <div className="db-stat-card">
                         <div className="db-stat-icon">
-                            <FontAwesomeIcon icon={faShip} />
-                        </div>
-                        <div className="db-stat-content">
-                            <h3>Số lượt chở khách</h3>
-                            <p>{data?.summary?.total_trips || 0}</p>
-                        </div>
-                    </div>
-
-                    <div className="db-stat-card">
-                        <div className="db-stat-icon">
                             <FontAwesomeIcon icon={faTicket} />
                         </div>
                         <div className="db-stat-content">
