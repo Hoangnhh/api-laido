@@ -42,7 +42,9 @@ class DashboardController extends Controller
         })->count();
 
         // Tổng số vé đã quét
-        $totalCheckedTickets = CheckedTicket::whereBetween('checkin_at', [$fromDate, $toDate])->count();
+        $totalCheckedTickets = CheckedTicket::whereBetween('checkin_at', [$fromDate, $toDate])
+            ->select('code')
+            ->distinct()->get()->count();
 
         // Dữ liệu biểu đồ số lượng lái đò hoạt động theo ngày
         $activeStaffByDay = GateStaffShift::whereBetween('checkin_at', [$fromDate, $toDate])
@@ -63,10 +65,10 @@ class DashboardController extends Controller
         }
 
         // Dữ liệu biểu đồ số lượng vé đã quét theo ngày
-        $checkedTicketsByDay = CheckedTicket::whereBetween('checkin_at', [$fromDate, $toDate])
+        $checkedTicketsByDay = CheckedTicket::whereBetween('checkin_at', [$fromDate, $toDate])->where('is_checkin_with_other', false)
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
+                DB::raw('COUNT(DISTINCT code) as count')
             )
             ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date')
@@ -171,9 +173,9 @@ class DashboardController extends Controller
                         ->whereBetween('checked_ticket.checkin_at', [$fromDate, $toDate]);
                 })
                 ->select(
-                    'gate.id as gate_id',
+                    'gate.id as gate_id', 
                     'gate.name as gate_name',
-                    DB::raw('COUNT(checked_ticket.id) as total_tickets')
+                    DB::raw('COUNT(DISTINCT checked_ticket.code) as total_tickets')
                 )
                 ->groupBy('gate.id', 'gate.name');
 

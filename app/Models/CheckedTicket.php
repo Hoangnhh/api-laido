@@ -23,6 +23,7 @@ class CheckedTicket extends Model
         'issue_date',
         'expired_date',
         'is_checkout_with_other',
+        'is_checkin_with_other',
         'payment_id',
         'paid',
         'price',

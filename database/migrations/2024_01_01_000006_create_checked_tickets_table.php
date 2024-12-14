@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('price', 20)->default('0');
             $table->integer('commisson')->default(0);
             $table->boolean('is_checkout_with_other')->default(false);
+            $table->boolean('is_checkin_with_other')->default(false);
             $table->foreignId('gate_shift_staff_id')->nullable();
             $table->foreignId('staff_id')->constrained('staff');
             $table->foreignId('extra_shift_id')->nullable()->constrained('extra_shifts');

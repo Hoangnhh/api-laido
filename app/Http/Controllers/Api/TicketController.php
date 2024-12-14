@@ -194,7 +194,8 @@ class TicketController extends Controller
                         'staff_id' => $staffId,
                         'gate_staff_shift_id' => $activeAssignment->id,
                         'paid' => false,
-                        'is_checkout_with_other' => $existingTicket->checkin_by != $request->username
+                        'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
+                        'is_checkin_with_other' => 1
                     ]);
 
                     return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
