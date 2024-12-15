@@ -75,6 +75,16 @@ class TicketController extends Controller
                     return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
                 }
 
+                // kiểm tra thời gian checkin vé
+                $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
+                // if($checkinTicketRangeTime > 0 && !$this->isIgnoreCheckinTime($ticketData['service_name'])) {
+                if($checkinTicketRangeTime > 0) {
+                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
+                    if ($timeDiff > $checkinTicketRangeTime) {
+                        return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
+                    }
+                }
+
                 // Kiểm tra giới hạn số vé theo vehical_size
                 if ($systemConfigs[SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value] == 1) {
                     $currentTicketCount = $activeAssignment->checked_ticket_num;
@@ -98,14 +108,6 @@ class TicketController extends Controller
                 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($ticketData['service_name']);
-
-                $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
-                if($checkinTicketRangeTime > 0 && !$this->isIgnoreCheckinTime($ticketData['service_name'])) {
-                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
-                    if ($timeDiff > $checkinTicketRangeTime) {
-                        return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
-                    }
-                }
 
                 // Thực hiện các thao tác trong transaction
                 DB::beginTransaction();
