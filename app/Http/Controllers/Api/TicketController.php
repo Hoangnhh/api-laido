@@ -77,8 +77,7 @@ class TicketController extends Controller
 
                 // kiểm tra thời gian checkin vé
                 $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
-                // if($checkinTicketRangeTime > 0 && !$this->isIgnoreCheckinTime($ticketData['service_name'])) {
-                if($checkinTicketRangeTime > 0) {
+                if($checkinTicketRangeTime > 0 && !str_starts_with($ticketData['service_name'], 'LV')) {
                     $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
                     if ($timeDiff > $checkinTicketRangeTime) {
                         return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
