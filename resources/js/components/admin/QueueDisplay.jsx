@@ -476,7 +476,7 @@ const QueueDisplay = () => {
                 </select>
             </Modal>
             <div className="qd-footer">
-                Cung cấp bởi <a href="https://thinksoft.com.vn" target="_blank" rel="noopener noreferrer">ThinkSoft.com.vn</a>
+                Cung cấp bởi <a href="https://thinksoft.com.vn" target="_blank" rel="noopener noreferrer">thinksoft.com.vn</a>
             </div>
         </div>
     );
