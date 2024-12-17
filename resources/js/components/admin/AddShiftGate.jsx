@@ -471,7 +471,7 @@ const AddShiftGate = () => {
                                             )}
                                             <div className="staff-info">
                                                 <span className="staff-name">{staff.name}</span>
-                                                <span className="staff-code">{staff.code}</span>
+                                                <span className="staff-code">{staff.code} - {staff.vehical_type_name}</span>
                                                 {staff.is_assigned && staff.assignment && (
                                                     <div className="staff-assignment-info">
                                                         <i className="fas fa-info-circle"></i>

@@ -22,6 +22,7 @@ class StaffController extends Controller
         $search = $request->input('search');
         $groupId = $request->input('group_id');
         $status = $request->input('status');
+        $vehicalType = $request->input('vehical_type');
         
         $query = Staff::with('group');
 
@@ -31,6 +32,10 @@ class StaffController extends Controller
 
         if ($status) {
             $query->where('status', $status);
+        }
+
+        if ($vehicalType) {
+            $query->where('vehical_type', $vehicalType);
         }
 
         if ($search) {

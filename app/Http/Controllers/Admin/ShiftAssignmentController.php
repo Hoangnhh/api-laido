@@ -164,6 +164,13 @@ class ShiftAssignmentController extends Controller
                         ->where('staff_group_id', $request->staff_group_id)
                         ->where('status', 'ACTIVE')
                         ->first();
+                        
+
+                    $staffCountForGate = floor(count($request->staff_ids) / count($request->gate_ids))
+                    + ($index < (count($request->staff_ids) % count($request->gate_ids)) ? 1 : 0);
+                    if($staffCountForGate == 0) {
+                        continue;
+                    }
 
                     // Sử dụng GateShift hiện có hoặc tạo mới
                     $gateShift = $existingGateShift ?? GateShift::create([
@@ -173,9 +180,6 @@ class ShiftAssignmentController extends Controller
                         'current_index' => $maxGroupIndex,
                         'status' => 'ACTIVE'
                     ]);
-
-                    $staffCountForGate = floor(count($request->staff_ids) / count($request->gate_ids))
-                        + ($index < (count($request->staff_ids) % count($request->gate_ids)) ? 1 : 0);
                     
                     // Tạo GateStaffShift cho từng nhân viên với index liên tục
                     for ($i = 0; $i < $staffCountForGate; $i++) {
@@ -246,10 +250,17 @@ class ShiftAssignmentController extends Controller
                 ->get()
                 ->map(function($staff){
                     $assignment = $staff->gateStaffShifts->first();
+                    $vehicalTypeName = match ($staff->vehical_type) {
+                        Staff::VEHICAL_TYPE_DO => 'Đò',
+                        Staff::VEHICAL_TYPE_XUONG => 'Xuồng',
+                        default => 'Không rõ',
+                    };
                     return [
                         'id' => $staff->id,
                         'name' => $staff->name,
                         'code' => $staff->code,
+                        'vehical_type' => $staff->vehical_type,
+                        'vehical_type_name' => $vehicalTypeName,
                         'is_assigned' => !is_null($assignment),
                         'assignment' => $assignment ? [
                             'index' => $assignment->index,
@@ -282,10 +293,12 @@ class ShiftAssignmentController extends Controller
             $date = $request->input('date');
             
             if (!$date) {
-                $date = GateShift::where('queue_status', 'RUNNING')
+                $date = GateShift::whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
+                    ->where('status', GateShift::STATUS_ACTIVE)
                     ->orderBy('date', 'asc')
+                    ->orderBy('queue_status', 'asc')
                     ->value('date');
-                    
+
                 if (!$date) {
                     $date = now()->format('Y-m-d');
                 }

@@ -99,7 +99,8 @@ const StaffManager = () => {
     const [filters, setFilters] = useState({
         search: '',
         groupId: '',
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        vehicalType: ''
     });
 
     // Tạo state để theo dõi việc cần fetch data
@@ -157,7 +158,8 @@ const StaffManager = () => {
                     per_page: rowsPerPage,
                     search: filters.search,
                     group_id: filters.groupId,
-                    status: filters.status || null
+                    status: filters.status || null,
+                    vehical_type: filters.vehicalType || null
                 }
             });
             setStaffs(response.data.data);
@@ -277,7 +279,7 @@ const StaffManager = () => {
 
             // Kiểm tra định dạng số tài khoản (chỉ được nhập số)
             if (formData.bank_account && !/^\d+$/.test(formData.bank_account)) {
-                showAlert('Số tài khoản chỉ được phép nhập số', 'error');
+                showAlert('Số tài khoản chỉ đợc phép nhập số', 'error');
                 return;
             }
 
@@ -392,6 +394,14 @@ const StaffManager = () => {
         }));
     };
 
+    // Thêm handler cho việc thay đổi loại phương tiện
+    const handleVehicalTypeChange = (event) => {
+        setFilters(prev => ({
+            ...prev,
+            vehicalType: event.target.value
+        }));
+    };
+
     // Thêm hàm showAlert
     const showAlert = (message, severity = 'success') => {
         setAlert({
@@ -502,6 +512,21 @@ const StaffManager = () => {
                                     {group.name}
                                 </MenuItem>
                             ))}
+                        </TextField>
+                        <TextField
+                            select
+                            size="small"
+                            label="Loại phương tiện"
+                            value={filters.vehicalType}
+                            onChange={handleVehicalTypeChange}
+                            className="staff-manager-filter"
+                            sx={{ minWidth: 200 }}
+                        >
+                            <MenuItem value="">
+                                <em>Tất cả</em>
+                            </MenuItem>
+                            <MenuItem value="1">Đò</MenuItem>
+                            <MenuItem value="2">Xuồng</MenuItem>
                         </TextField>
 
                         {/* Search */}

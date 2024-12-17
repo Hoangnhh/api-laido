@@ -408,7 +408,7 @@ const ShiftAssignments = () => {
         fetchDashboardData(date);
     }
 
-    const fetchDashboardData = async (date = false) => {
+    const fetchDashboardData = async (date = selectedDate) => {
         try {
             setLoading(true);
             const response = await axios.post('/api/admin/get-assignments-dasboard', {
