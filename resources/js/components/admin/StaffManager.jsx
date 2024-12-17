@@ -22,7 +22,8 @@ import {
     Alert,
     Snackbar,
     Avatar,
-    Chip
+    Chip,
+    CircularProgress
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -103,6 +104,9 @@ const StaffManager = () => {
 
     // Tạo state để theo dõi việc cần fetch data
     const [shouldFetch, setShouldFetch] = useState(true);
+
+    // Thêm state để theo dõi trạng thái submit
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Cập nhật hàm format ngày
     const formatDate = (dateString) => {
@@ -233,7 +237,11 @@ const StaffManager = () => {
     
     // Xử lý submit form
     const handleSubmit = async () => {
+        if (isSubmitting) return; // Ngăn submit nhiều lần
+        
         try {
+            setIsSubmitting(true); // Bắt đầu submit
+            
             // Kiểm tra các trường bắt buộc
             const requiredFields = [
                 'code', 'name', 'group_id', 'card_id', 
@@ -319,6 +327,8 @@ const StaffManager = () => {
             } else {
                 showAlert(error.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin', 'error');
             }
+        } finally {
+            setIsSubmitting(false); // Kết thúc submit
         }
     };
 
@@ -759,7 +769,26 @@ const StaffManager = () => {
                                             label="Địa chỉ"
                                             value={formData.address}
                                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            sx={{ flex: 1 }}
                                         />
+
+                                        <TextField
+                                            required
+                                            select
+                                            label="Nhóm nhân viên"
+                                            value={formData.group_id || ''}
+                                            onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
+                                            sx={{ flex: 1 }}
+                                        >
+                                            <MenuItem value="">
+                                                <em>Chọn nhóm</em>
+                                            </MenuItem>
+                                            {groups.filter(group => group.status === 'ACTIVE').map((group) => (
+                                                <MenuItem key={group.id} value={group.id}>
+                                                    {group.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Box>
                                 </Box>
 
@@ -867,6 +896,7 @@ const StaffManager = () => {
                     <DialogActions sx={{ p: 3 }}>
                         <Button 
                             onClick={() => setOpenDialog(false)}
+                            disabled={isSubmitting}
                             sx={{ 
                                 color: '#2c3e50',
                                 '&:hover': {
@@ -879,6 +909,7 @@ const StaffManager = () => {
                         <Button 
                             variant="contained" 
                             onClick={handleSubmit}
+                            disabled={isSubmitting}
                             sx={{ 
                                 bgcolor: '#2c3e50', 
                                 color: 'white',
@@ -887,7 +918,14 @@ const StaffManager = () => {
                                 }
                             }}
                         >
-                            {selectedStaff ? 'Cập nhật' : 'Thêm mới'}
+                            {isSubmitting ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CircularProgress size={20} color="inherit" />
+                                    <span>Đang xử lý...</span>
+                                </Box>
+                            ) : (
+                                selectedStaff ? 'Cập nhật' : 'Thêm mới'
+                            )}
                         </Button>
                     </DialogActions>
                 </Dialog>
