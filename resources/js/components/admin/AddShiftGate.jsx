@@ -162,25 +162,42 @@ const AddShiftGate = () => {
     const calculateStaffDistribution = () => {
         if (!selectedStaffs.length || !selectedGates.length) return null;
         
-        const staffPerGate = Math.floor(selectedStaffs.length / selectedGates.length);
-        const remainder = selectedStaffs.length % selectedGates.length;
+        // Tách nhân viên theo vehical_type
+        const selectedStaffDetails = selectedStaffs.map(id => 
+            staffs.find(staff => staff.id === id)
+        );
         
-        return selectedGates.map((gateId, index) => {
+        const type1Staffs = selectedStaffDetails.filter(staff => staff.vehical_type === 1);
+        const type2Staffs = selectedStaffDetails.filter(staff => staff.vehical_type === 2);
+        
+        return selectedGates.map((gateId) => {
             const gate = gates.find(g => g.id === gateId);
-            const extraStaff = index < remainder ? 1 : 0;
             
-            // Tính số nhân viên đã được phân ca cho cổng này
-            const assignedStaffCount = staffs.filter(staff => 
+            // Tính số nhân viên cho mỗi loại phương tiện
+            const type1PerGate = Math.floor(type1Staffs.length / selectedGates.length);
+            const type2PerGate = Math.floor(type2Staffs.length / selectedGates.length);
+            
+            // Tính số dư để phân bổ thêm
+            const type1Remainder = type1Staffs.length % selectedGates.length;
+            const type2Remainder = type2Staffs.length % selectedGates.length;
+            
+            // Lấy số nhân viên đã được phân ca theo từng loại
+            const assignedStaffs = staffs.filter(staff => 
                 staff.is_assigned && 
                 staff.assignment && 
                 staff.assignment.gate_name === gate?.name
-            ).length;
+            );
+            
+            const assignedType1Count = assignedStaffs.filter(staff => staff.vehical_type === 1).length;
+            const assignedType2Count = assignedStaffs.filter(staff => staff.vehical_type === 2).length;
 
             return {
                 gateId,
                 gateName: gate?.name,
-                staffCount: staffPerGate + extraStaff,
-                assignedStaffCount // Thêm số nhân viên đã được phân ca
+                type1Count: type1PerGate + (selectedGates.indexOf(gateId) < type1Remainder ? 1 : 0),
+                type2Count: type2PerGate + (selectedGates.indexOf(gateId) < type2Remainder ? 1 : 0),
+                assignedType1Count,
+                assignedType2Count
             };
         });
     };
@@ -218,7 +235,7 @@ const AddShiftGate = () => {
                 setSelectedStaffs([]);
                 setSelectedGates([]);
                 setAssignmentType('');
-                setPushNotification(false);
+                // setPushNotification(false);
 
             } else {
                 showAlert(response.data.message || 'Có lỗi xảy ra khi tạo ca', 'error');
@@ -242,10 +259,7 @@ const AddShiftGate = () => {
         if (!distribution) return null;
 
         const renderDistributionItem = (item) => (
-            <div 
-                key={item.gateId} 
-                className="distribution-item"
-            >
+            <div key={item.gateId} className="distribution-item">
                 <div className="gate-info">
                     <div className="gate-name">
                         <i className="fas fa-door-open"></i>
@@ -253,15 +267,35 @@ const AddShiftGate = () => {
                     </div>
                     
                     <div className="staff-counts">
-                        <div className="count-item new-staff-count" title="Số nhân viên mới">
-                            <FontAwesomeIcon icon={faUserPlus} />
-                            <span className="count-number">{item.staffCount}</span>
-                        </div>
+                        {/* Đò - Type 1 - Mới */}
+                        {item.type1Count > 0 && (
+                            <div className="count-item type-1" title="Đò - Phân ca mới">
+                                <FontAwesomeIcon icon={faUserPlus} />
+                                <span className="count-number">{item.type1Count}</span>
+                            </div>
+                        )}
                         
-                        {item.assignedStaffCount > 0 && (
-                            <div className="count-item assigned-staff-count" title="Số nhân viên đã có ca">
+                        {/* Đò - Type 1 - Đã phân ca */}
+                        {item.assignedType1Count > 0 && (
+                            <div className="count-item type-1" title="Đò - Đã phân ca">
                                 <FontAwesomeIcon icon={faUserCheck} />
-                                <span className="count-number">{item.assignedStaffCount}</span>
+                                <span className="count-number">{item.assignedType1Count}</span>
+                            </div>
+                        )}
+                        
+                        {/* Xuồng - Type 2 - Mới */}
+                        {item.type2Count > 0 && (
+                            <div className="count-item type-2" title="Xuồng - Phân ca mới">
+                                <FontAwesomeIcon icon={faUserPlus} />
+                                <span className="count-number">{item.type2Count}</span>
+                            </div>
+                        )}
+                        
+                        {/* Xuồng - Type 2 - Đã phân ca */}
+                        {item.assignedType2Count > 0 && (
+                            <div className="count-item type-2" title="Xuồng - Đã phân ca">
+                                <FontAwesomeIcon icon={faUserCheck} />
+                                <span className="count-number">{item.assignedType2Count}</span>
                             </div>
                         )}
                     </div>

@@ -344,7 +344,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 120px;
+    min-width: 76px;
 }
 
 .gate-name i {
@@ -353,31 +353,36 @@
 }
 
 .staff-counts {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
 }
 
 .count-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0;
     padding: 4px 8px;
     border-radius: 4px;
     background: #fff;
     border: 1px solid #e0e0e0;
-    width: 70px;
+    width: 60px;
 }
 
-.count-item i {
-    font-size: 12px;
-    width: 16px;
-    text-align: center;
+.count-item.type-2 {
+    color: #ffa184;
 }
 
-.count-item span {
-    font-size: 13px;
+.count-item.type-2 i {
+    color: #ffa184;
+}
+
+.count-item.type-1 {
+    color: #2196f3;
+}
+
+.count-item.type-1 i {
+    color: #2196f3;
 }
 
 .count-number {
