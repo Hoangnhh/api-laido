@@ -94,4 +94,16 @@ class Staff extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public static function getVehicalTypeName($type){
+        switch ($type) {
+            case self::VEHICAL_TYPE_DO:
+                return 'Đò';
+            case self::VEHICAL_TYPE_XUONG:
+                return 'Xuồng';
+            default:
+                return 'Không rõ';
+        }
+    }
 } 
+

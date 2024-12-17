@@ -18,6 +18,7 @@ class ReportController extends Controller
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
         $staffGroupId = $request->input('staff_group_id');
+        $vehicleType = $request->input('vehicle_type');
 
         $query = GateStaffShift::query()
             ->select([
@@ -25,11 +26,14 @@ class ReportController extends Controller
                 'staff.name as staff_name',
                 'staff_group.name as staff_group_name',
                 'gate_staff_shift.date as date_raw',
+                'staff.vehical_type as vehical_type',
+                'gate.name as gate_name',
                 DB::raw("DATE_FORMAT(gate_staff_shift.date, '%d/%m/%Y') as date_display"),
                 DB::raw("'Đang chờ' as status")
             ])
             ->join('staff', 'gate_staff_shift.staff_id', '=', 'staff.id')
             ->join('staff_group', 'staff.group_id', '=', 'staff_group.id')
+            ->join('gate', 'gate_staff_shift.gate_id', '=', 'gate.id')
             ->where('gate_staff_shift.status', GateStaffShift::STATUS_WAITING);
 
         if ($fromDate) {
@@ -44,7 +48,15 @@ class ReportController extends Controller
             $query->where('staff_group.id', $staffGroupId);
         }
 
+        if ($vehicleType) {
+            $query->where('staff_group.vehicle_type', $vehicleType);
+        }
+
         $result = $query->orderBy('staff.code', 'asc')->get();
+
+        foreach ($result as $item) {
+            $item->vehical_type_name = Staff::getVehicalTypeName($item->vehical_type);
+        }
 
         return response()->json([
             'success' => true,

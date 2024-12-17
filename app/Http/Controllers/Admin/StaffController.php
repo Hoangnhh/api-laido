@@ -52,17 +52,7 @@ class StaffController extends Controller
         $staffs = $query->latest()->paginate($perPage);
 
         foreach($staffs as $staff) {
-            switch($staff->vehical_type) {
-                case Staff::VEHICAL_TYPE_DO:
-                    $staff->vehical_type_name = 'Đò';
-                    break;
-                case Staff::VEHICAL_TYPE_XUONG:
-                    $staff->vehical_type_name = 'Xuồng';
-                    break;
-                default:
-                    $staff->vehical_type_name = 'Không rõ';
-                    break;
-            }
+            $staff->vehical_type_name = Staff::getVehicalTypeName($staff->vehical_type);
         }
         
         return response()->json($staffs);

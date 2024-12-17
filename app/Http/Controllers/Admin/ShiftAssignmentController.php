@@ -250,17 +250,12 @@ class ShiftAssignmentController extends Controller
                 ->get()
                 ->map(function($staff){
                     $assignment = $staff->gateStaffShifts->first();
-                    $vehicalTypeName = match ($staff->vehical_type) {
-                        Staff::VEHICAL_TYPE_DO => 'Đò',
-                        Staff::VEHICAL_TYPE_XUONG => 'Xuồng',
-                        default => 'Không rõ',
-                    };
                     return [
                         'id' => $staff->id,
                         'name' => $staff->name,
                         'code' => $staff->code,
                         'vehical_type' => $staff->vehical_type,
-                        'vehical_type_name' => $vehicalTypeName,
+                        'vehical_type_name' => Staff::getVehicalTypeName($staff->vehical_type),
                         'is_assigned' => !is_null($assignment),
                         'assignment' => $assignment ? [
                             'index' => $assignment->index,

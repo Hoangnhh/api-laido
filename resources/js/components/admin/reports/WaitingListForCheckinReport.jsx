@@ -146,6 +146,8 @@ const WaitingListForCheckinReport = () => {
             'Tên lái đò': item.staff_name,
             'Nhóm': item.staff_group_name,
             'Ngày phân ca': item.date_display,
+            'Vị trí': item.gate_name,
+            'Loại phương tiện': item.vehical_type_name,
             'Trạng thái': item.status
         }));
 
@@ -158,6 +160,8 @@ const WaitingListForCheckinReport = () => {
             { wch: 25 }, // Tên lái đò
             { wch: 20 }, // Nhóm
             { wch: 15 }, // Ngày phân ca
+            { wch: 15 }, // Vị trí
+            { wch: 15 }, // Loại phương tiện
             { wch: 15 }, // Trạng thái
         ];
         ws['!cols'] = colWidths;
@@ -256,6 +260,8 @@ const WaitingListForCheckinReport = () => {
                                                 <th>Tên lái đò</th>
                                                 <th>Nhóm</th>
                                                 <th>Ngày phân ca</th>
+                                                <th>Vị trí</th>
+                                                <th>Loại phương tiện</th>
                                                 <th>Trạng thái</th>
                                             </tr>
                                         </thead>
@@ -267,6 +273,8 @@ const WaitingListForCheckinReport = () => {
                                                     <td>{item.staff_name}</td>
                                                     <td>{item.staff_group_name}</td>
                                                     <td className="text-center">{item.date_display}</td>
+                                                    <td className="text-center">{item.gate_name}</td>
+                                                    <td className="text-center">{item.vehical_type_name}</td>
                                                     <td className="text-center">{item.status}</td>
                                                 </tr>
                                             ))}
