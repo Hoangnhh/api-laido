@@ -16,9 +16,25 @@
     letter-spacing: 0.5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     display: flex;
-    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.qd-controls {
+    display: flex;
     align-items: center;
     gap: 30px;
+    margin: 0 auto;
+}
+
+.qd-ticket-count {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    padding: 5px 15px;
 }
 
 .qd-position-selector {
@@ -1136,20 +1152,42 @@
 .qd-ticket-count {
     display: flex;
     align-items: center;
-    margin-left: 20px;
-    padding: 5px 10px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    margin-left: auto;
+    padding: 5px 15px;
 }
 
 .qd-ticket-label {
-    font-size: 14px;
-    color: #ffffff;
-    margin-right: 8px;
+    display: none;
 }
 
 .qd-ticket-number {
+    font-size: 70px !important;
     font-weight: bold;
-    color: #ffffff;
+    color: #ffd700 !important;
     padding: 2px 8px;
+}
+
+.qd-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background-color: #415c95;
+    color: #ffffff;
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid #1d4ed8;
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+}
+
+.qd-footer a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 26px;
+}
+
+.qd-footer a:hover {
+    text-decoration: underline;
 }

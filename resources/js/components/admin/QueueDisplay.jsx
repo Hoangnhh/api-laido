@@ -119,7 +119,7 @@ const QueueDisplay = () => {
             }
 
         } catch (err) {
-            console.error('L���i khi lấy danh sách phân ca:', err);
+            console.error('Lỗi khi lấy danh sách phân ca:', err);
         }
     };
 
@@ -340,7 +340,6 @@ const QueueDisplay = () => {
     return (
         <div className="qd-wrapper">
             <h1 className="qd-title">
-                HỆ THỐNG XẾP HÀNG TỰ ĐỘNG
                 <div className="qd-controls">
                     <div className="qd-position-selector">
                         <span>Vị trí:</span>
@@ -476,7 +475,10 @@ const QueueDisplay = () => {
                     ))}
                 </select>
             </Modal>
-       </div>
+            <div className="qd-footer">
+                Cung cấp bởi <a href="https://thinksoft.com.vn" target="_blank" rel="noopener noreferrer">ThinkSoft.com.vn</a>
+            </div>
+        </div>
     );
 };
 
