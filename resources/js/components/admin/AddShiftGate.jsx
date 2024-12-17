@@ -47,6 +47,7 @@ const AddShiftGate = () => {
     });
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [pushNotification, setPushNotification] = useState(true);
+    const [selectedVehicalType, setSelectedVehicalType] = useState('');
 
     useEffect(() => {
         fetchInitialData();
@@ -110,12 +111,11 @@ const AddShiftGate = () => {
     };
 
     const filteredStaffs = staffs.filter(staff => {
-
         const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             staff.code.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesGroup = true; // Bỏ điều kiện check group vì đã filter từ API
-
-        return matchesSearch && matchesGroup;
+        const matchesVehicalType = !selectedVehicalType || staff.vehical_type === selectedVehicalType;
+        
+        return matchesSearch && matchesVehicalType;
     });
 
     const handleStaffSelect = (staffId) => {
@@ -330,6 +330,12 @@ const AddShiftGate = () => {
         return { assignedCount, unassignedCount };
     };
 
+    // Thay thế hàm getUniqueVehicalTypes bằng danh sách cố định
+    const vehicalTypes = [
+        { value: 1, label: 'Đò' },
+        { value: 2, label: 'Xuồng' }
+    ];
+
     if (loading) {
         return (
             <AdminLayout>
@@ -380,6 +386,27 @@ const AddShiftGate = () => {
                                         {staffGroups.map(group => (
                                             <MenuItem key={group.id} value={group.id}>
                                                 {group.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                
+                                <FormControl 
+                                    variant="outlined" 
+                                    size="small" 
+                                    className="vehical-type-select"
+                                    disabled={!selectedGroup}
+                                >
+                                    <InputLabel>Loại phương tiện</InputLabel>
+                                    <Select
+                                        value={selectedVehicalType}
+                                        onChange={(e) => setSelectedVehicalType(e.target.value)}
+                                        label="Loại phương tiện"
+                                    >
+                                        <MenuItem value="">Tất cả</MenuItem>
+                                        {vehicalTypes.map(type => (
+                                            <MenuItem key={type.value} value={type.value}>
+                                                {type.label}
                                             </MenuItem>
                                         ))}
                                     </Select>
