@@ -143,9 +143,15 @@ class ShiftAssignmentController extends Controller
 
             DB::beginTransaction();
             try {
-                $gateShifts = [];
-                $gateStaffShifts = [];
-                $staffIndex = 0;
+
+                // Lấy danh sách nhân viên được chọn
+                $selectedStaffs = Staff::whereIn('id', $request->staff_ids)
+                    ->where('status', Staff::STATUS_ACTIVE)
+                    ->get();
+
+                // Tách nhân viên theo loại phương tiện
+                $doStaffs = $selectedStaffs->where('vehical_type', Staff::VEHICAL_TYPE_DO)->values();
+                $xuongStaffs = $selectedStaffs->where('vehical_type', Staff::VEHICAL_TYPE_XUONG)->values();
 
                 // Lấy index lớn nhất của nhóm trong ngày (across all gates)
                 $maxGroupIndex = GateStaffShift::where('date', $request->date)
@@ -155,6 +161,17 @@ class ShiftAssignmentController extends Controller
                     ->max('index') ?? 0;
 
                 $startIndex = $maxGroupIndex + 1;
+                $currentIndex = $startIndex;
+
+                // Phân bổ nhân viên lái đò
+                $doStaffsPerGate = floor($doStaffs->count() / count($request->gate_ids));
+                $doRemainder = $doStaffs->count() % count($request->gate_ids);
+                $doStaffIndex = 0;
+
+                // Phân bổ nhân viên lái xuồng
+                $xuongStaffsPerGate = floor($xuongStaffs->count() / count($request->gate_ids));
+                $xuongRemainder = $xuongStaffs->count() % count($request->gate_ids);
+                $xuongStaffIndex = 0;
 
                 // Tạo danh sách phân ca cho từng gate
                 foreach ($request->gate_ids as $index => $gateId) {
@@ -162,13 +179,15 @@ class ShiftAssignmentController extends Controller
                     $existingGateShift = GateShift::where('date', $request->date)
                         ->where('gate_id', $gateId)
                         ->where('staff_group_id', $request->staff_group_id)
-                        ->where('status', 'ACTIVE')
+                        ->where('status', GateShift::STATUS_ACTIVE)
                         ->first();
-                        
 
-                    $staffCountForGate = floor(count($request->staff_ids) / count($request->gate_ids))
-                    + ($index < (count($request->staff_ids) % count($request->gate_ids)) ? 1 : 0);
-                    if($staffCountForGate == 0) {
+                    // Tính số lượng nhân viên cho gate này
+                    $doStaffCountForGate = $doStaffsPerGate + ($index < $doRemainder ? 1 : 0);
+                    $xuongStaffCountForGate = $xuongStaffsPerGate + ($index < $xuongRemainder ? 1 : 0);
+
+                    // Bỏ qua nếu không có nhân viên nào được phân bổ
+                    if ($doStaffCountForGate == 0 && $xuongStaffCountForGate == 0) {
                         continue;
                     }
 
@@ -180,38 +199,56 @@ class ShiftAssignmentController extends Controller
                         'current_index' => $maxGroupIndex,
                         'status' => 'ACTIVE'
                     ]);
-                    
-                    // Tạo GateStaffShift cho từng nhân viên với index liên tục
-                    for ($i = 0; $i < $staffCountForGate; $i++) {
-                        $gateStaffShift = GateStaffShift::create([
-                            'date' => $request->date,
-                            'gate_shift_id' => $gateShift->id,
-                            'index' => $startIndex + $staffIndex,  // Sử dụng staffIndex để tăng liên tục
-                            'gate_id' => $gateId,
-                            'staff_id' => $request->staff_ids[$staffIndex],
-                            'status' => 'WAITING'
-                        ]);
-                        $gateStaffShiftIds[] = $gateStaffShift->id;
-                        $staffIndex++;
+
+                    // Tạo GateStaffShift cho nhân viên lái đò
+                    for ($i = 0; $i < $doStaffCountForGate; $i++) {
+                        if ($doStaffIndex < $doStaffs->count()) {
+                            $gateStaffShift = GateStaffShift::create([
+                                'date' => $request->date,
+                                'gate_shift_id' => $gateShift->id,
+                                'index' => $currentIndex,
+                                'gate_id' => $gateId,
+                                'staff_id' => $doStaffs[$doStaffIndex]->id,
+                                'status' => GateStaffShift::STATUS_WAITING
+                            ]);
+                            $gateStaffShiftIds[] = $gateStaffShift->id;
+                            $currentIndex++;
+                            $doStaffIndex++;
+                        }
+                    }
+
+                    // Tạo GateStaffShift cho nhân viên lái xuồng
+                    for ($i = 0; $i < $xuongStaffCountForGate; $i++) {
+                        if ($xuongStaffIndex < $xuongStaffs->count()) {
+                            $gateStaffShift = GateStaffShift::create([
+                                'date' => $request->date,
+                                'gate_shift_id' => $gateShift->id,
+                                'index' => $currentIndex,
+                                'gate_id' => $gateId,
+                                'staff_id' => $xuongStaffs[$xuongStaffIndex]->id,
+                                'status' => GateStaffShift::STATUS_WAITING
+                            ]);
+                            $gateStaffShiftIds[] = $gateStaffShift->id;
+                            $currentIndex++;
+                            $xuongStaffIndex++;
+                        }
                     }
                 }
 
                 DB::commit();
-                try {
-                    if ($request->push_notification) {  
+
+                // Gửi thông báo nếu được yêu cầu
+                if ($request->push_notification) {
+                    try {
                         $this->notificationService->pushShiftNotiForMultiple($gateStaffShiftIds);
+                    } catch (Exception $e) {
+                        Log::error('Error pushing shift notification: ' . $e->getMessage());
                     }
-                } catch (Exception $e) {
-                    Log::error('Error pushing shift notification: ' . $e->getMessage());
                 }
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Phân ca thành công',
-                    'data' => [
-                        'gate_shifts' => $gateShifts,
-                        'gate_staff_shifts' => $gateStaffShifts
-                    ]
+                    'message' => 'Phân ca thành công'
                 ], 201);
 
             } catch (Exception $e) {
@@ -222,8 +259,7 @@ class ShiftAssignmentController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage(),
-                'error' => $e->getMessage()
+                'message' => $e->getMessage()
             ]);
         }
     }
