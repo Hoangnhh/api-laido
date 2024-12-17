@@ -476,7 +476,7 @@ const AddShiftGate = () => {
                                     {filteredStaffs.map((staff) => (
                                         <div 
                                             key={staff.id} 
-                                            className={`staff-card ${staff.is_assigned ? 'assigned' : ''}`}
+                                            className={`staff-card ${staff.is_assigned ? 'assigned' : ''} vehical-type-${staff.vehical_type}`}
                                             onClick={() => !staff.is_assigned && handleStaffSelect(staff.id)}
                                         >
                                             {!staff.is_assigned && (
