@@ -536,6 +536,7 @@ const StaffManager = () => {
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>CMND/CCCD</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày cấp</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tải trọng</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Loại</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngân hàng</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Trạng thái</TableCell>
                                 <TableCell align="right" sx={{ color: '#fff', fontWeight: 'bold' }}>Thao tác</TableCell>
@@ -602,6 +603,7 @@ const StaffManager = () => {
                                         <TableCell>{staff.card_id}</TableCell>
                                         <TableCell>{formatDate(staff.card_date)}</TableCell>
                                         <TableCell>{staff.vehical_size}</TableCell>
+                                        <TableCell>{staff.vehical_type_name}</TableCell>
                                         <TableCell>
                                             {staff.bank_name && staff.bank_account ? (
                                                 <Box>
@@ -798,16 +800,30 @@ const StaffManager = () => {
                                                 }
                                             />
 
-                                            <TextField
-                                                label="Tải trọng phương tiện (Người)"
-                                                type="number"
-                                                value={formData.vehical_size}
-                                                onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
-                                                InputProps={{
-                                                    inputProps: { min: 0 }
-                                                }}
-                                                helperText="Nhập 0 nếu không có phương tiện"
-                                            />
+                                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                                <TextField
+                                                    label="Tải trọng phương tiện (Người)" 
+                                                    type="number"
+                                                    value={formData.vehical_size}
+                                                    onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
+                                                    InputProps={{
+                                                        inputProps: { min: 0 }
+                                                    }}
+                                                    helperText="Nhập 0 nếu không có phương tiện"
+                                                    sx={{ flex: 1 }}
+                                                />
+
+                                                <TextField
+                                                    select
+                                                    label="Loại phương tiện"
+                                                    value={formData.vehical_type || 1}
+                                                    onChange={(e) => setFormData({ ...formData, vehical_type: parseInt(e.target.value) })}
+                                                    sx={{ flex: 1 }}
+                                                >
+                                                    <MenuItem value={1}>Đò</MenuItem>
+                                                    <MenuItem value={2}>Xuồng</MenuItem>
+                                                </TextField>
+                                            </Box>
                                         </Box>
                                     </Box>
 

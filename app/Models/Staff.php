@@ -14,6 +14,8 @@ class Staff extends Model
 
     const STATUS_ACTIVE = 'ACTIVE';
     const STATUS_INACTIVE = 'INACTIVE';
+    const VEHICAL_TYPE_DO = 1;
+    const VEHICAL_TYPE_XUONG = 2;
 
     protected $fillable = [
         'type',
@@ -31,13 +33,15 @@ class Staff extends Model
         'bank_account',
         'status',
         'vehical_size',
+        'vehical_type',
         'phone',
         'fcm_token'
     ];
 
     protected $casts = [
         'birthdate' => 'date',
-        'vehical_size' => 'integer'
+        'vehical_size' => 'integer',
+        'vehical_type' => 'integer'
     ];
 
     public function group(): BelongsTo

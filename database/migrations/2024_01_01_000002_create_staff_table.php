@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('card_id', 45)->nullable();
             $table->string('status', 45)->default('ACTIVE');
             $table->integer('vehical_size')->default(6);
+            $table->integer('vehical_type')->default(1);
             $table->string('fcm_token', 200)->nullable();
             $table->timestamps();
         });

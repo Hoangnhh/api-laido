@@ -45,6 +45,20 @@ class StaffController extends Controller
         }
 
         $staffs = $query->latest()->paginate($perPage);
+
+        foreach($staffs as $staff) {
+            switch($staff->vehical_type) {
+                case Staff::VEHICAL_TYPE_DO:
+                    $staff->vehical_type_name = 'Đò';
+                    break;
+                case Staff::VEHICAL_TYPE_XUONG:
+                    $staff->vehical_type_name = 'Xuồng';
+                    break;
+                default:
+                    $staff->vehical_type_name = 'Không rõ';
+                    break;
+            }
+        }
         
         return response()->json($staffs);
     }
@@ -82,6 +96,7 @@ class StaffController extends Controller
                 'address' => 'required',
                 'avatar' => 'nullable|image|max:2048',
                 'vehical_size' => 'required|integer|min:0',
+                'vehical_type' => 'required|integer|min:0',
                 'phone' => 'required|size:10|unique:staff'
             ]);
 
@@ -131,6 +146,8 @@ class StaffController extends Controller
                 'birthdate' => 'required|date',
                 'address' => 'required',
                 'phone' => 'required|size:10|unique:staff,phone,'.$staff->id,
+                'vehical_size' => 'required|integer|min:0',
+                'vehical_type' => 'required|integer|min:0',
                 'avatar' => 'nullable|image|max:2048'
             ];
 
