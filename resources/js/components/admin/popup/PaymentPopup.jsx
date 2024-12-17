@@ -551,7 +551,6 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                                                     id="bankName"
                                                     className="form-control"
                                                     value={info.bank_name}
-                                                    readOnly
                                                 />
                                             </div>
 
@@ -562,7 +561,6 @@ const PaymentPopup = ({ show, onClose, payment, info }) => {
                                                     id="bankAccount"
                                                     className="form-control"
                                                     value={info.bank_account}
-                                                    readOnly
                                                 />
                                             </div>
                                         </>

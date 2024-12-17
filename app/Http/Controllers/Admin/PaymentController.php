@@ -278,13 +278,6 @@ class PaymentController extends Controller
                 }
             }
 
-            if($paymentMethod == Payment::PAYMENT_METHOD_BANK_TRANSFER && ($bank == "" || $accountNumber == "")) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Vui lòng nhập đẩy đủ thông tin'
-                ], 400);
-            }
-
             if ($staffId == "" || $date == "" || $amount == "") {
                 return response()->json([
                     'success' => false,

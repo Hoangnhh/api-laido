@@ -356,7 +356,7 @@ const QueueDisplay = () => {
                         </select>
                         {selectedPosition !== 0 && (
                             <div className="qd-ticket-count">
-                                <span className="qd-ticket-label">Số vé đã checkin:</span>
+                                <span className="qd-ticket-label">SL vé:</span>
                                 <span className="qd-ticket-number">{checkedTicketsCount}</span>
                             </div>
                         )}
