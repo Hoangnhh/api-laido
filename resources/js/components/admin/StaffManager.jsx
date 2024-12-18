@@ -65,12 +65,13 @@ const FIELD_LABELS = {
 const StaffManager = () => {
     const [staffs, setStaffs] = useState([]);
     const [groups, setGroups] = useState([]); // Để chọn nhóm nhân viên
+    const [gates, setGates] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState(null);
     const [formData, setFormData] = useState({
-        type: 'DRIVER',
+        type: 'STAFF',
         group_id: null,
         code: null,
         name: null,
@@ -85,6 +86,7 @@ const StaffManager = () => {
         card_date: null,
         bank_name: null,
         bank_account: null,
+        default_gate_id: null,
     });
     const [alert, setAlert] = useState({
         open: false,
@@ -100,7 +102,8 @@ const StaffManager = () => {
         search: '',
         groupId: '',
         status: 'ACTIVE',
-        vehicalType: ''
+        vehicalType: '',
+        defaultGateId: ''
     });
 
     // Tạo state để theo dõi việc cần fetch data
@@ -159,7 +162,8 @@ const StaffManager = () => {
                     search: filters.search,
                     group_id: filters.groupId,
                     status: filters.status || null,
-                    vehical_type: filters.vehicalType || null
+                    vehical_type: filters.vehicalType || null,
+                    default_gate_id: filters.defaultGateId || null
                 }
             });
             setStaffs(response.data.data);
@@ -174,8 +178,10 @@ const StaffManager = () => {
     // Fetch staff groups
     const fetchGroups = async () => {
         try {
-            const response = await axios.get('/api/admin/staff-groups');
-            setGroups(response.data);
+            const response = await axios.get('/api/admin/shift-assignments-data');
+            console.log(response.data.shifts);
+            setGroups(response.data.shifts || []);
+            setGates(response.data.gates || []);
         } catch (error) {
             showAlert('Lỗi khi tải danh sách nhóm', 'error');
         }
@@ -212,7 +218,8 @@ const StaffManager = () => {
                 ...staff,
                 birthdate: formatDateForInput(staff.birthdate),
                 card_date: formatDateForInput(staff.card_date),
-                password: ''
+                password: '',
+                default_gate_id: staff.default_gate_id
             });
         } else {
             setSelectedStaff(null);
@@ -232,6 +239,7 @@ const StaffManager = () => {
                 card_date: null,
                 bank_name: null,
                 bank_account: null,
+                default_gate_id: null,
             });
         }
         setOpenDialog(true);
@@ -402,6 +410,14 @@ const StaffManager = () => {
         }));
     };
 
+    // Thêm handler cho việc thay đổi filter default gate
+    const handleDefaultGateChange = (event) => {
+        setFilters(prev => ({
+            ...prev,
+            defaultGateId: event.target.value
+        }));
+    };
+
     // Thêm hàm showAlert
     const showAlert = (message, severity = 'success') => {
         setAlert({
@@ -507,12 +523,14 @@ const StaffManager = () => {
                             <MenuItem value="">
                                 <em>Tất cả nhóm</em>
                             </MenuItem>
-                            {groups.filter(group => group.status === 'ACTIVE').map((group) => (
+                            {groups.map((group) => (
                                 <MenuItem key={group.id} value={group.id}>
                                     {group.name}
                                 </MenuItem>
                             ))}
                         </TextField>
+
+                        {/* Vehical Type Filter */}
                         <TextField
                             select
                             size="small"
@@ -520,13 +538,31 @@ const StaffManager = () => {
                             value={filters.vehicalType}
                             onChange={handleVehicalTypeChange}
                             className="staff-manager-filter"
-                            sx={{ minWidth: 200 }}
                         >
                             <MenuItem value="">
                                 <em>Tất cả</em>
                             </MenuItem>
                             <MenuItem value="1">Đò</MenuItem>
                             <MenuItem value="2">Xuồng</MenuItem>
+                        </TextField>
+
+                        {/* Default Gate Filter - Thêm mới */}
+                        <TextField
+                            select
+                            size="small"
+                            label="Vị trí mặc định"
+                            value={filters.defaultGateId}
+                            onChange={handleDefaultGateChange}
+                            className="staff-manager-filter"
+                        >
+                            <MenuItem value="">
+                                <em>Tất cả vị trí</em>
+                            </MenuItem>
+                            {gates.map((gate) => (
+                                <MenuItem key={gate.id} value={gate.id}>
+                                    {gate.name}
+                                </MenuItem>
+                            ))}
                         </TextField>
 
                         {/* Search */}
@@ -561,12 +597,11 @@ const StaffManager = () => {
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
-                            <TableRow sx={{ 
-                                bgcolor: '#2c3e50',
-                            }}>
+                            <TableRow sx={{ bgcolor: '#2c3e50' }}>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Avatar</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tên nhân viên</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Nhóm</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Vị trí mặc đ��nh</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày sinh</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>CMND/CCCD</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày cấp</TableCell>
@@ -580,13 +615,13 @@ const StaffManager = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
+                                    <TableCell colSpan={12} align="center">
                                         Đang tải dữ liệu...
                                     </TableCell>
                                 </TableRow>
                             ) : staffs.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
+                                    <TableCell colSpan={12} align="center">
                                         Không có dữ liệu
                                     </TableCell>
                                 </TableRow>
@@ -633,8 +668,23 @@ const StaffManager = () => {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {formatDate(staff.birthdate)}
+                                            {staff.default_gate_id ? (
+                                                <Chip 
+                                                    label={gates.find(g => g.id === staff.default_gate_id)?.name || `Cổng ${staff.default_gate_id}`}
+                                                    color="info"
+                                                    variant="outlined"
+                                                    size="small"
+                                                />
+                                            ) : (
+                                                <Chip 
+                                                    label="Không rõ"
+                                                    color="default"
+                                                    variant="outlined"
+                                                    size="small"
+                                                />
+                                            )}
                                         </TableCell>
+                                        <TableCell>{formatDate(staff.birthdate)}</TableCell>
                                         <TableCell>{staff.card_id}</TableCell>
                                         <TableCell>{formatDate(staff.card_date)}</TableCell>
                                         <TableCell>{staff.vehical_size}</TableCell>
@@ -814,6 +864,23 @@ const StaffManager = () => {
                                                 </MenuItem>
                                             ))}
                                         </TextField>
+
+                                        <TextField
+                                            select
+                                            label="Vị trí mặc định"
+                                            value={formData.default_gate_id || ''}
+                                            onChange={(e) => setFormData({ ...formData, default_gate_id: e.target.value })}
+                                            sx={{ flex: 1 }}
+                                        >
+                                            <MenuItem value="">
+                                                <em>Chọn vị trí mặc định</em>
+                                            </MenuItem>
+                                            {gates.map((gate) => (
+                                                <MenuItem key={gate.id} value={gate.id}>
+                                                    {gate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Box>
                                 </Box>
 
@@ -850,7 +917,7 @@ const StaffManager = () => {
                                                 error={formData.password !== formData.password_confirmation}
                                                 helperText={formData.password !== formData.password_confirmation ? 
                                                     "Mật khẩu không khớp" : 
-                                                    selectedStaff ? "Để trống nếu không muốn đổi mật khẩu" : "Bắt buộc nhập lại mật khẩu"
+                                                    selectedStaff ? "ể trống nếu không muốn đổi mật khẩu" : "Bắt buộc nhập lại mật khẩu"
                                                 }
                                             />
 

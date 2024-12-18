@@ -23,6 +23,7 @@ class StaffController extends Controller
         $groupId = $request->input('group_id');
         $status = $request->input('status');
         $vehicalType = $request->input('vehical_type');
+        $defaultGateId = $request->input('default_gate_id');
         
         $query = Staff::with('group');
 
@@ -36,6 +37,10 @@ class StaffController extends Controller
 
         if ($vehicalType) {
             $query->where('vehical_type', $vehicalType);
+        }
+
+        if ($defaultGateId) {
+            $query->where('default_gate_id', $defaultGateId);
         }
 
         if ($search) {
@@ -92,7 +97,8 @@ class StaffController extends Controller
                 'avatar' => 'nullable|image|max:2048',
                 'vehical_size' => 'required|integer|min:0',
                 'vehical_type' => 'required|integer|min:0',
-                'phone' => 'required|size:10|unique:staff'
+                'phone' => 'required|size:10|unique:staff',
+                'default_gate_id' => 'required|exists:gate,id'
             ]);
 
             if ($request->hasFile('avatar')) {
