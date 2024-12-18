@@ -18,6 +18,7 @@ CREATE TABLE `admin-laido`.`staff` (
   `vehical_size` INT NOT NULL DEFAULT 6,
   `vehical_type` INT(2) NOT NULL DEFAULT 1,
   `fcm_token` TEXT NULL,
+  `default_gate_id` INT NULL DEFAULT 1,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP ,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 

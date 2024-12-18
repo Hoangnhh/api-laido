@@ -35,7 +35,8 @@ class Staff extends Model
         'vehical_size',
         'vehical_type',
         'phone',
-        'fcm_token'
+        'fcm_token',
+        'default_gate_id'
     ];
 
     protected $casts = [
@@ -72,6 +73,11 @@ class Staff extends Model
     public function notifications(): HasMany
     {
         return $this->hasMany(StaffNotification::class);
+    }
+
+    public function gate(): BelongsTo
+    {
+        return $this->belongsTo(Gate::class, 'default_gate_id');
     }
 
     public function sendNotification($title, $body, $data = [])
