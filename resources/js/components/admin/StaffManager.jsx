@@ -601,7 +601,7 @@ const StaffManager = () => {
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Avatar</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tên nhân viên</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Nhóm</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Vị trí mặc đ��nh</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Vị trí mặc định</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày sinh</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>CMND/CCCD</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Ngày cấp</TableCell>

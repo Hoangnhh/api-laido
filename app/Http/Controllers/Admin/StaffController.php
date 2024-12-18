@@ -98,7 +98,7 @@ class StaffController extends Controller
                 'vehical_size' => 'required|integer|min:0',
                 'vehical_type' => 'required|integer|min:0',
                 'phone' => 'required|size:10|unique:staff',
-                'default_gate_id' => 'required|exists:gate,id'
+                'default_gate_id' => 'nullable'
             ]);
 
             if ($request->hasFile('avatar')) {
@@ -149,7 +149,8 @@ class StaffController extends Controller
                 'phone' => 'required|size:10|unique:staff,phone,'.$staff->id,
                 'vehical_size' => 'required|integer|min:0',
                 'vehical_type' => 'required|integer|min:0',
-                'avatar' => 'nullable|image|max:2048'
+                'avatar' => 'nullable|image|max:2048',
+                'default_gate_id' => 'required'
             ];
 
             if ($request->filled('password')) {
