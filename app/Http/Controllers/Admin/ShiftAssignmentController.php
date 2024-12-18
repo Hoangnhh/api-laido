@@ -291,9 +291,10 @@ class ShiftAssignmentController extends Controller
                         'name' => $staff->name,
                         'code' => $staff->code,
                         'vehical_type' => $staff->vehical_type,
+                        'default_gate_id' => $staff->default_gate_id,
                         'vehical_type_name' => Staff::getVehicalTypeName($staff->vehical_type),
                         'is_assigned' => !is_null($assignment),
-                        'assignment' => $assignment ? [
+                        'assignment' => $assignment && isset($assignment->gate->name) ? [
                             'index' => $assignment->index,
                             'gate_name' => $assignment->gate->name
                         ] : null
@@ -308,7 +309,7 @@ class ShiftAssignmentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Có lỗi xảy ra khi lấy danh sách nhân viên',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage() . ' at line ' . $e->getLine()
             ], 500);
         }
     }
@@ -943,6 +944,181 @@ class ShiftAssignmentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Xóa ca làm việc thất bại',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createDefaultGateAssignment(Request $request)
+    {
+        try {
+            // Validate đầu vào
+            $validated = $request->validate([
+                'date' => [
+                    'required',
+                    'date_format:Y-m-d',
+                    function ($attribute, $value, $fail) {
+                        if (strtotime($value) < strtotime(date('Y-m-d'))) {
+                            $fail('Không thể tạo ca làm việc cho ngày trong quá khứ');
+                        }
+                    },
+                ],
+                'staff_group_id' => 'required|exists:staff_group,id',
+                'push_notification' => 'nullable|boolean',
+                'shift_info' => 'required|array',
+                'shift_info.*.gate_id' => 'required|exists:gate,id',
+                'shift_info.*.staff_ids' => 'required|array',
+                'shift_info.*.staff_ids.*' => 'exists:staff,id',
+            ]);
+
+            // Kiểm tra thêm một lần nữa để đảm bảo
+            $selectedDate = strtotime($request->date);
+            $today = strtotime(date('Y-m-d'));
+            
+            if ($selectedDate < $today) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể tạo ca làm việc cho ngày trong quá khứ'
+                ], 422);
+            }
+
+            // Lấy tất cả staff_ids từ shift_info
+            $allStaffIds = collect($request->shift_info)->pluck('staff_ids')->flatten()->unique();
+
+            // Kiểm tra trạng thái của các Gate
+            $inactiveGates = Gate::whereIn('id', collect($request->shift_info)->pluck('gate_id'))
+                ->where('status', '!=', 'ACTIVE')
+                ->get();
+            
+            if ($inactiveGates->isNotEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Các vị trí sau đang không hoạt động: ' . 
+                        $inactiveGates->pluck('name')->join(', ')
+                ], 422);
+            }
+
+            // Kiểm tra trạng thái của các Staff
+            $inactiveStaffs = Staff::whereIn('id', $allStaffIds)
+                ->where('status', '!=', 'ACTIVE')
+                ->get();
+
+            if ($inactiveStaffs->isNotEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Các nhân viên sau đang không hoạt động: ' . 
+                        $inactiveStaffs->pluck('name')->join(', ')
+                ], 422);
+            }
+
+            // Kiểm tra xem nhân viên có thuộc nhóm không
+            $staffCount = Staff::whereIn('id', $allStaffIds)
+                ->where('group_id', $request->staff_group_id)
+                ->where('status', 'ACTIVE')
+                ->count();
+
+            if ($staffCount !== count($allStaffIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Một số nhân viên không thuộc nhóm này'
+                ], 422);
+            }
+
+            // Kiểm tra xem có nhân viên nào đã được phân ca trong ngày chưa
+            $searchDate = Carbon::parse($request->date)->startOfDay();
+            
+            $existingAssignments = GateStaffShift::whereDate('date', $searchDate)
+                ->whereIn('staff_id', $allStaffIds)
+                ->with('staff:id,name,code')
+                ->get();
+
+            if ($existingAssignments->isNotEmpty()) {
+                $assignedStaffs = $existingAssignments->map(function($assignment) {
+                    return $assignment->staff->name . ' (' . $assignment->staff->code . ')';
+                })->join(', ');
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Các nhân viên sau đã được phân ca trong ngày: ' . $assignedStaffs
+                ], 422);
+            }
+
+            DB::beginTransaction();
+            try {
+                $gateStaffShiftIds = [];
+
+                foreach ($request->shift_info as $shiftInfo) {
+                    // Bỏ qua nếu không có nhân viên nào được phân bổ cho cổng này
+                    if (empty($shiftInfo['staff_ids'])) {
+                        continue;
+                    }
+
+                    // Kiểm tra xem đã có GateShift cho ngày và nhóm này chưa
+                    $gateShift = GateShift::where('date', $request->date)
+                        ->where('gate_id', $shiftInfo['gate_id'])
+                        ->where('staff_group_id', $request->staff_group_id)
+                        ->where('status', GateShift::STATUS_ACTIVE)
+                        ->first();
+
+                    // Lấy index lớn nhất của nhóm trong ngày cho gate này
+                    $maxIndex = GateStaffShift::whereDate('date', $request->date)
+                        ->whereHas('gateShift', function($query) use ($request, $shiftInfo) {
+                            $query->where('gate_id', $shiftInfo['gate_id'])
+                                ->where('staff_group_id', $request->staff_group_id);
+                        })
+                        ->max('index') ?? 0;
+
+                    // Tạo hoặc sử dụng GateShift hiện có
+                    if (!$gateShift) {
+                        $gateShift = GateShift::create([
+                            'staff_group_id' => $request->staff_group_id,
+                            'gate_id' => $shiftInfo['gate_id'],
+                            'date' => $request->date,
+                            'current_index' => $maxIndex,
+                            'status' => 'ACTIVE'
+                        ]);
+                    }
+
+                    // Tạo GateStaffShift cho từng nhân viên
+                    foreach ($shiftInfo['staff_ids'] as $staffId) {
+                        $maxIndex++;
+                        $gateStaffShift = GateStaffShift::create([
+                            'gate_shift_id' => $gateShift->id,
+                            'gate_id' => $shiftInfo['gate_id'],
+                            'staff_id' => $staffId,
+                            'date' => $request->date,
+                            'index' => $maxIndex,
+                            'status' => GateStaffShift::STATUS_WAITING
+                        ]);
+                        $gateStaffShiftIds[] = $gateStaffShift->id;
+                    }
+                }
+
+                // Gửi thông báo nếu được yêu cầu
+                if ($request->push_notification && !empty($gateStaffShiftIds)) {
+                    try {
+                        $this->notificationService->pushShiftNotiForMultiple($gateStaffShiftIds);
+                    } catch (Exception $e) {
+                        Log::error('Error pushing shift notification: ' . $e->getMessage());
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Tạo ca làm việc thành công'
+                ]);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tạo ca làm việc thất bại',
                 'error' => $e->getMessage()
             ], 500);
         }

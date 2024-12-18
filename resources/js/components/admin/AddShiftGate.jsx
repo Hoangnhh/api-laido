@@ -48,6 +48,7 @@ const AddShiftGate = () => {
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [pushNotification, setPushNotification] = useState(true);
     const [selectedVehicalType, setSelectedVehicalType] = useState('');
+    const [selectedDefaultGate, setSelectedDefaultGate] = useState('');
 
     useEffect(() => {
         fetchInitialData();
@@ -114,8 +115,9 @@ const AddShiftGate = () => {
         const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             staff.code.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesVehicalType = !selectedVehicalType || staff.vehical_type === selectedVehicalType;
+        const matchesDefaultGate = !selectedDefaultGate || staff.default_gate_id === selectedDefaultGate;
         
-        return matchesSearch && matchesVehicalType;
+        return matchesSearch && matchesVehicalType && matchesDefaultGate;
     });
 
     const handleStaffSelect = (staffId) => {
@@ -143,11 +145,20 @@ const AddShiftGate = () => {
         const type = e.target.value;
         setAssignmentType(type);
         
-        if (type === 'all') {
-            const allGateIds = gates.map(gate => gate.id);
-            setSelectedGates(allGateIds);
-        } else {
-            setSelectedGates([]);
+        switch(type) {
+            case 'all':
+                const allGateIds = gates.map(gate => gate.id);
+                setSelectedGates(allGateIds);
+                break;
+            case 'default':
+                const allGatesForDefault = gates.map(gate => gate.id);
+                setSelectedGates(allGatesForDefault);
+                break;
+            case 'specific':
+                setSelectedGates([]);
+                break;
+            default:
+                setSelectedGates([]);
         }
     };
 
@@ -202,8 +213,166 @@ const AddShiftGate = () => {
         });
     };
 
-    // Thêm hàm xử lý tạo ca làm việc
-    const handleCreateShift = async () => {
+    // Thêm hàm tính toán phân bổ nhân viên theo cổng mặc định
+    const calculateDefaultDistribution = () => {
+        if (!selectedStaffs.length) return null;
+        
+        // Tạo object phân bổ theo cổng
+        const distribution = gates.map(gate => {
+            // Lọc nhân viên có default_gate_id trùng với gate hiện tại
+            const defaultStaffs = selectedStaffs
+                .map(staffId => staffs.find(s => s.id === staffId))
+                .filter(staff => staff.default_gate_id === gate.id);
+            
+            // Tách nhân viên theo loại phương tiện
+            const type1Staffs = defaultStaffs.filter(staff => staff.vehical_type === 1);
+            const type2Staffs = defaultStaffs.filter(staff => staff.vehical_type === 2);
+            
+            // Lấy số nhân viên đã được phân ca
+            const assignedStaffs = staffs.filter(staff => 
+                staff.is_assigned && 
+                staff.assignment && 
+                staff.assignment.gate_name === gate.name
+            );
+            
+            return {
+                gateId: gate.id,
+                gateName: gate.name,
+                type1Count: type1Staffs.length,
+                type2Count: type2Staffs.length,
+                assignedType1Count: assignedStaffs.filter(staff => staff.vehical_type === 1).length,
+                assignedType2Count: assignedStaffs.filter(staff => staff.vehical_type === 2).length
+            };
+        });
+
+        return distribution;
+    };
+
+    // Thêm component hiển thị phân bổ mặc định
+    const DefaultDistribution = () => {
+        const distribution = calculateDefaultDistribution();
+        if (!distribution) return null;
+
+        return (
+            <div className="staff-distribution">
+                <h4>
+                    <i className="fas fa-random me-2"></i>
+                    Phân bổ nhân viên theo vị trí mặc định:
+                </h4>
+                <div className="distribution-grid">
+                    {distribution.map(item => (
+                        <div key={item.gateId} className="distribution-item">
+                            <div className="gate-info">
+                                <div className="gate-name">
+                                    <i className="fas fa-door-open"></i>
+                                    {item.gateName}
+                                </div>
+                                
+                                <div className="staff-counts">
+                                    {/* Đò - Type 1 - Mới */}
+                                    {item.type1Count > 0 && (
+                                        <div className="count-item type-1" title="Đò - Phân ca mới">
+                                            <FontAwesomeIcon icon={faUserPlus} />
+                                            <span className="count-number">{item.type1Count}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Đò - Type 1 - Đã phân ca */}
+                                    {item.assignedType1Count > 0 && (
+                                        <div className="count-item type-1" title="Đò - Đã phân ca">
+                                            <FontAwesomeIcon icon={faUserCheck} />
+                                            <span className="count-number">{item.assignedType1Count}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Xuồng - Type 2 - Mới */}
+                                    {item.type2Count > 0 && (
+                                        <div className="count-item type-2" title="Xuồng - Phân ca mới">
+                                            <FontAwesomeIcon icon={faUserPlus} />
+                                            <span className="count-number">{item.type2Count}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Xuồng - Type 2 - Đã phân ca */}
+                                    {item.assignedType2Count > 0 && (
+                                        <div className="count-item type-2" title="Xuồng - Đã phân ca">
+                                            <FontAwesomeIcon icon={faUserCheck} />
+                                            <span className="count-number">{item.assignedType2Count}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    // Thêm hàm xử lý phân ca theo cổng mặc định
+    const handleDefaultGateAssignment = async () => {
+        try {
+            setIsCreating(true);
+            
+            if (!selectedDate) {
+                showAlert('Vui lòng chọn ngày trước khi tạo ca', 'error');
+                return;
+            }
+
+            if (!selectedGroup || !selectedStaffs.length) {
+                showAlert('Vui lòng chọn đầy đủ thông tin trước khi tạo ca', 'error');
+                return;
+            }
+
+            // Tạo shift_info theo cổng mặc định
+            const shiftInfo = gates.map(gate => ({
+                gate_id: gate.id,
+                staff_ids: selectedStaffs.filter(staffId => 
+                    staffs.find(s => s.id === staffId)?.default_gate_id === gate.id
+                )
+            })).filter(info => info.staff_ids.length > 0);
+
+            const response = await axios.post('/api/admin/create-default-gate-assignment', {
+                date: selectedDate.format('YYYY-MM-DD'),
+                staff_group_id: selectedGroup,
+                push_notification: pushNotification,
+                shift_info: shiftInfo
+            });
+
+            if (response.data.status === 'success') {
+                showAlert(response.data.message, 'success');
+                await fetchStaffsByGroup(selectedGroup);
+                setSelectedStaffs([]);
+                setSelectedGates([]);
+                setAssignmentType('');
+            } else {
+                showAlert(response.data.message || 'Có lỗi xảy ra khi tạo ca', 'error');
+            }
+
+        } catch (error) {
+            if (error.response?.data?.status === 'error') {
+                showAlert(error.response.data.message, 'error');
+            } else {
+                showAlert('Có lỗi xảy ra khi tạo ca làm việc', 'error');
+            }
+            console.error('Error creating shift:', error);
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    // Cập nhật hàm handleCreateShift
+    const handleCreateShift = () => {
+        if (assignmentType === 'default') {
+            handleDefaultGateAssignment();
+        } else {
+            // Existing create shift logic
+            handleNormalCreateShift();
+        }
+    };
+
+    // Đổi tên hàm cũ thành handleNormalCreateShift
+    const handleNormalCreateShift = async () => {
         try {
             setIsCreating(true);
             
@@ -446,6 +615,27 @@ const AddShiftGate = () => {
                                     </Select>
                                 </FormControl>
                                 
+                                <FormControl 
+                                    variant="outlined" 
+                                    size="small" 
+                                    className="default-gate-select"
+                                    disabled={!selectedGroup}
+                                >
+                                    <InputLabel>Vị trí mặc định</InputLabel>
+                                    <Select
+                                        value={selectedDefaultGate}
+                                        onChange={(e) => setSelectedDefaultGate(e.target.value)}
+                                        label="Vị trí mặc định"
+                                    >
+                                        <MenuItem value="">Tất cả</MenuItem>
+                                        {gates.map(gate => (
+                                            <MenuItem key={gate.id} value={gate.id}>
+                                                {gate.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                
                                 <div className="search-container">
                                     <TextField
                                         size="small"
@@ -532,7 +722,14 @@ const AddShiftGate = () => {
                                             )}
                                             <div className="staff-info">
                                                 <span className="staff-name">{staff.name}</span>
-                                                <span className="staff-code">{staff.code} - {staff.vehical_type_name}</span>
+                                                <span className="staff-code">
+                                                    {staff.code} - {staff.vehical_type_name}
+                                                    {!staff.is_assigned && staff.default_gate_id && (
+                                                        <span className="default-gate">
+                                                            {" "}- {gates.find(g => g.id === staff.default_gate_id)?.name}
+                                                        </span>
+                                                    )}
+                                                </span>
                                                 {staff.is_assigned && staff.assignment && (
                                                     <div className="staff-assignment-info">
                                                         <i className="fas fa-info-circle"></i>
@@ -561,6 +758,7 @@ const AddShiftGate = () => {
                                     label="Tùy chọn phân ca"
                                 >
                                     <MenuItem value="">Tùy chọn phân ca</MenuItem>
+                                    <MenuItem value="default">Chia theo vị trí mặc định</MenuItem>
                                     <MenuItem value="all">Chia đều cho tất cả các vị trí</MenuItem>
                                     <MenuItem value="specific">Chọn vị trí cụ thể</MenuItem>
                                 </Select>
@@ -603,7 +801,11 @@ const AddShiftGate = () => {
 
                             {(selectedStaffs.length > 0 && selectedGates.length > 0) && (
                                 <>
-                                    <StaffDistribution />
+                                    {assignmentType === 'default' ? (
+                                        <DefaultDistribution />
+                                    ) : (
+                                        <StaffDistribution />
+                                    )}
                                     
                                     <div className="assignment-summary">
                                         <button 

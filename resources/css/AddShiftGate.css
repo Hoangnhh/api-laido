@@ -105,6 +105,11 @@
     color: #666;
 }
 
+.staff-code .default-gate {
+    color: #1976d2;
+    font-weight: 500;
+}
+
 .assignment-section {
     flex: 1;
     min-width: 300px;
@@ -236,7 +241,8 @@
     }
     
     .search-container,
-    .vehical-type-select {
+    .vehical-type-select,
+    .default-gate-select {
         width: 100% !important;
         margin-top: 8px;
     }
@@ -250,6 +256,7 @@
     .date-picker,
     .group-select,
     .vehical-type-select,
+    .default-gate-select,
     .search-input {
         width: 100% !important;
     }
@@ -798,4 +805,8 @@
 .staff-card.assigned.vehical-type-2 {
     background: #fffcf8;
     border-color: #ffa184;
+}
+
+.default-gate-select {
+    width: 180px !important;
 }

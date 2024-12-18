@@ -153,4 +153,5 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/delete-payment', [PaymentController::class, 'deletePayment']);
     Route::get('/get-payment-report', [ReportController::class, 'getPaymentReport']);
     Route::get('/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
+    Route::post('/create-default-gate-assignment', [ShiftAssignmentController::class, 'createDefaultGateAssignment']);
 });
