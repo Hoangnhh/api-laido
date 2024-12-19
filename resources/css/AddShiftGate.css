@@ -314,7 +314,7 @@
 .distribution-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 4px;
     margin-top: 12px;
 }
 
@@ -322,7 +322,7 @@
     background: white;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 12px;
+    padding: 4px;
     transition: all 0.2s ease;
 }
 
