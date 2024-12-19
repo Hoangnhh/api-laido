@@ -556,6 +556,7 @@ class ShiftAssignmentController extends Controller
                 'card_id' => 'required',
                 'gate_id' => 'required|exists:gate,id',
             ]);
+            $originalGateId = $request->gate_id;
             
             // Sửa query lấy thông tin staff theo card_id
             $staff = Staff::where('card_id', $request->card_id)
@@ -599,7 +600,7 @@ class ShiftAssignmentController extends Controller
                 $gateStaffShift->update([
                     'status' => GateStaffShift::STATUS_CHECKIN,
                     'checkin_at' => now(),
-                    'checkin_gate_id' => $request->gate_id
+                    'checkin_gate_id' => $originalGateId
                 ]);
                 return response()->json([
                     'status' => 'success',
@@ -718,7 +719,7 @@ class ShiftAssignmentController extends Controller
 
             $assignment->update([
                 'status' => GateStaffShift::STATUS_CHECKIN,
-                'checkin_gate_id' => $request->gate_id,
+                'checkin_gate_id' => $originalGateId,
                 'checkin_at' => now(),
                 'checked_ticket_num' => 0
             ]);
