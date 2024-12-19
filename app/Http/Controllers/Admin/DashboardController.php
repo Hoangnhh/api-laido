@@ -166,8 +166,7 @@ class DashboardController extends Controller
 
             // Bắt đầu từ bảng gates
             $query = DB::table('gate')
-                ->leftJoin('gate_shift', 'gate.id', '=', 'gate_shift.gate_id')
-                ->leftJoin('gate_staff_shift', 'gate_shift.id', '=', 'gate_staff_shift.gate_shift_id')
+                ->leftJoin('gate_staff_shift', 'gate.id', '=', 'gate_staff_shift.checkin_gate_id')
                 ->leftJoin('checked_ticket', function($join) use ($fromDate, $toDate) {
                     $join->on('gate_staff_shift.id', '=', 'checked_ticket.gate_staff_shift_id')
                         ->whereBetween('checked_ticket.checkin_at', [$fromDate, $toDate]);
