@@ -16,6 +16,7 @@ class CheckedTicket extends Model
         'name',
         'status',
         'date',
+        'checkin_gate_id',
         'checkin_at',
         'checkout_at',
         'checkin_by',

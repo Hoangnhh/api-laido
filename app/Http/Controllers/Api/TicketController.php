@@ -122,6 +122,7 @@ class TicketController extends Controller
                         'expired_date' => $ticketData['expired_date'],
                         'status' => CheckedTicket::STATUS_CHECKIN,
                         'date' => Carbon::now(),
+                        'checkin_gate_id' => $activeAssignment->checkin_gate_id,
                         'checkin_at' => Carbon::now(),
                         'checkin_by' => $request->username,
                         'price' => $ticketData['price'],
@@ -194,6 +195,7 @@ class TicketController extends Controller
                         'commission' => $commission,
                         'staff_id' => $staffId,
                         'gate_staff_shift_id' => $activeAssignment->id,
+                        'checkin_gate_id' => $activeAssignment->checkin_gate_id,
                         'paid' => false,
                         'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
                         'is_checkin_with_other' => 1

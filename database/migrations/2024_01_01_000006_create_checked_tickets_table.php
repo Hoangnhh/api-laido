@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('name', 45)->nullable();
             $table->string('status', 45)->default('CHECKIN');
             $table->date('date');
+            $table->integer('checkin_gate_id')->default(0);
             $table->dateTime('checkin_at')->nullable();
             $table->dateTime('checkout_at')->nullable();
             $table->string('checkin_by', 45)->nullable();

@@ -62,6 +62,7 @@ CREATE TABLE `admin-laido`.`checked_ticket` (
   `date` DATE NOT NULL,
   `issue_date` DATETIME NULL,
   `expired_date` DATETIME NULL,
+  `checkin_gate_id` INT NOT NULL DEFAULT 0,
   `checkin_at` DATETIME NULL,
   `checkout_at` DATETIME NULL,
   `checkin_by` VARCHAR(45) NULL,
