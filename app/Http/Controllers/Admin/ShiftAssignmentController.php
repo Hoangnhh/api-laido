@@ -598,7 +598,8 @@ class ShiftAssignmentController extends Controller
             if($extraShifts->where('staff_id', $staff->id)->count() > 0 && $gateStaffShift->status == GateStaffShift::STATUS_CHECKIN){
                 $gateStaffShift->update([
                     'status' => GateStaffShift::STATUS_CHECKIN,
-                    'checkin_at' => now()
+                    'checkin_at' => now(),
+                    'checkin_gate_id' => $request->gate_id
                 ]);
                 return response()->json([
                     'status' => 'success',

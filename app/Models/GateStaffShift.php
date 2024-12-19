@@ -21,6 +21,7 @@ class GateStaffShift extends Model
         'status',
         'checkin_at',
         'checkout_at',
+        'checkin_gate_id',
         'checked_ticket_num',
     ];
 

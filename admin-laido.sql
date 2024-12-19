@@ -103,6 +103,7 @@ CREATE TABLE `admin-laido`.`gate_staff_shift` (
   `gate_id` varchar(45) NULL,
   `staff_id` varchar(45) NOT NULL,
   `status` varchar(45) NOT NULL DEFAULT 'WAITING',
+  `checkin_gate_id` INT NULL,
   `checkin_at` datetime DEFAULT NULL,
   `checkout_at` datetime DEFAULT NULL,
   `checked_ticket_num` int NOT NULL DEFAULT '0',

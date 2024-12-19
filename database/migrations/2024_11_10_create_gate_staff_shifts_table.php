@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('gate_id')->nullable();
             $table->string('staff_id');
             $table->string('status')->default('WAITING');
-            $table->dateTime('checkin_at')->nullable();
+            $table->integer('checkin_gate_id')->nullable();
             $table->dateTime('checkout_at')->nullable();
             $table->integer('checked_ticket_num')->default(0);
             $table->timestamps();
