@@ -53,7 +53,8 @@ const PaymentReport = () => {
             'STT': index + 1,
             'Mã thanh toán': item.payment_code,
             'Ngày': item.payment_date,
-            'Nhân viên': item.staff_name,
+            'Mã NV': item.staff_code,
+            'Tên nhân viên': item.staff_name,
             'Số tiền': item.amount,
             'Hình thức thanh toán': item.payment_method,
             'Người tạo': item.created_by
@@ -63,9 +64,14 @@ const PaymentReport = () => {
         const ws = XLSX.utils.json_to_sheet(excelData);
 
         const colWidths = [
-            { wch: 5 }, { wch: 15 }, { wch: 20 }, 
-            { wch: 20 }, { wch: 15 }, { wch: 20 }, 
-            { wch: 20 }
+            { wch: 5 },  // STT
+            { wch: 15 }, // Mã thanh toán
+            { wch: 15 }, // Ngày
+            { wch: 10 }, // Mã NV
+            { wch: 20 }, // Tên nhân viên
+            { wch: 15 }, // Số tiền
+            { wch: 20 }, // Hình thức thanh toán
+            { wch: 20 }  // Người tạo
         ];
         ws['!cols'] = colWidths;
 
@@ -92,7 +98,7 @@ const PaymentReport = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="mb-3">
-                        <strong>Nhân viên:</strong> {selectedPayment.staff_name}<br />
+                        <strong>Nhân viên:</strong> {selectedPayment.staff_code} - {selectedPayment.staff_name}<br />
                         <strong>Ngày:</strong> {selectedPayment.payment_date}<br />
                         <strong>Hình thức:</strong> {selectedPayment.payment_method}<br />
                         <strong>Tổng tiền:</strong> {new Intl.NumberFormat('vi-VN', { 
@@ -325,7 +331,8 @@ const PaymentReport = () => {
                                                 <th className="text-center">STT</th>
                                                 <th>Mã thanh toán</th>
                                                 <th>Ngày</th>
-                                                <th>Nhân viên</th>
+                                                <th>Mã NV</th>
+                                                <th>Tên nhân viên</th>
                                                 <th className="text-end">Số tiền</th>
                                                 <th>Hình thức thanh toán</th>
                                                 <th>Người tạo</th>
@@ -338,6 +345,7 @@ const PaymentReport = () => {
                                                     <td className="text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                                     <td>{item.payment_code}</td>
                                                     <td>{item.payment_date}</td>
+                                                    <td>{item.staff_code}</td>
                                                     <td>{item.staff_name}</td>
                                                     <td className="text-end">
                                                         {new Intl.NumberFormat('vi-VN', { 

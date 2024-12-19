@@ -51,7 +51,8 @@ const UsedTicketsListReport = () => {
             'Thời gian check-in': item.checkin_at_formatted,
             'Thời gian check-out': item.checkout_at_formatted,
             'Trạng thái': item.status_text,
-            'Nhân viên': item.staff_name
+            'Mã NV': item.staff_code,
+            'Tên nhân viên': item.staff_name
         }));
 
         const wb = XLSX.utils.book_new();
@@ -60,7 +61,7 @@ const UsedTicketsListReport = () => {
         const colWidths = [
             { wch: 5 }, { wch: 15 }, { wch: 20 }, { wch: 15 },
             { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
-            { wch: 15 }, { wch: 25 }
+            { wch: 15 }, { wch: 10 }, { wch: 25 }
         ];
         ws['!cols'] = colWidths;
 
@@ -275,7 +276,8 @@ const UsedTicketsListReport = () => {
                                                 <th>Thời gian check-in</th>
                                                 <th>Thời gian check-out</th>
                                                 <th>Trạng thái</th>
-                                                <th>Nhân viên</th>
+                                                <th>Mã NV</th>
+                                                <th>Tên nhân viên</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -301,6 +303,7 @@ const UsedTicketsListReport = () => {
                                                     <td className={getStatusStyle(item.status, item.checkin_at)}>
                                                         <span>{item.status_text}</span>
                                                     </td>
+                                                    <td>{item.staff_code}</td>
                                                     <td>{item.staff_name}</td>
                                                 </tr>
                                             ))}
