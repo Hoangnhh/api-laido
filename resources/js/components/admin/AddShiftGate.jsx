@@ -430,43 +430,45 @@ const AddShiftGate = () => {
         const renderDistributionItem = (item) => (
             <div key={item.gateId} className="distribution-item">
                 <div className="gate-info">
-                    <div className="gate-name">
-                        <i className="fas fa-door-open"></i>
+                    <div className="gate-name mb-2">
+                        <i className="fas fa-door-open me-2"></i>
                         {item.gateName}
                     </div>
                     
-                    <div className="staff-counts">
-                        {/* Đò - Type 1 - Mới */}
-                        {item.type1Count > 0 && (
-                            <div className="count-item type-1" title="Đò - Phân ca mới">
-                                <FontAwesomeIcon icon={faUserPlus} />
-                                <span className="count-number">{item.type1Count}</span>
-                            </div>
-                        )}
-                        
-                        {/* Đò - Type 1 - Đã phân ca */}
-                        {item.assignedType1Count > 0 && (
-                            <div className="count-item type-1" title="Đò - Đã phân ca">
-                                <FontAwesomeIcon icon={faUserCheck} />
-                                <span className="count-number">{item.assignedType1Count}</span>
-                            </div>
-                        )}
-                        
-                        {/* Xuồng - Type 2 - Mới */}
-                        {item.type2Count > 0 && (
-                            <div className="count-item type-2" title="Xuồng - Phân ca mới">
-                                <FontAwesomeIcon icon={faUserPlus} />
-                                <span className="count-number">{item.type2Count}</span>
-                            </div>
-                        )}
-                        
-                        {/* Xuồng - Type 2 - Đã phân ca */}
-                        {item.assignedType2Count > 0 && (
-                            <div className="count-item type-2" title="Xuồng - Đã phân ca">
-                                <FontAwesomeIcon icon={faUserCheck} />
-                                <span className="count-number">{item.assignedType2Count}</span>
-                            </div>
-                        )}
+                    <div className="staff-counts-container">
+                        <div className="staff-counts">
+                            {/* Đò - Type 1 - Mới */}
+                            {item.type1Count > 0 && (
+                                <div className="count-item type-1" title="Đò - Phân ca mới">
+                                    <FontAwesomeIcon icon={faUserPlus} />
+                                    <span className="count-number">{item.type1Count}</span>
+                                </div>
+                            )}
+                            
+                            {/* Đò - Type 1 - Đã phân ca */}
+                            {item.assignedType1Count > 0 && (
+                                <div className="count-item type-1" title="Đò - Đã phân ca">
+                                    <FontAwesomeIcon icon={faUserCheck} />
+                                    <span className="count-number">{item.assignedType1Count}</span>
+                                </div>
+                            )}
+                            
+                            {/* Xuồng - Type 2 - Mới */}
+                            {item.type2Count > 0 && (
+                                <div className="count-item type-2" title="Xuồng - Phân ca mới">
+                                    <FontAwesomeIcon icon={faUserPlus} />
+                                    <span className="count-number">{item.type2Count}</span>
+                                </div>
+                            )}
+                            
+                            {/* Xuồng - Type 2 - Đã phân ca */}
+                            {item.assignedType2Count > 0 && (
+                                <div className="count-item type-2" title="Xuồng - Đã phân ca">
+                                    <FontAwesomeIcon icon={faUserCheck} />
+                                    <span className="count-number">{item.assignedType2Count}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -759,7 +761,7 @@ const AddShiftGate = () => {
                                 >
                                     <MenuItem value="">Tùy chọn phân ca</MenuItem>
                                     <MenuItem value="default">Chia theo vị trí mặc định</MenuItem>
-                                    <MenuItem value="all">Chia đều cho tất cả các vị trí</MenuItem>
+                                    <MenuItem value="all" disabled>Chia đều cho tất cả các vị trí</MenuItem>
                                     <MenuItem value="specific">Chọn vị trí cụ thể</MenuItem>
                                 </Select>
                             </FormControl>

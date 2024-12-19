@@ -319,13 +319,11 @@
 }
 
 .distribution-item {
-    background: #f8f9fa;
+    background: white;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
 }
 
 .distribution-item.has-assigned {
@@ -340,29 +338,24 @@
 
 .gate-info {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1;
+    flex-direction: column;
 }
 
 .gate-name {
     font-weight: 500;
     color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 76px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1em;
 }
 
-.gate-name i {
-    color: #1976d2;
-    font-size: 14px;
+.staff-counts-container {
+    padding-top: 8px;
 }
 
 .staff-counts {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+    gap: 8px;
 }
 
 .count-item {
