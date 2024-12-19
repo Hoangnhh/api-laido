@@ -718,6 +718,7 @@ class ShiftAssignmentController extends Controller
 
             $assignment->update([
                 'status' => GateStaffShift::STATUS_CHECKIN,
+                'checkin_gate_id' => $request->gate_id,
                 'checkin_at' => now(),
                 'checked_ticket_num' => 0
             ]);
