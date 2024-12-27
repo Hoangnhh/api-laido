@@ -1064,7 +1064,7 @@
 /* Cập nhật thông tin nhân viên */
 .qd-staff-info {
     margin-top: 20px;
-    padding: 30px;
+    padding: 10px;
     background: white;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
@@ -1087,10 +1087,10 @@
 }
 
 .qd-staff-number {
-    font-size: 48px;
+    font-size: 28px;
     font-weight: 800;
     color: #2563eb;
-    margin: 20px 0;
+    margin: 0px 0;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
 
