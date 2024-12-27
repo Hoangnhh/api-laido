@@ -599,6 +599,7 @@ const StaffManager = () => {
                         <TableHead>
                             <TableRow sx={{ bgcolor: '#2c3e50' }}>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Avatar</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Mã</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Tên nhân viên</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Nhóm</TableCell>
                                 <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Vị trí mặc định</TableCell>
@@ -649,6 +650,7 @@ const StaffManager = () => {
                                                 />
                                             </Box>
                                         </TableCell>
+                                        <TableCell>{staff.code}</TableCell>
                                         <TableCell>{staff.name}</TableCell>
                                         <TableCell>
                                             {staff.group ? (
