@@ -341,8 +341,9 @@ const QueueDisplay = () => {
         <div className="qd-wrapper">
             <h1 className="qd-title">
                 <div className="qd-controls">
+                    <span className="qd-header-title">Hệ thống checkin tự động</span>
                     <div className="qd-position-selector">
-                        <span>Vị trí:</span>
+                        <span></span>
                         <select 
                             value={selectedPosition}
                             onChange={(e) => setSelectedPosition(Number(e.target.value))}
@@ -476,7 +477,7 @@ const QueueDisplay = () => {
                 </select>
             </Modal>
             <div className="qd-footer">
-                Cung cấp bởi <a href="http://thinksoft.com.vn" target="_blank" rel="noopener noreferrer">thinksoft.com.vn</a>
+             Powered by <a href="https://thinksoft.com.vn" target="_blank" rel="noopener noreferrer">thinksoft.com.vn</a>
             </div>
         </div>
     );

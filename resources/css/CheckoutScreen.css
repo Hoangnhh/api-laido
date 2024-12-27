@@ -1,12 +1,18 @@
 .checkout-wrapper {
-    padding: 20px;
+    padding: 25px;
     background-color: #f9fafb;
     min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
 .checkout-title {
     text-align: center;
-    padding: 12px 20px;
+    padding: 12px 20px 20px 20px;
     color: #ffffff;
     font-size: 22px;
     font-weight: 600;
@@ -15,6 +21,20 @@
     border-bottom: 1px solid #1d4ed8;
     letter-spacing: 0.5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.checkout-header-title {
+    font-size: 35px;
+    color: #ffd700;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    text-align: center;
+    width: 100%;
 }
 
 .checkout-container {
@@ -24,6 +44,8 @@
     padding: 15px;
     margin: 0 auto;
     width: 100%;
+    height: calc(100vh - 180px);
+    overflow: hidden;
 }
 
 .checkout-section {
@@ -31,7 +53,7 @@
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     overflow: hidden;
-    height: calc(100vh - 260px);
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -228,6 +250,7 @@
     background: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: min-content;
 }
 
 .checkout-shift-row {
@@ -303,7 +326,7 @@
     display: flex;
     justify-content: center;
     gap: 40px;
-    padding: 20px;
+    padding: 30px;
     background: white;
     margin: 15px -20px;
     border-bottom: 1px solid #e2e8f0;
@@ -314,9 +337,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 35px;
+    padding: 0 45px;
     position: relative;
-    min-width: 220px;
+    min-width: 250px;
 }
 
 .checkout-stat-item:not(:last-child)::after {
@@ -331,14 +354,59 @@
 }
 
 .checkout-stat-label {
-    font-size: 16px;
+    font-size: 20px;
     color: #475569;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     font-weight: 600;
 }
 
 .checkout-stat-value {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 35px;
+    font-weight: 700;
     color: #1e40af;
+}
+
+/* Thêm style cho footer */
+.checkout-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background-color: #415c95;
+    color: #ffffff;
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid #1d4ed8;
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.checkout-footer a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 20px;
+    font-style: italic;
+}
+
+.checkout-footer a:hover {
+    text-decoration: underline;
+}
+
+.checkout-section.checkout-shift-info {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.checkout-section.checkout-shift-info .checkout-content {
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 300px);
 }

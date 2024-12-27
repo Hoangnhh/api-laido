@@ -2,11 +2,17 @@
     padding: 25px;
     background-color: #f9fafb;
     min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
 .qd-title {
     text-align: center;
-    padding: 12px 20px;
+    padding: 12px 20px 20px 20px;
     color: #ffffff;
     font-size: 22px;
     font-weight: 600;
@@ -22,8 +28,9 @@
 
 .qd-controls {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 15px;
     margin: 0 auto;
 }
 
@@ -93,6 +100,8 @@
     padding: 25px;
     max-width: 1800px;
     margin: 0 auto;
+    height: calc(100vh - 150px);
+    overflow: hidden;
 }
 
 .qd-section {
@@ -170,6 +179,7 @@
     border-radius: 6px;
     background-color: #f8fafc;
     margin-top: 5px;
+    height: 100%;
 }
 
 .qd-content::-webkit-scrollbar {
@@ -1185,10 +1195,18 @@
     color: #ffd700;
     text-decoration: none;
     font-weight: 500;
-    font-size: 26px;
+    font-size: 20px;
     font-style: italic;
 }
 
 .qd-footer a:hover {
     text-decoration: underline;
+}
+
+.qd-header-title {
+    font-size: 35px;
+    color: #ffd700;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 5px;
 }
