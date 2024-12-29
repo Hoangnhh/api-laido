@@ -11,7 +11,7 @@ const QueueDisplay = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [assignments, setAssignments] = useState([]);
     const [checkedInAssignments, setCheckedInAssignments] = useState([]);
-    const [positions, setPositions] = useState(Array.from({length: 10}, (_, i) => i + 1));
+    const [positions, setPositions] = useState([]);
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
     const [isMuted, setIsMuted] = useState(() => {
@@ -105,6 +105,10 @@ const QueueDisplay = () => {
             window.removeEventListener('keypress', handleKeyPress);
         };
     }, [cardBuffer, lastKeyTime, lastSubmitTime, showModal]);
+
+    useEffect(() => {
+        fetchGates();
+    }, []);
 
     const fetchAssignments = async () => {
         if(selectedPosition === 0) return;
@@ -337,6 +341,16 @@ const QueueDisplay = () => {
         }
     };
 
+    const fetchGates = async () => {
+        try {
+            const response = await axios.get('/api/admin/gates');
+            const gates = response.data;
+            setPositions(gates);
+        } catch (err) {
+            console.error('Lỗi khi lấy danh sách cửa:', err);
+        }
+    };
+
     return (
         <div className="qd-wrapper">
             <h1 className="qd-title">
@@ -351,7 +365,9 @@ const QueueDisplay = () => {
                         >
                             <option value={0}>Lựa chọn vị trí</option>
                             {positions.map(pos => (
-                                <option key={pos} value={pos}>Cửa số {pos}</option>
+                                <option key={pos.id} value={pos.id}>
+                                    {pos.name}
+                                </option>
                             ))}
                         </select>
                         {selectedPosition !== 0 && (
@@ -472,7 +488,9 @@ const QueueDisplay = () => {
                 >
                     <option value={0}>Chọn vị trí Làm Việc</option>
                     {positions.map(pos => (
-                        <option key={pos} value={pos}>Cửa số {pos}</option>
+                        <option key={pos.id} value={pos.id}>
+                            {pos.name}
+                        </option>
                     ))}
                 </select>
             </Modal>
