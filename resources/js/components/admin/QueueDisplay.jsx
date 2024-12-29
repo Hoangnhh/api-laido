@@ -205,13 +205,12 @@ const QueueDisplay = () => {
                             <div className="qd-waiting-name">
                                 {assignment.staff?.name}
                             </div>
+                        </div>
+                        <div className="qd-waiting-details">
+                            <span className="qd-waiting-code">Số Đò: {assignment.staff?.code}</span>
                             <div className="qd-waiting-group">
                                 {assignment.staff?.group_name || 'Chưa phân nhóm'}
                             </div>
-                        </div>
-                        <div className="qd-waiting-details">
-                            <span className="qd-waiting-code">Mã NV: {assignment.staff?.code}</span>
-                            {/* <span className="qd-waiting-card">CCCD: {assignment.staff?.card_id || 'N/A'}</span> */}
                         </div>
                     </div>
                 </div>
@@ -238,13 +237,12 @@ const QueueDisplay = () => {
                             <div className="qd-checkedin-name">
                                 {assignment.staff?.name}
                             </div>
+                        </div>
+                        <div className="qd-checkedin-details">
+                            <span className="qd-checkedin-code">Số Đò: {assignment.staff?.code}</span>
                             <div className="qd-checkedin-group">
                                 {assignment.staff?.group_name || 'Chưa phân nhóm'}
                             </div>
-                        </div>
-                        <div className="qd-checkedin-details">
-                            <span className="qd-checkedin-code">Mã NV: {assignment.staff?.code}</span>
-                            {/* <span className="qd-checkedin-card">Thẻ: {assignment.staff?.card_id || 'N/A'}</span> */}
                         </div>
                     </div>
                 </div>
@@ -391,7 +389,7 @@ const QueueDisplay = () => {
             </h1>
             <div className="qd-container">
                 <div className="qd-section qd-search">
-                    <h2>CHECKIN NHÂN VIÊN</h2>
+                    <h2>THÔNG TIN LÁI ĐÒ</h2>
                     <div className="qd-content">
                         <form onSubmit={handleSubmit} className="qd-search-form">
                             <input
@@ -430,7 +428,7 @@ const QueueDisplay = () => {
                                 </div>
                                 <div className="qd-staff-details">
                                     <div className="qd-info-row">
-                                        <div className="qd-info-label">Mã NV:</div>
+                                        <div className="qd-info-label">Số Đò:</div>
                                         <div className="qd-info-value">
                                             {checkedInStaff.staff?.code}
                                         </div>
@@ -462,14 +460,14 @@ const QueueDisplay = () => {
                 </div>
                 
                 <div className="qd-section qd-waiting">
-                    <h2>Danh sách nhân viên chờ</h2>
+                    <h2>LÁI ĐÒ CHỜ PHỤC VỤ</h2>
                     <div className="qd-content">
                         {renderWaitingList()}
                     </div>
                 </div>
 
                 <div className="qd-section qd-serving">
-                    <h2>Nhân viên đã checkin</h2>
+                    <h2>LÁI ĐÒ ĐANG CHỞ KHÁCH</h2>
                     <div className="qd-content">
                         {renderCheckedInList()}
                     </div>
