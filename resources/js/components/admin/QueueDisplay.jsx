@@ -244,7 +244,7 @@ const QueueDisplay = () => {
                         </div>
                         <div className="qd-checkedin-details">
                             <span className="qd-checkedin-code">Mã NV: {assignment.staff?.code}</span>
-                            <span className="qd-checkedin-card">Thẻ: {assignment.staff?.card_id || 'N/A'}</span>
+                            {/* <span className="qd-checkedin-card">Thẻ: {assignment.staff?.card_id || 'N/A'}</span> */}
                         </div>
                     </div>
                 </div>

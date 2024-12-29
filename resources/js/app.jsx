@@ -31,6 +31,18 @@ const theme = createTheme({
     },
 });
 
+// Thêm axios interceptor global
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.data?.redirect) {
+            window.location.href = error.response.data.redirect;
+            return Promise.reject(error);
+        }
+        return Promise.reject(error);
+    }
+);
+
 const App = () => {
     const currentPath = window.location.pathname;
     
