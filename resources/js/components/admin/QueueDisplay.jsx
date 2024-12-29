@@ -211,7 +211,7 @@ const QueueDisplay = () => {
                         </div>
                         <div className="qd-waiting-details">
                             <span className="qd-waiting-code">Mã NV: {assignment.staff?.code}</span>
-                            <span className="qd-waiting-card">CCCD: {assignment.staff?.card_id || 'N/A'}</span>
+                            {/* <span className="qd-waiting-card">CCCD: {assignment.staff?.card_id || 'N/A'}</span> */}
                         </div>
                     </div>
                 </div>
