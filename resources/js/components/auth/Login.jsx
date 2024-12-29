@@ -60,29 +60,20 @@ const Login = () => {
         setIsLoading(true);
         
         try {
-            // Lấy CSRF token từ thẻ meta
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1];
 
             if (!csrfToken) {
-                // Thử lấy từ cookie nếu không có meta tag
-                const cookieToken = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('XSRF-TOKEN='))
-                    ?.split('=')[1];
-                    
-                if (!cookieToken) {
-                    throw new Error('CSRF token không tìm thấy');
-                }
-                
-                csrfToken = decodeURIComponent(cookieToken);
+                throw new Error('CSRF token không tìm thấy');
             }
-            console.log(csrfToken);
 
             const response = await fetch('/admin/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': decodeURIComponent(csrfToken),
                     'Accept': 'application/json'
                 },
                 credentials: 'include',
