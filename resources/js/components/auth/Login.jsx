@@ -76,6 +76,7 @@ const Login = () => {
                 
                 csrfToken = decodeURIComponent(cookieToken);
             }
+            console.log(csrfToken);
 
             const response = await fetch('/admin/login', {
                 method: 'POST',
