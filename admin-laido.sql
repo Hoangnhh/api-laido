@@ -151,3 +151,17 @@ CREATE TABLE `admin-laido`.`payment` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`));
 
+  CREATE TABLE `admin-laido`.`reviews` (
+  `id` INT NOT NULL,
+  `staff_code` VARCHAR(45) NOT NULL,
+  `customer_name` VARCHAR(200) NOT NULL,
+  `customer_phone` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(45) NULL,
+  `stars` INT(1) NOT NULL DEFAULT 1,
+  `other_review` TEXT NULL,
+  `note` TEXT NULL,
+  `is_view` INT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+
+

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Middleware\VerifyJWTToken;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,12 @@ Route::group(['middleware' => ['api']], function () {
                 Route::post('token', [StaffController::class, 'updateFcmToken']);
             });
         });
+    });
+
+    // Routes cho Review API
+    Route::prefix('reviews')->group(function () {
+        Route::post('/', [ReviewController::class, 'store']);
+        Route::put('/{id}/mark-as-viewed', [ReviewController::class, 'markAsViewed']);
     });
 
     // Handle invalid routes
