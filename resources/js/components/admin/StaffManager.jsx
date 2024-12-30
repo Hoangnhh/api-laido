@@ -860,7 +860,7 @@ const StaffManager = () => {
                                             <MenuItem value="">
                                                 <em>Chọn nhóm</em>
                                             </MenuItem>
-                                            {groups.filter(group => group.status === 'ACTIVE').map((group) => (
+                                            {groups.map((group) => (
                                                 <MenuItem key={group.id} value={group.id}>
                                                     {group.name}
                                                 </MenuItem>
