@@ -120,6 +120,7 @@ class StaffController extends Controller
                     'code' => $staff->code,
                     'username' => $staff->username,
                     'vehicle_size' => $staff->vehical_size,
+                    'vehicle_type' => $staff->vehicle_type == 1 ? 'Đò' : 'Xuồng',
                     'age' => Carbon::parse($staff->birthdate)->age,
                     'birthdate' => Carbon::parse($staff->birthdate)->format('d/m/Y'),
                     'card_id' => $staff->card_id,
@@ -354,6 +355,66 @@ class StaffController extends Controller
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
+
+    /**
+     * Thay đổi mật khẩu cho nhân viên
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changePassword(Request $request)
+    {
+        try {
+            // Validate đầu vào
+            $request->validate([
+                'old_password' => 'required|string',
+                'new_password' => 'required|string',
+                'confirm_password' => 'required|string'
+            ]);
+
+            // Lấy thông tin nhân viên
+            $staff = Staff::where('id', $request->user_id)
+                ->where('status', Staff::STATUS_ACTIVE)
+                ->first();
+
+            if (!$staff) {
+                return $this->errorResponse('Không tìm thấy thông tin nhân viên', 404);
+            }
+
+            // Thực hiện thay đổi mật khẩu
+            $result = $staff->changePassword(
+                $request->old_password,
+                $request->new_password,
+                $request->confirm_password
+            );
+
+            if (!$result['success']) {
+                return $this->errorResponse($result['message'], 400);
+            }
+
+            // Gửi thông báo cho nhân viên
+            $staff->sendNotification(
+                'Thay đổi mật khẩu',
+                'Mật khẩu của bạn đã được thay đổi thành công',
+                [
+                    'type' => 'CHANGE_PASSWORD',
+                    'time' => now()->format('Y-m-d H:i:s')
+                ]
+            );
+
+            return $this->successResponse(
+                null,
+                $result['message']
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    
     
 
     

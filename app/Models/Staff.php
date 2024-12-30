@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
 use App\Services\FirebaseService;
+use Exception;
 
 class Staff extends Model
 {
@@ -109,6 +110,60 @@ class Staff extends Model
                 return 'Xuồng';
             default:
                 return 'Không rõ';
+        }
+    }
+
+    /**
+     * Thay đổi mật khẩu cho nhân viên
+     * 
+     * @param string $oldPasswordBase64 Mật khẩu cũ (đã mã hóa base64)
+     * @param string $newPasswordBase64 Mật khẩu mới (đã mã hóa base64)
+     * @param string $confirmPasswordBase64 Xác nhận mật khẩu mới (đã mã hóa base64)
+     * @return array
+     * @throws Exception
+     */
+    public function changePassword(string $oldPasswordBase64, string $newPasswordBase64, string $confirmPasswordBase64): array
+    {
+        try {
+            // Giải mã base64
+            $oldPassword = base64_decode($oldPasswordBase64);
+            $newPassword = base64_decode($newPasswordBase64);
+            $confirmPassword = base64_decode($confirmPasswordBase64);
+
+            // Kiểm tra mật khẩu cũ
+            if (!Hash::check($oldPassword, $this->password)) {
+                throw new Exception('Mật khẩu cũ không chính xác');
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận mật khẩu
+            if ($newPassword !== $confirmPassword) {
+                throw new Exception('Mật khẩu mới và xác nhận mật khẩu không khớp');
+            }
+
+            // Kiểm tra độ dài mật khẩu mới (tối thiểu 6 ký tự)
+            if (strlen($newPassword) < 6) {
+                throw new Exception('Mật khẩu mới phải có ít nhất 6 ký tự');
+            }
+
+            // Kiểm tra mật khẩu mới không được trùng với mật khẩu cũ
+            if (Hash::check($newPassword, $this->password)) {
+                throw new Exception('Mật khẩu mới không được trùng với mật khẩu cũ');
+            }
+
+            // Cập nhật mật khẩu mới
+            $this->password = $newPassword;
+            $this->save();
+
+            return [
+                'success' => true,
+                'message' => 'Thay đổi mật khẩu thành công'
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 } 
