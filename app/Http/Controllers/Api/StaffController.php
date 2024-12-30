@@ -389,7 +389,7 @@ class StaffController extends Controller
             );
 
             if (!$result['success']) {
-                return $this->errorResponse($result['message'], 400);
+                return $this->errorResponse($result['message'], 200);
             }
 
             // Gửi thông báo cho nhân viên
