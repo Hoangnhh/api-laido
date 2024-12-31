@@ -60,7 +60,7 @@ class ReviewController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'staff_code' => 'required|exists:staffs,code',
+                'staff_code' => 'required',
                 'customer_name' => 'required|max:200',
                 'customer_phone' => 'required|max:45',
                 'email' => 'nullable|email|max:45',
