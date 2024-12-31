@@ -21,6 +21,7 @@ import QueueDisplay from './components/admin/QueueDisplay';
 import CheckoutScreen from './components/admin/CheckoutScreen';
 import AddExtraShift from './components/admin/AddExtraShift';
 import StaffPayment from './components/admin/StaffPayment';
+import Review from './components/admin/Review';
 const theme = createTheme({
     palette: {
         primary: {
@@ -85,6 +86,8 @@ const App = () => {
                 return <UsedTicketsListReport />;
             case '/admin/accounts-payable':
                 return <StaffPayment />;
+            case '/admin/reviews':
+                return <Review />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }
