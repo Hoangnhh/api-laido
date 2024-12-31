@@ -1,0 +1,99 @@
+.review-manager {
+    padding: 20px;
+}
+
+.review-manager-header {
+    margin-bottom: 20px;
+}
+
+.review-manager-title {
+    margin-bottom: 20px !important;
+    color: #2c3e50;
+    font-weight: 500 !important;
+}
+
+.review-manager-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.review-filter {
+    min-width: 150px !important;
+}
+
+.review-search {
+    min-width: 250px;
+}
+
+.review-export-btn {
+    margin-left: auto !important;
+    background-color: #2c3e50 !important;
+}
+
+.review-export-btn:hover {
+    background-color: #1a252f !important;
+}
+
+/* Table styles */
+.MuiTableHead-root .MuiTableRow-root {
+    background-color: #2c3e50;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+    color: white;
+    font-weight: bold;
+}
+
+.MuiTableRow-root:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Rating styles */
+.MuiRating-root {
+    color: #f1c40f;
+}
+
+/* Chip styles */
+.MuiChip-root.MuiChip-colorWarning {
+    background-color: #f39c12;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+    .review-manager-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .review-filter,
+    .review-search {
+        width: 100%;
+    }
+
+    .review-export-btn {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+}
+
+/* Thêm style cho note dialog */
+.MuiDialog-paper {
+    min-height: 200px;
+}
+
+.MuiDialogTitle-root {
+    background-color: #2c3e50;
+    color: white !important;
+}
+
+.MuiDialogContent-root {
+    padding: 20px !important;
+}
+
+.MuiDialogActions-root {
+    padding: 16px !important;
+}
