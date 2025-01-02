@@ -158,8 +158,8 @@ class StaffController extends Controller
             $toDate = $request->toDate ?? $fromDate;
 
             $tickets = CheckedTicket::where('staff_id', $userId)
-                ->whereDate('date', '>=', $fromDate)
-                ->whereDate('date', '<=', $toDate)
+                ->whereDate('checkin_at', '>=', $fromDate)
+                ->whereDate('checkin_at', '<=', $toDate)
                 ->orderByRaw('CASE 
                     WHEN status = ? THEN checkout_at 
                     ELSE checkin_at 
