@@ -47,10 +47,6 @@
     font-weight: bold;
 }
 
-.MuiTableRow-root:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
 /* Rating styles */
 .MuiRating-root {
     color: #f1c40f;

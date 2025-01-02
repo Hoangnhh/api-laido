@@ -260,9 +260,6 @@
     font-size: 14px !important;
 }
 
-.ap-dialog__content .MuiTableRow-root:hover {
-    background-color: #f5f5f5;
-}
 
 /* Style cho checkbox */
 .ap-dialog__content .MuiCheckbox-root {
