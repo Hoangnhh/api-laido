@@ -121,7 +121,7 @@ Route::prefix('admin')->group(function () {
 
     // Route login cho admin
     Route::get('/login', function () {
-        return view('admin.login');
+        return redirect('/admin');
     })->name('login');
 });
 
