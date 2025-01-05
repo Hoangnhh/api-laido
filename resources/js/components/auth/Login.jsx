@@ -110,10 +110,24 @@ const Login = () => {
                 sx={{
                     height: '100vh',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}
             >
+                <Typography 
+                    component="h1" 
+                    variant="h3" 
+                    sx={{ 
+                        mb: 4,
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                    }}
+                >
+                    THink System
+                </Typography>
+                
                 <Box
                     sx={{
                         display: 'flex',
@@ -150,7 +164,11 @@ const Login = () => {
                             >
                                 <FontAwesomeIcon icon={faUserShield} size="lg" />
                             </Avatar>
-                            <Typography component="h1" variant="h5" sx={{ mt: 1 }}>
+                            <Typography 
+                                component="h2" 
+                                variant="h5" 
+                                sx={{ mt: 1 }}
+                            >
                                 Đăng nhập Admin
                             </Typography>
                         </Box>
@@ -243,6 +261,30 @@ const Login = () => {
                                 ) : null}
                                 {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
                             </Button>
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                align="center"
+                                sx={{ 
+                                    mt: 1,
+                                    fontStyle: 'italic',
+                                    '& a': {
+                                        color: 'inherit',
+                                        textDecoration: 'none',
+                                        '&:hover': {
+                                            textDecoration: 'underline'
+                                        }
+                                    }
+                                }}
+                            >
+                                <a 
+                                    href="https://thinksoft.com.vn" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                >
+                                    Powered by Thinksoft.com.vn
+                                </a>
+                            </Typography>
                         </Box>
                     </Paper>
                 </Box>

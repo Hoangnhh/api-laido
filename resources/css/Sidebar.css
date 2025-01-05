@@ -597,3 +597,10 @@
         z-index: auto;
     }
 }
+
+.sb-powered-by {
+    font-size: 12px;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
+}

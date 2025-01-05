@@ -6,17 +6,18 @@ import {
     faCalendarAlt,
     faGear,
     faRightFromBracket,
-    faDesktop,
     faUserCircle,
     faChartLine,
     faChevronDown,
     faChevronRight,
     faBars,
     faAngleLeft,
-    faDisplay,
     faCircle,
     faMoneyBillWave,
-    faStar
+    faStar,
+    faDoorOpen,
+    faDoorClosed,
+    faLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -40,26 +41,20 @@ const Sidebar = () => {
             path: '/admin/shift-assignments'
         },
         { 
-            text: 'Màn hình xếp hàng', 
-            icon: faDisplay,
+            text: 'Thanh toán', 
+            icon: faMoneyBillWave,
+            path: '/admin/accounts-payable'
+        },
+        { 
+            text: 'Màn hình checkin', 
+            icon: faDoorOpen,
             path: '/admin/queue-display'
         },
         { 
-            text: 'Màn hình Checkout', 
-            icon: faDisplay,
+            text: 'Màn hình checkout', 
+            icon: faDoorClosed,
             path: '/admin/checkout-screen'
         },
-        { 
-            text: 'Quản lý vị trí', 
-            icon: faDesktop,
-            path: '/admin/gate'
-        },
-        { 
-            text: 'Quản lý người dùng', 
-            icon: faUserCircle,
-            path: '/admin/users'
-        },
-        
         {
             text: 'Quản lý nhân viên',
             icon: faUsers,
@@ -77,6 +72,7 @@ const Sidebar = () => {
                 },
             ]
         },
+        
         {
             text: 'Báo cáo',
             icon: faChartLine,
@@ -111,14 +107,19 @@ const Sidebar = () => {
             ]
         },
         { 
-            text: 'Thanh toán', 
-            icon: faMoneyBillWave,
-            path: '/admin/accounts-payable'
-        },
-        { 
             text: 'Đánh giá từ khách hàng', 
             icon: faStar,
             path: '/admin/reviews'
+        },
+                { 
+            text: 'Quản lý người dùng', 
+            icon: faUserCircle,
+            path: '/admin/users'
+        },
+        { 
+            text: 'Quản lý vị trí', 
+            icon: faLocationDot,
+            path: '/admin/gate'
         },
         { 
             text: 'Cấu hình hệ thống', 
@@ -387,6 +388,9 @@ const Sidebar = () => {
                             </span>
                             <span className="sb-menu-text">Đăng xuất</span>
                         </a>
+                        {!collapsed && (
+                            <div className="sb-powered-by">Powered by THinkSoft</div>
+                        )}
                     </div>
                 </nav>
             </aside>
