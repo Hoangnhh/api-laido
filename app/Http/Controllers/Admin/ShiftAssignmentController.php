@@ -1083,7 +1083,7 @@ class ShiftAssignmentController extends Controller
                         $query->whereIn('gate_id', $allGateIds)
                             ->where('staff_group_id', $request->staff_group_id);
                     })
-                    ->select('gate_id', DB::raw('MAX(index) as max_index'))
+                    ->select('gate_id', DB::raw('MAX(`index`) as max_index'))
                     ->groupBy('gate_id')
                     ->get()
                     ->keyBy('gate_id');
