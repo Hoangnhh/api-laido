@@ -119,6 +119,8 @@ class StaffController extends Controller
                     'name' => $staff->name,
                     'code' => $staff->code,
                     'username' => $staff->username,
+                    'bank_account' => $staff->bank_account,
+                    'bank_name' => $staff->bank_name,
                     'vehicle_size' => $staff->vehical_size,
                     'vehicle_type' => $staff->vehicle_type == 1 ? 'Đò' : 'Xuồng',
                     'age' => Carbon::parse($staff->birthdate)->age,
