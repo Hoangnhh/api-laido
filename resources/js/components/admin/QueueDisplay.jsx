@@ -373,7 +373,7 @@ const QueueDisplay = () => {
                 <div className="qd-section qd-search">
                     <h2>THÔNG TIN LÁI ĐÒ</h2>
                     <div className="qd-content">
-                        <form onSubmit={handleSubmit} className="qd-search-form">
+                        <form onSubmit={handleSubmit} className="qd-search-form" style={{display: new URLSearchParams(window.location.search).get('test') === '1' ? '' : 'none'}}>
                             <input
                                 type="text"
                                 value={cardId}
