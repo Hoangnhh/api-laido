@@ -458,6 +458,135 @@ class ShiftAssignmentController extends Controller
 
             // Query base cho cả 2 danh sách
             $baseQuery = GateStaffShift::with([
+                'staff:id,code,name,group_id,card_id,vehical_type',
+                'staff.group:id,name',
+                'gateShift'
+            ])
+                ->whereHas('gateShift', function($query) {
+                    $query->where('queue_status', GateShift::QUEUE_STATUS_RUNNING)
+                        ->where('status', GateShift::STATUS_ACTIVE);
+                })
+                ->where('gate_id', $request->gate_id);
+
+            // Lấy danh sách WAITING
+            $waitingAssignments = (clone $baseQuery)
+                ->where('status', GateStaffShift::STATUS_WAITING)
+                ->orderBy('index')
+                ->get();
+
+            // Nếu số lượng nhân viên WAITING < 10, lấy thêm từ ca kế tiếp
+            if ($waitingAssignments->count() < 10) {
+                $nextGateShift = GateShift::where('gate_id', $request->gate_id)
+                    ->where('queue_status', GateShift::QUEUE_STATUS_WAITING)
+                    ->where('status', GateShift::STATUS_ACTIVE)
+                    ->where('date', '<=', now()->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d'))
+                    ->orderBy('date')
+                    ->first();
+
+                if ($nextGateShift) {
+                    $additionalWaitingAssignments = GateStaffShift::with([
+                        'staff:id,code,name,group_id,card_id,vehical_type',
+                        'staff.group:id,name',
+                        'gateShift'
+                    ])
+                        ->where('gate_shift_id', $nextGateShift->id)
+                        ->where('status', GateStaffShift::STATUS_WAITING)
+                        ->orderBy('index')
+                        ->get();
+
+                    $waitingAssignments = $waitingAssignments->merge($additionalWaitingAssignments);
+                }
+            }
+
+            // Hàm format dữ liệu
+            $formatAssignment = function($assignment) {
+                return [
+                    'id' => $assignment->id,
+                    'index' => $assignment->index,
+                    'staff' => [
+                        'id' => $assignment->staff->id,
+                        'code' => $assignment->staff->code,
+                        'name' => $assignment->staff->name,
+                        'card_id' => $assignment->staff->card_id,
+                        'group_id' => $assignment->staff->group_id,
+                        'vehical_type' => $assignment->staff->vehical_type,
+                        'vehical_type_name' => Staff::getVehicalTypeName($assignment->staff->vehical_type),
+                        'group_name' => $assignment->staff->group?->name ?? 'Chưa phân nhóm'
+                    ],
+                    'status' => $assignment->status,
+                    'checkin_at' => $assignment->checkin_at?->format('H:i:s'),
+                    'checkout_at' => $assignment->checkout_at?->format('H:i:s'),
+                    'checked_ticket_num' => $assignment->checked_ticket_num,
+                    'gate_shift_id' => $assignment->gate_shift_id
+                ];
+            };
+
+            // Tách danh sách theo vehical_type
+            $type1Assignments = [];
+            $type2Assignments = [];
+
+            foreach ($waitingAssignments as $assignment) {
+                $formattedAssignment = $formatAssignment($assignment);
+                if ($assignment->staff->vehical_type === Staff::VEHICAL_TYPE_DO) {
+                    $type1Assignments[] = $formattedAssignment;
+                } else if ($assignment->staff->vehical_type === Staff::VEHICAL_TYPE_XUONG) {
+                    $type2Assignments[] = $formattedAssignment;
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'assignments' => [
+                    'type_1' => $type1Assignments,
+                    'type_2' => $type2Assignments
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy danh sách phân ca',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy danh sách phân ca theo cửa
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAssignmentByGateOld(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'gate_id' => 'required|exists:gate,id'
+            ]);
+
+            // Kiểm tra xem có GateShift nào đang RUNNING không
+            $runningGateShift = GateShift::where('gate_id', $request->gate_id)
+                ->where('queue_status', GateShift::QUEUE_STATUS_RUNNING)
+                ->where('status', GateShift::STATUS_ACTIVE)
+                ->first();
+
+            // Nếu không có GateShift RUNNING, tìm GateShift WAITING có date nhỏ nhất
+            if (!$runningGateShift) {
+                $waitingGateShift = GateShift::where('gate_id', $request->gate_id)
+                    ->where('queue_status', GateShift::QUEUE_STATUS_WAITING)
+                    ->where('status', GateShift::STATUS_ACTIVE)
+                    ->orderBy('date')
+                    ->first();
+
+                // Nếu tìm thấy GateShift WAITING, update thành RUNNING
+                if ($waitingGateShift) {
+                    $waitingGateShift->update([
+                        'queue_status' => GateShift::QUEUE_STATUS_RUNNING
+                    ]);
+                }
+            }
+
+            // Query base cho cả 2 danh sách
+            $baseQuery = GateStaffShift::with([
                 'staff:id,code,name,group_id,card_id',
                 'staff.group:id,name',
                 'gateShift'

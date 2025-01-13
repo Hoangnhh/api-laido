@@ -138,7 +138,6 @@ class StaffController extends Controller
                         'status' => $currentShift->status,
                         'checkin_at' => $currentShift->checkin_at,
                     ] : null,
-                    'revenue' => "5000000",
                     'avatar' => $staff->avatar_url,
                     'group' => [
                         'id' => $staff->group->id,

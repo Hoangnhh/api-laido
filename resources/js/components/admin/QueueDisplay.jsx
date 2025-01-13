@@ -9,8 +9,10 @@ const QueueDisplay = () => {
     const [cardId, setCardId] = useState('');
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [assignments, setAssignments] = useState([]);
-    const [checkedInAssignments, setCheckedInAssignments] = useState([]);
+    const [assignments, setAssignments] = useState({
+        type_1: [], // Danh sách Đò
+        type_2: []  // Danh sách xuồng
+    });
     const [positions, setPositions] = useState([]);
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
@@ -20,7 +22,10 @@ const QueueDisplay = () => {
     });
     const [showModal, setShowModal] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [lastAnnounced, setLastAnnounced] = useState(null);
+    const [lastAnnounced, setLastAnnounced] = useState({
+        type_1: null,
+        type_2: null
+    });
     const [cardBuffer, setCardBuffer] = useState('');
     const [lastKeyTime, setLastKeyTime] = useState(Date.now());
     const SCAN_TIMEOUT = 100; // 100ms timeout giữa các ký tự
@@ -28,6 +33,7 @@ const QueueDisplay = () => {
     const [lastSubmitTime, setLastSubmitTime] = useState(0);
     const SUBMIT_DELAY = 500; // 500ms delay giữa các lần submit
     const [checkedTicketsCount, setCheckedTicketsCount] = useState(0);
+    const [audioQueue, setAudioQueue] = useState([]);
 
     const inputRef = useRef(null);
     const isSubmitting = useRef(false);
@@ -110,20 +116,108 @@ const QueueDisplay = () => {
         fetchGates();
     }, []);
 
+    useEffect(() => {
+        if (!isMuted && audioQueue.length > 0 && !isPlaying) {
+            playNextInQueue();
+        }
+    }, [audioQueue, isPlaying, isMuted]);
+
+    const playNextInQueue = async () => {
+        if (audioQueue.length === 0 || isPlaying) return;
+
+        try {
+            setIsPlaying(true);
+            const announcement = audioQueue[0];
+            
+            const response = await axios.post(
+                'https://texttospeech.googleapis.com/v1/text:synthesize',
+                {
+                    input: {
+                        text: announcement.text
+                    },
+                    voice: {
+                        languageCode: 'vi-VN',
+                        name: 'vi-VN-Wavenet-A',
+                        ssmlGender: 'FEMALE'
+                    },
+                    audioConfig: {
+                        audioEncoding: 'MP3',
+                        pitch: 0,
+                        speakingRate: 1
+                    }
+                },
+                {
+                    params: {
+                        key: 'AIzaSyCs1WxI4euLChHIacdFZr1g00xgjAVmENA'
+                    }
+                }
+            );
+
+            const audio = new Audio(`data:audio/mp3;base64,${response.data.audioContent}`);
+            
+            audio.addEventListener('ended', () => {
+                setAudioQueue(prevQueue => prevQueue.slice(1));
+                setIsPlaying(false);
+            });
+            
+            await audio.play();
+
+        } catch (error) {
+            console.error('Lỗi khi đọc thông báo:', error);
+            setAudioQueue(prevQueue => prevQueue.slice(1));
+            setIsPlaying(false);
+        }
+    };
+
+    const announceStaff = async (staffName, staffIndex, type) => {
+        if (isMuted) return;
+        
+        const currentAnnouncement = `${type}-${staffIndex}-${staffName}`;
+        const lastAnnouncedForType = lastAnnounced[type];
+        
+        if (currentAnnouncement === lastAnnouncedForType) return;
+        
+        setLastAnnounced(prev => ({
+            ...prev,
+            [type]: currentAnnouncement
+        }));
+
+        const announcementText = type === 'type_1' 
+            ? `Mời lái đò số thứ tự ${staffIndex} ,${staffName}, tới cửa số ${selectedPosition} để checkin`
+            : `Mời lái xuồng số thứ tự ${staffIndex} ,${staffName}, tới cửa số ${selectedPosition} để checkin`;
+
+        setAudioQueue(prevQueue => [...prevQueue, {
+            text: announcementText,
+            type: type
+        }]);
+    };
+
     const fetchAssignments = async () => {
         if(selectedPosition === 0) return;
         try {
             const response = await axios.get(`/api/admin/get-assignments-by-gate?gate_id=${selectedPosition}`);
-            setAssignments(response.data.assignments.waiting);
-            setCheckedInAssignments(response.data.assignments.checkin);
+            setAssignments({
+                type_1: Array.isArray(response.data.assignments.type_1) ? response.data.assignments.type_1 : [],
+                type_2: Array.isArray(response.data.assignments.type_2) ? response.data.assignments.type_2 : []
+            });
 
-            const firstWaitingStaff = response.data.assignments.waiting[0];
-            if (firstWaitingStaff) {
-                await announceStaff(firstWaitingStaff.staff.name,firstWaitingStaff.index);
+            // Thông báo cho nhân viên đầu tiên của mỗi loại
+            const firstType1Staff = response.data.assignments.type_1?.[0];
+            const firstType2Staff = response.data.assignments.type_2?.[0];
+            
+            if (firstType1Staff) {
+                await announceStaff(firstType1Staff.staff.name, firstType1Staff.index, 'type_1');
+            }
+            if (firstType2Staff) {
+                await announceStaff(firstType2Staff.staff.name, firstType2Staff.index, 'type_2');
             }
 
         } catch (err) {
             console.error('Lỗi khi lấy danh sách phân ca:', err);
+            setAssignments({
+                type_1: [],
+                type_2: []
+            });
         }
     };
 
@@ -183,118 +277,6 @@ const QueueDisplay = () => {
         const maxItems = Math.floor(availableHeight / itemHeight);
         
         setMaxWaitingItems(Math.min(Math.max(maxItems, 3), 8));
-    };
-
-    const renderWaitingList = () => {
-        if (!assignments || assignments.length === 0) {
-            return (
-                <div className="qd-empty-state">
-                    <FontAwesomeIcon icon={faUserClock} className="qd-empty-icon" />
-                    <p>Không có nhân viên nào trong danh sách chờ</p>
-                </div>
-            );
-        }
-
-        return assignments
-            .slice(0, maxWaitingItems)
-            .map((assignment) => (
-                <div key={assignment.staff.id} className="qd-waiting-item">
-                    <div className="qd-waiting-number">{assignment.index}</div>
-                    <div className="qd-waiting-info">
-                        <div className="qd-waiting-header">
-                            <div className="qd-waiting-name">
-                                {assignment.staff?.name}
-                            </div>
-                        </div>
-                        <div className="qd-waiting-details">
-                            <span className="qd-waiting-code">Số Đò: {assignment.staff?.code}</span>
-                            <div className="qd-waiting-group">
-                                {assignment.staff?.group_name || 'Chưa phân nhóm'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ));
-    };
-
-    const renderCheckedInList = () => {
-        if (!checkedInAssignments || checkedInAssignments.length === 0) {
-            return (
-                <div className="qd-empty-state">
-                    <FontAwesomeIcon icon={faUserCheck} className="qd-empty-icon" />
-                    <p>Chưa có nhân viên nào checkin</p>
-                </div>
-            );
-        }
-
-        return checkedInAssignments
-            .slice(0, maxWaitingItems)
-            .map((assignment) => (
-                <div key={assignment.staff.id} className="qd-checkedin-item">
-                    <div className="qd-checkedin-number">{assignment.index}</div>
-                    <div className="qd-checkedin-info">
-                        <div className="qd-checkedin-header">
-                            <div className="qd-checkedin-name">
-                                {assignment.staff?.name}
-                            </div>
-                        </div>
-                        <div className="qd-checkedin-details">
-                            <span className="qd-checkedin-code">Số Đò: {assignment.staff?.code}</span>
-                            <div className="qd-checkedin-group">
-                                {assignment.staff?.group_name || 'Chưa phân nhóm'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ));
-    };
-
-    const announceStaff = async (staffName, staffIndex) => {
-        if (isMuted || isPlaying) return;
-        
-        const currentAnnouncement = `${staffIndex}-${staffName}`;
-        if (currentAnnouncement === lastAnnounced) return;
-        
-        try {
-            setIsPlaying(true);
-            setLastAnnounced(currentAnnouncement);
-            
-            const response = await axios.post(
-                'https://texttospeech.googleapis.com/v1/text:synthesize',
-                {
-                    input: {
-                        text: `Mời lái đò số thứ tự ${staffIndex} ,${staffName}, tới cửa số ${selectedPosition} để checkin`
-                    },
-                    voice: {
-                        languageCode: 'vi-VN',
-                        name: 'vi-VN-Wavenet-A',
-                        ssmlGender: 'FEMALE'
-                    },
-                    audioConfig: {
-                        audioEncoding: 'MP3',
-                        pitch: 0,
-                        speakingRate: 1
-                    }
-                },
-                {
-                    params: {
-                        key: 'AIzaSyCs1WxI4euLChHIacdFZr1g00xgjAVmENA'
-                    }
-                }
-            );
-
-            const audio = new Audio(`data:audio/mp3;base64,${response.data.audioContent}`);
-            
-            audio.addEventListener('ended', () => {
-                setIsPlaying(false);
-            });
-            
-            await audio.play();
-
-        } catch (error) {
-            console.error('Lỗi khi đọc tên nhân viên:', error);
-            setIsPlaying(false);
-        }
     };
 
     const Modal = ({ isOpen, onClose, children }) => {
@@ -421,7 +403,7 @@ const QueueDisplay = () => {
                         {checkedInStaff && (
                             <div className="qd-staff-info">
                                 <div className="qd-staff-avatar">
-                                    <img src={checkedInStaff.staff?.avatar_url || "/images/default-avatar.png"} alt="" />
+                                    <img src={"http://admin-laido.invade.vn/" + checkedInStaff.staff?.avatar_url} alt="" />
                                 </div>
                                 <div className="qd-staff-number">
                                     #{checkedInStaff.assignment?.index || "000"}
@@ -459,17 +441,72 @@ const QueueDisplay = () => {
                     </div>
                 </div>
                 
-                <div className="qd-section qd-waiting">
-                    <h2>LÁI ĐÒ CHỜ PHỤC VỤ</h2>
+                <div className="qd-section qd-type-1">
+                    <h2>DANH SÁCH ĐÒ</h2>
                     <div className="qd-content">
-                        {renderWaitingList()}
+                        {assignments.type_1.length === 0 ? (
+                            <div className="qd-empty-state">
+                                <FontAwesomeIcon icon={faUserClock} className="qd-empty-icon" />
+                                <p>Không có Đò nào trong danh sách</p>
+                            </div>
+                        ) : (
+                            assignments.type_1
+                                .slice(0, maxWaitingItems)
+                                .map((assignment) => (
+                                    <div key={assignment.staff.id} className="qd-waiting-item">
+                                        <div className="qd-waiting-number">{assignment.index}</div>
+                                        <div className="qd-waiting-info">
+                                            <div className="qd-waiting-header">
+                                                <div className="qd-waiting-name">
+                                                    {assignment.staff?.name}
+                                                </div>
+                                            </div>
+                                            <div className="qd-waiting-details">
+                                                <span className="qd-waiting-code">Số Đò: {assignment.staff?.code}</span>
+                                                <div className="qd-waiting-group">
+                                                    {assignment.staff?.group_name || 'Chưa phân nhóm'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                        )}
                     </div>
                 </div>
 
-                <div className="qd-section qd-serving">
-                    <h2>LÁI ĐÒ ĐANG CHỞ KHÁCH</h2>
+                <div className="qd-section qd-type-2">
+                    <h2>DANH SÁCH XUỒNG</h2>
                     <div className="qd-content">
-                        {renderCheckedInList()}
+                        {
+                            console.log(assignments)
+                        }
+                        {assignments.type_2.length === 0 ? (
+                            <div className="qd-empty-state">
+                                <FontAwesomeIcon icon={faUserClock} className="qd-empty-icon" />
+                                <p>Không có Xuồng nào trong danh sách</p>
+                            </div>
+                        ) : (
+                            assignments.type_2
+                                .slice(0, maxWaitingItems)
+                                .map((assignment) => (
+                                    <div key={assignment.staff.id} className="qd-waiting-item">
+                                        <div className="qd-waiting-number">{assignment.index}</div>
+                                        <div className="qd-waiting-info">
+                                            <div className="qd-waiting-header">
+                                                <div className="qd-waiting-name">
+                                                    {assignment.staff?.name}
+                                                </div>
+                                            </div>
+                                            <div className="qd-waiting-details">
+                                                <span className="qd-waiting-code">Số Xuồng: {assignment.staff?.code}</span>
+                                                <div className="qd-waiting-group">
+                                                    {assignment.staff?.group_name || 'Chưa phân nhóm'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                        )}
                     </div>
                 </div>
             </div>

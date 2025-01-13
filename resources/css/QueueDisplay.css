@@ -95,7 +95,7 @@
 
 .qd-container {
     display: grid;
-    grid-template-columns: 450px minmax(0, 0.8fr) minmax(0, 0.8fr);
+    grid-template-columns: 450px minmax(0, 1fr) minmax(0, 1fr);
     gap: 25px;
     padding: 25px;
     max-width: 1800px;
@@ -911,11 +911,13 @@
 /* Cập nhật container chính */
 .qd-container {
     display: grid;
-    grid-template-columns: 450px minmax(0, 0.8fr) minmax(0, 0.8fr);
+    grid-template-columns: 450px minmax(0, 1fr) minmax(0, 1fr);
     gap: 25px;
     padding: 25px;
     max-width: 1800px;
     margin: 0 auto;
+    height: calc(100vh - 150px);
+    overflow: hidden;
 }
 
 /* Cập nhật section */
@@ -968,24 +970,18 @@
 /* Responsive */
 @media (max-width: 1600px) {
     .qd-container {
-        grid-template-columns: 450px minmax(0, 0.8fr) minmax(0, 0.8fr);
+        grid-template-columns: 450px minmax(0, 1fr) minmax(0, 1fr);
         gap: 20px;
     }
 }
 
 @media (max-width: 1400px) {
     .qd-container {
-        grid-template-columns: 450px minmax(0, 0.8fr) minmax(0, 0.8fr);
+        grid-template-columns: 450px minmax(0, 1fr);
     }
     
-    .qd-section.qd-serving {
-        grid-column: 2;
-        grid-row: 1;
-    }
-    
-    .qd-section.qd-waiting {
+    .qd-section.qd-type-2 {
         grid-column: 1 / -1;
-        grid-row: 2;
     }
 }
 
@@ -994,19 +990,8 @@
         grid-template-columns: 1fr;
     }
     
-    .qd-section.qd-search {
+    .qd-section {
         grid-column: 1;
-        grid-row: 1;
-    }
-    
-    .qd-section.qd-waiting {
-        grid-column: 1;
-        grid-row: 2;
-    }
-    
-    .qd-section.qd-serving {
-        grid-column: 1;
-        grid-row: 3;
     }
 }
 
@@ -1213,4 +1198,39 @@
     font-weight: bold;
     text-transform: uppercase;
     margin-bottom: 5px;
+}
+
+.qd-type-section {
+    margin-bottom: 25px;
+}
+
+.qd-type-section h3 {
+    color: #1e40af;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 15px 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.qd-type-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Style cho các section type */
+.qd-section.qd-type-1 h2,
+.qd-section.qd-type-2 h2 {
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.qd-section.qd-type-1 h2 {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+}
+
+.qd-section.qd-type-2 h2 {
+    background: linear-gradient(135deg, #047857, #10b981);
 }
