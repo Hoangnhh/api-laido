@@ -113,16 +113,15 @@ class StaffController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Staff $staff)
     {
         try {
-            $staff = Staff::find($id);
             // Kiểm tra username và code trùng, ngoại trừ bản ghi hiện tại
             $existingStaff = Staff::where(function($query) use ($request) {
                     $query->where('username', $request->username)
                           ->orWhere('code', $request->code);
                 })
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $staff->id)
                 ->first();
 
             if ($existingStaff) {
