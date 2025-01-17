@@ -79,7 +79,7 @@ class StaffController extends Controller
                 if ($existingStaff->code === $request->code) {
                     $errors['code'] = 'Mã nhân viên đã tồn tại';
                 }
-                return response()->json(['errors' => $errors], 422);
+                return response()->json(['errors' => $errors], 500);
             }
 
             $validated = $request->validate([
@@ -132,7 +132,7 @@ class StaffController extends Controller
                 if ($existingStaff->code === $request->code) {
                     $errors['code'] = 'Mã nhân viên đã tồn tại';
                 }
-                return response()->json(['errors' => $errors], 422);
+                return response()->json(['errors' => $errors], 500);
             }
 
             $rules = [
