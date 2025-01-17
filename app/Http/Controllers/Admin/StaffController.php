@@ -72,14 +72,14 @@ class StaffController extends Controller
                 ->first();
 
             if ($existingStaff) {
-                $errors = [];
+                $message = '';
                 if ($existingStaff->username === $request->username) {
-                    $errors['username'] = 'Username đã được sử dụng';
+                    $message = 'Username đã được sử dụng';
                 }
                 if ($existingStaff->code === $request->code) {
-                    $errors['code'] = 'Mã nhân viên đã tồn tại';
+                    $message = 'Mã nhân viên đã tồn tại';
                 }
-                return response()->json(['errors' => $errors], 500);
+                return response()->json(['message' => $message], 500);
             }
 
             $validated = $request->validate([
@@ -125,14 +125,13 @@ class StaffController extends Controller
                 ->first();
 
             if ($existingStaff) {
-                $errors = [];
                 if ($existingStaff->username === $request->username) {
-                    $errors['username'] = 'Username đã được sử dụng';
+                    $message = 'Username đã được sử dụng';
                 }
                 if ($existingStaff->code === $request->code) {
-                    $errors['code'] = 'Mã nhân viên đã tồn tại';
+                    $message = 'Mã nhân viên đã tồn tại';
                 }
-                return response()->json(['errors' => $errors], 500);
+                return response()->json(['message' => $message], 500);
             }
 
             $rules = [
