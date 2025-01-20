@@ -184,31 +184,33 @@ class TicketController extends Controller
                 ]);
 
                 // Nếu vé đã thanh toán hoặc người checkout khác người checkin thì tạo vé mới
-                if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1 && ($existingTicket->paid || $existingTicket->checkin_by != $request->username)) {
-                    $createdCheckedTicket = CheckedTicket::create([
-                        'code' => $request->code,
-                        'name' => $existingTicket->name,
-                        'status' => CheckedTicket::STATUS_CHECKOUT,
-                        'date' => Carbon::now(),
-                        'checkin_at' => $existingTicket->checkin_at,
-                        'checkin_by' => $existingTicket->checkin_by,
-                        'checkout_at' => Carbon::now(),
-                        'checkout_by' => $request->username,
-                        'price' => $existingTicket->price,
-                        'commission' => $commission,
-                        'staff_id' => $staffId,
-                        'gate_staff_shift_id' => $activeAssignment->id,
-                        'checkin_gate_id' => $activeAssignment->checkin_gate_id,
-                        'paid' => false,
-                        'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
-                        'is_checkin_with_other' => 1
-                    ]);
+                if(($existingTicket->paid || $existingTicket->checkin_by != $request->username)) {
+                    if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1){
+                        $createdCheckedTicket = CheckedTicket::create([
+                            'code' => $request->code,
+                            'name' => $existingTicket->name,
+                            'status' => CheckedTicket::STATUS_CHECKOUT,
+                            'date' => Carbon::now(),
+                            'checkin_at' => $existingTicket->checkin_at,
+                            'checkin_by' => $existingTicket->checkin_by,
+                            'checkout_at' => Carbon::now(),
+                            'checkout_by' => $request->username,
+                            'price' => $existingTicket->price,
+                            'commission' => $commission,
+                            'staff_id' => $staffId,
+                            'gate_staff_shift_id' => $activeAssignment->id,
+                            'checkin_gate_id' => $activeAssignment->checkin_gate_id,
+                            'paid' => false,
+                            'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
+                                'is_checkin_with_other' => 1
+                        ]);
+                    }else{
+                        throw new \Exception('Checkout vé không thành công . Vé đã vé được checkin bởi tài khoản ' . $existingTicket->checkin_by);
+                    }
 
                     DB::commit();
 
                     return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
-                }else{
-                    throw new \Exception('Checkout vé không thành công . Vé đã vé được checkin bởi tài khoản ' . $existingTicket->checkin_by);
                 }
                 
                 DB::commit();
