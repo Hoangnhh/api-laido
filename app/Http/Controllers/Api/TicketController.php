@@ -173,6 +173,7 @@ class TicketController extends Controller
                 if(!$activeAssignment) {
                     return $this->errorResponse('Nhân viên chưa checkin hoặc không trong ca trực');
                 }
+                DB::beginTransaction();
 
                 // Cập nhật thông tin checkout cho vé hiện tại
                 $existingTicket->update([
@@ -207,6 +208,8 @@ class TicketController extends Controller
                 }else{
                     throw new \Exception('Checkout vé không thành công . Vé đã vé được checkin bởi tài khoản ' . $existingTicket->checkin_by);
                 }
+                
+                DB::commit();
 
                 // Trường hợp checkout bởi chính nhân viên đã checkin và vé chưa thanh toán
                 $existingTicket->increment('commission', $commission);
@@ -218,6 +221,7 @@ class TicketController extends Controller
             }
 
         } catch (\Exception $e) {
+            DB::rollback();
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
