@@ -138,8 +138,8 @@ Route::prefix('api/admin')->group(function () {
     ->name('admin.shift-assignments.store');
     Route::post('/get-assignments-dasboard', [ShiftAssignmentController::class, 'getAssignmentDashboard']);
     Route::get('/staff/search', [StaffController::class, 'search']);
-    Route::get('/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
-    Route::post('/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
+    // Route::get('/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
+    // Route::post('/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
     Route::get('/dashboard-data', [DashboardController::class, 'index'])->name('admin.dashboard-data');
     Route::get('/system-configs', [SystemConfigController::class, 'index'])->name('admin.system-configs');
     Route::post('/system-configs', [SystemConfigController::class, 'store'])->name('admin.system-configs.store');
@@ -159,8 +159,13 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/create-payment', [PaymentController::class, 'createPayment']);
     Route::post('/delete-payment', [PaymentController::class, 'deletePayment']);
     Route::get('/get-payment-report', [ReportController::class, 'getPaymentReport']);
-    Route::get('/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
+    // Route::get('/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
     Route::post('/create-default-gate-assignment', [ShiftAssignmentController::class, 'createDefaultGateAssignment']);
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/export', [ReviewController::class, 'export']);
 });
+
+// Route không cần xác thực
+Route::get('/api/admin/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
+Route::post('api/admin/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
+Route::get('api/admin/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
