@@ -204,12 +204,15 @@ class TicketController extends Controller
                         'is_checkin_with_other' => 1
                     ]);
 
+                    DB::commit();
+
                     return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
                 }else{
                     throw new \Exception('Checkout vé không thành công . Vé đã vé được checkin bởi tài khoản ' . $existingTicket->checkin_by);
                 }
                 
                 DB::commit();
+                
 
                 // Trường hợp checkout bởi chính nhân viên đã checkin và vé chưa thanh toán
                 $existingTicket->increment('commission', $commission);
