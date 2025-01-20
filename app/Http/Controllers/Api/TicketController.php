@@ -59,7 +59,9 @@ class TicketController extends Controller
             $systemConfigs = SystemConfig::getConfigs(
                 [
                     SystemConfigKey::ENABLE_LIMIT_BY_VEHICAL_SIZE->value, 
-                    SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value
+                    SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value,
+                    SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value,
+                    SystemConfigKey::CHECKOUT_DELAY_MINUTE->value
                 ]
             );
 
@@ -143,7 +145,7 @@ class TicketController extends Controller
                 );
 
             } else if($existingTicket->status == CheckedTicket::STATUS_CHECKIN) { // Đã có record và chưa checkout thì là checkout
-                $checkoutDelayMinute = SystemConfig::getConfig(SystemConfigKey::CHECKOUT_DELAY_MINUTE->value);
+                $checkoutDelayMinute = $systemConfigs[SystemConfigKey::CHECKOUT_DELAY_MINUTE->value];
                 // Tính số phút và giây từ lúc checkin đến hiện tại, đảm bảo luôn là số dương
                 $secondsSinceCheckin = abs(Carbon::now()->diffInSeconds($existingTicket->checkin_at));
                 $minutesSinceCheckin = floor($secondsSinceCheckin / 60);
@@ -181,7 +183,7 @@ class TicketController extends Controller
                 ]);
 
                 // Nếu vé đã thanh toán hoặc người checkout khác người checkin thì tạo vé mới
-                if($existingTicket->paid || $existingTicket->checkin_by != $request->username) {
+                if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1 && ($existingTicket->paid || $existingTicket->checkin_by != $request->username)) {
                     $createdCheckedTicket = CheckedTicket::create([
                         'code' => $request->code,
                         'name' => $existingTicket->name,
@@ -202,6 +204,8 @@ class TicketController extends Controller
                     ]);
 
                     return $this->successResponse($createdCheckedTicket->toArray(), 'Checkout thành công');
+                }else{
+                    throw new \Exception('Checkout vé không thành công . Vé đã vé được checkin bởi tài khoản ' . $existingTicket->checkin_by);
                 }
 
                 // Trường hợp checkout bởi chính nhân viên đã checkin và vé chưa thanh toán
@@ -214,7 +218,7 @@ class TicketController extends Controller
             }
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Có lỗi xảy ra: ' . $e->getMessage(), 500);
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 

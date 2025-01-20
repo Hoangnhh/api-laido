@@ -11,6 +11,7 @@ enum SystemConfigKey: string
     case CHECKOUT_DELAY_MINUTE = 'CHECKOUT_DELAY_MINUTE';
     case CHECKIN_TICKET_RANGE_MINUTE = 'CHECKIN_TICKET_RANGE_MINUTE';
     case ENABLE_CHECKIN_ALL_GATE = 'ENABLE_CHECKIN_ALL_GATE';
+    case ENABLE_CHECKOUT_WITH_OTHER = 'ENABLE_CHECKOUT_WITH_OTHER';
 
     /**
      * Lấy danh sách tất cả các key
@@ -45,6 +46,7 @@ enum SystemConfigKey: string
             self::ENABLE_CHECKIN_BY_INDEX => 'Check-in lần lượt theo số',
             self::ENABLE_CHECKIN_ALL_GATE => 'Cho phép Lái đò Check-in tại tất cả cổng',
             self::CHECKIN_TICKET_RANGE_MINUTE => 'Thời gian cho phép checkin vé sau khi nhân viên checkin tại cổng(phút)',
+            self::ENABLE_CHECKOUT_WITH_OTHER => 'Cho phép lái đò checkout vé hộ (checkin và checkout vé bởi 2 lái đò)',
         };
     }
 } 
