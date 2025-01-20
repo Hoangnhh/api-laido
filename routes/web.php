@@ -60,10 +60,6 @@ Route::prefix('admin')->group(function () {
             return view('admin.add-extra-shift');
         })->name('admin.add-extra-shift');
 
-        Route::get('/queue-display', function () {
-            return view('admin.queue-display');
-        })->name('admin.queue-display');
-
         Route::get('/checkout-screen', function () {
             return view('admin.checkout-screen');
         })->name('admin.checkout-screen');
@@ -169,3 +165,6 @@ Route::prefix('api/admin')->group(function () {
 Route::get('/api/admin/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
 Route::post('api/admin/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
 Route::get('api/admin/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
+Route::get('admin/queue-display', function () {
+    return view('admin.queue-display');
+})->name('admin.queue-display');
