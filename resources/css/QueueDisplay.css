@@ -12,7 +12,7 @@
 
 .qd-title {
     text-align: center;
-    padding: 12px 20px 20px 20px;
+    padding: 5px;
     color: #ffffff;
     font-size: 22px;
     font-weight: 600;
@@ -98,7 +98,7 @@
     grid-template-columns: 450px minmax(0, 1fr) minmax(0, 1fr);
     gap: 25px;
     padding: 25px;
-    max-width: 1800px;
+    max-width: 2000px;
     margin: 0 auto;
     height: calc(100vh - 150px);
     overflow: hidden;
@@ -120,8 +120,8 @@
 
 .qd-section h2 {
     margin: 0;
-    padding: 20px;
-    font-size: 18px;
+    padding: 12px;
+    font-size: 28px;
     font-weight: 600;
     background: linear-gradient(135deg, #1e40af, #3b82f6);
     color: white;
@@ -280,16 +280,6 @@
     font-size: 14px;
 }
 
-/* Style cho thông tin nhân viên */
-.qd-staff-info {
-    margin-top: 20px;
-    padding: 30px;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    text-align: center;
-}
-
 /* Style cho avatar */
 .qd-staff-avatar {
     width: 180px;
@@ -329,11 +319,6 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
-.qd-info-label {
-    color: #64748b;
-    font-weight: 500;
-}
-
 .qd-info-value {
     color: #1e293b;
     font-weight: 600;
@@ -371,7 +356,7 @@
 }
 
 .qd-waiting-number {
-    font-size: 40px;
+    font-size: 60px;
     font-weight: bold;
     color: #f83b01;
     min-width: 80px;
@@ -393,7 +378,7 @@
 }
 
 .qd-waiting-name {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 700;
     color: #1e293b;
     text-transform: uppercase;
@@ -401,7 +386,7 @@
 }
 
 .qd-waiting-group {
-    font-size: 16px;
+    font-size: 26px;
     font-weight: 500;
     color: #2563eb;
     background: rgba(37, 99, 235, 0.1);
@@ -419,7 +404,7 @@
 }
 
 .qd-waiting-code {
-    font-size: 18px;
+    font-size: 28px;
     font-weight: 600;
     color: #2563eb;
 }
@@ -476,7 +461,7 @@
 
 /* Điều chỉnh padding của waiting item để tối ưu không gian */
 .qd-waiting-item {
-    padding: 25px;
+    padding: 15px;
     margin-bottom: 15px;
 }
 
@@ -518,7 +503,7 @@
 
 /* Tăng độ nổi bật cho số thứ tự của item đầu tiên */
 .qd-waiting-item:first-child .qd-waiting-number {
-    font-size: 44px;
+    font-size: 60px;
     color: #f83b01;
     font-weight: 800;
 }
@@ -619,7 +604,7 @@
     margin-top: 16px;
     padding: 16px 20px;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 26px;
     font-weight: 500;
     text-align: center;
 }
@@ -908,17 +893,6 @@
     color: #cbd5e1;
 }
 
-/* Cập nhật container chính */
-.qd-container {
-    display: grid;
-    grid-template-columns: 450px minmax(0, 1fr) minmax(0, 1fr);
-    gap: 25px;
-    padding: 25px;
-    max-width: 1800px;
-    margin: 0 auto;
-    height: calc(100vh - 150px);
-    overflow: hidden;
-}
 
 /* Cập nhật section */
 .qd-section {
@@ -930,16 +904,6 @@
     flex-direction: column;
     height: calc(100vh - 150px);
 }
-
-.qd-section h2 {
-    margin: 0;
-    padding: 20px;
-    font-size: 18px;
-    font-weight: 600;
-    background: linear-gradient(135deg, #1e40af, #3b82f6);
-    color: white;
-}
-
 /* Cập nhật form tìm kiếm */
 .qd-search-form {
     margin: 20px;
@@ -1006,8 +970,8 @@
 
 .qd-section.qd-search h2 {
     margin: 0;
-    padding: 20px;
-    font-size: 18px;
+    padding: 12px;
+    font-size: 28px;
     font-weight: 600;
     background: linear-gradient(135deg, #1e40af, #3b82f6);
     color: white;
@@ -1052,7 +1016,6 @@
 
 /* Cập nhật thông tin nhân viên */
 .qd-staff-info {
-    margin-top: 20px;
     padding: 10px;
     background: white;
     border-radius: 12px;
@@ -1061,8 +1024,8 @@
 }
 
 .qd-staff-avatar {
-    width: 220px;
-    height: 220px;
+    width: 320px;
+    height: 320px;
     border-radius: 50%;
     overflow: hidden;
     margin: 0 auto 20px;
@@ -1076,9 +1039,9 @@
 }
 
 .qd-staff-number {
-    font-size: 28px;
+    font-size: 60px;
     font-weight: 800;
-    color: #2563eb;
+    color: red;
     margin: 0px 0;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
@@ -1097,13 +1060,13 @@
 }
 
 .qd-info-label {
-    color: #64748b;
     font-weight: 500;
+    font-size: 24px;
 }
 
 .qd-info-value {
-    color: #1e293b;
     font-weight: 600;
+    font-size: 24px;
 }
 
 /* Thêm styles cho trạng thái processing */
@@ -1221,8 +1184,7 @@
 .qd-section.qd-type-1 h2,
 .qd-section.qd-type-2 h2 {
     margin: 0;
-    padding: 20px;
-    font-size: 18px;
+    font-size: 28px;
     font-weight: 600;
     color: white;
 }
