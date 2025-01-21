@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '.././Layout/AdminLayout';
 import { Card, Row, Col, Form, Button, Table, Pagination } from 'react-bootstrap';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 const TicketPrintHistoryReport = () => {
     const [filters, setFilters] = useState({
-        from_date: new Date().toISOString().split('T')[0],
-        booking_code: '',
-        full_name: ''
+        from_date: new Date().toISOString().split('T')[0]
     });
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -22,22 +21,17 @@ const TicketPrintHistoryReport = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('http://api-test.invade.vn/pos/reports/ticket-print-history', {
-                TransactionDate: filters.from_date
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer #0c8c7a3caee9c01260f2c396a6ecbd58dba363f8c669ae1cedd12481376d050d4f1a20ecad385424a848ebaa5904a6272c1d2112341af04a52d367e05f3dd6e1'
-                }
-            });
+            const response = await axios.get(`http://transfer.invade.vn/api/TicketPrintHistory?date=${filters.from_date}`);
 
-            if (response.data.status === "SUCCESS") {
-                setData(response.data.value);
+            if (response.data) {
+                setData(response.data);
             } else {
-                console.error('Lỗi từ API:', response.data.errors);
+                console.error('Dữ liệu không hợp lệ:', response.data);
+                setData([]);
             }
         } catch (error) {
             console.error('Lỗi khi tải dữ liệu:', error);
+            setData([]);
         }
         setLoading(false);
     };
@@ -131,6 +125,42 @@ const TicketPrintHistoryReport = () => {
         return items;
     };
 
+    const handleExportExcel = () => {
+        const excelData = data.map((item, index) => ({
+            'STT': index + 1,
+            'Tên dịch vụ': item.ticketName,
+            'Mã vé': item.TicketCode,
+            'Mã hóa đơn': item.bookingCode,
+            'Thời gian in': new Date(item.printTime).toLocaleString('vi-VN'),
+            'Trạng thái': item.status,
+            'Tổng tiền': item.TotalAmount,
+            'Tên đơn vị': item.Organization,
+            'Người in': item.fullName,
+            'Số lần in': item.printCount
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(excelData);
+
+        // Định nghĩa độ rộng cột
+        const colWidths = [
+            { wch: 5 },  // STT
+            { wch: 30 }, // Tên dịch vụ
+            { wch: 15 }, // Mã vé
+            { wch: 15 }, // Mã hóa đơn
+            { wch: 20 }, // Thời gian in
+            { wch: 15 }, // Trạng thái
+            { wch: 15 }, // Tổng tiền
+            { wch: 30 }, // Tên đơn vị
+            { wch: 20 }, // Người in
+            { wch: 10 }  // Số lần in
+        ];
+        ws['!cols'] = colWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo lịch sử in vé');
+        XLSX.writeFile(wb, `bao_cao_lich_su_in_ve_${filters.from_date}.xlsx`);
+    };
+
     return (
         <AdminLayout>
             <div className="rp-container d-flex flex-column vh-100">
@@ -160,6 +190,13 @@ const TicketPrintHistoryReport = () => {
                                         >
                                             Tìm kiếm
                                         </Button>
+                                        <Button 
+                                            variant="success" 
+                                            onClick={handleExportExcel}
+                                            disabled={data.length === 0}
+                                        >
+                                            Xuất Excel
+                                        </Button>
                                     </Col>
                                 </Row>
                             </Form>
@@ -181,10 +218,11 @@ const TicketPrintHistoryReport = () => {
                                             <th className="text-center">STT</th>
                                             <th>Tên dịch vụ</th>
                                             <th>Mã vé</th>
-                                            <th>Số hóa đơn</th>
-                                            <th>Ngày in</th>
+                                            <th>Mã hóa đơn</th>
+                                            <th>Thời gian in</th>
                                             <th>Trạng thái</th>
                                             <th>Tổng tiền</th>
+                                            <th>Tên đơn vị</th>
                                             <th>Người in</th>
                                             <th>Số lần in</th>
                                         </tr>
@@ -193,17 +231,18 @@ const TicketPrintHistoryReport = () => {
                                         {data.map((item, index) => (
                                             <tr key={index}>
                                                 <td className="text-center">{index + 1}</td>
-                                                <td>{item.serviceName}</td>
-                                                <td>{item.accountCode}</td>
+                                                <td>{item.ticketName}</td>
+                                                <td>{item.TicketCode}</td>
                                                 <td>{item.bookingCode}</td>
                                                 <td>{new Date(item.printTime).toLocaleString('vi-VN')}</td>
-                                                <td>{item.statusStr}</td>
+                                                <td>{item.status}</td>
                                                 <td>
                                                     {new Intl.NumberFormat('vi-VN', { 
                                                         style: 'currency', 
                                                         currency: 'VND' 
-                                                    }).format(item.totalMoney)}
+                                                    }).format(item.TotalAmount)}
                                                 </td>
+                                                <td>{item.Organization}</td>
                                                 <td>{item.fullName}</td>
                                                 <td>{item.printCount}</td>
                                             </tr>

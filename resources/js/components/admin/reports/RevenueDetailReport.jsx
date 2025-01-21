@@ -20,24 +20,26 @@ const RevenueDetailReport = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('http://api-test.invade.vn/pos/reports/revenue-detail', {
-                StartDate: `${filters.from_date}T00:00:00+07:00`, // Đặt giờ bắt đầu
-                EndDate: `${filters.to_date}T23:59:00+07:00`, // Đặt giờ kết thúc
-                SiteCode: 'BQL-CH'
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer #0c8c7a3caee9c01260f2c396a6ecbd58dba363f8c669ae1cedd12481376d050d4f1a20ecad385424a848ebaa5904a6272c1d2112341af04a52d367e05f3dd6e1'
-                }
+            const response = await axios.post('http://transfer.invade.vn/api/Revenue/cashier', {
+                fromDate: `${filters.from_date}T00:00:00`,
+                toDate: `${filters.to_date}T23:59:59`,
+                Username: "",
+                Type: ""
             });
 
-            if (response.data && response.data.status === "SUCCESS") {
-                setData(response.data.value);
+            // Kiểm tra và log response để debug
+            console.log('Response:', response.data);
+
+            // Điều chỉnh cách kiểm tra và set data
+            if (response.data) {
+                setData(response.data); // Bỏ .value vì response trả về trực tiếp là array
             } else {
                 console.error('Dữ liệu không hợp lệ:', response.data);
+                setData([]); // Set mảng rỗng nếu không có dữ liệu
             }
         } catch (error) {
             console.error('Lỗi khi tải dữ liệu:', error);
+            setData([]); // Set mảng rỗng nếu có lỗi
         }
         setLoading(false);
     };
@@ -52,7 +54,7 @@ const RevenueDetailReport = () => {
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header>
-                            <h4>Báo cáo chi tiết vé đã in theo hóa đơn</h4>
+                            <h4>Báo cáo chi tiết vé đã in theo thu ngân</h4>
                         </Card.Header>
                         <Card.Body>
                             <Form>
@@ -101,39 +103,45 @@ const RevenueDetailReport = () => {
                                     <thead>
                                         <tr>
                                             <th>STT</th>
-                                            <th>Ngày xuất vé</th>
-                                            <th>Mã hóa đơn</th>
+                                            <th>Mã phiên</th>
+                                            <th>Thời gian bắt đầu</th>
+                                            <th>Thời gian kết thúc</th>
+                                            <th>Tên vé</th>
+                                            <th>Nhóm vé</th>
+                                            <th>Đơn giá</th>
                                             <th>Số lượng</th>
                                             <th>Tổng tiền</th>
-                                            <th>Tên dịch vụ</th>
-                                            <th>Đơn vị</th>
-                                            <th>Nhân viên in</th>
+                                            <th>Nhân viên</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {data.map((item, index) => (
                                             <tr key={index}>
                                                 <td>{index + 1}</td>
-                                                <td>{new Date(item.saleDate).toLocaleString('vi-VN')}</td>
-                                                <td>{item.bookingCode}</td>
-                                                <td>{item.quantity}</td>
-                                                <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.totalMoney)}</td>
-                                                <td>{item.serviceName}</td>
-                                                <td>{item.profileName}</td>
-                                                <td>{item.cashier}</td>
+                                                <td>{item['Ses.No']}</td>
+                                                <td>{new Date(item.StartTime).toLocaleString('vi-VN')}</td>
+                                                <td>{item.Endtime}</td>
+                                                <td>{item.TicketName}</td>
+                                                <td>{item.GroupName}</td>
+                                                <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.Price)}</td>
+                                                <td>{new Intl.NumberFormat('vi-VN').format(item.Quantity)}</td>
+                                                <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.TotalAmount)}</td>
+                                                <td>{item.FullName}</td>
                                             </tr>
                                         ))}
                                         <tr className="table-footer">
-                                            <td colSpan={3} style={{ textAlign: 'right' }}><strong>Tổng:</strong></td>
+                                            <td colSpan={7} style={{ textAlign: 'right' }}><strong>Tổng:</strong></td>
                                             <td>
-                                                {data.reduce((total, item) => total + item.quantity, 0)}
+                                                {new Intl.NumberFormat('vi-VN').format(
+                                                    data.reduce((total, item) => total + item.Quantity, 0)
+                                                )}
                                             </td>
                                             <td>
                                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                                                    data.reduce((total, item) => total + item.totalMoney, 0)
+                                                    data.reduce((total, item) => total + item.TotalAmount, 0)
                                                 )}
                                             </td>
-                                            <td colSpan={2}></td>
+                                            <td></td>
                                         </tr>
                                     </tbody>
                                 </Table>

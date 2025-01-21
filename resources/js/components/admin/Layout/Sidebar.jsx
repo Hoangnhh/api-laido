@@ -109,7 +109,7 @@ const Sidebar = () => {
                     path: '/admin/revenue-report'
                 },
                 { 
-                    text: 'Vé đã in theo hóa đơn', 
+                    text: 'Vé đã in theo thu ngân', 
                     icon: faCircle,
                     path: '/admin/revenue-detail-report'
                 },

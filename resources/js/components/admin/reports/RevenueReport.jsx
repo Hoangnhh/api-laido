@@ -12,8 +12,8 @@ const RevenueReport = () => {
     const today = new Date().toISOString().split('T')[0];
     
     const [filters, setFilters] = useState({
-        from_date: "2025-01-19",
-        to_date: "2025-01-21"
+        from_date: today,
+        to_date: today
     });
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -229,7 +229,7 @@ const RevenueReport = () => {
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header>
-                            <h4>Báo cáo doanh thu</h4>
+                            <h4>Báo cáo vé đã in theo dịch vụ</h4>
                         </Card.Header>
                         <Card.Body>
                             <Form>
@@ -309,7 +309,6 @@ const RevenueReport = () => {
                                                     <th>Số lượng</th>
                                                     <th>Giá</th>
                                                     <th>Tổng tiền</th>
-                                                    <th>Trạng thái</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -333,7 +332,6 @@ const RevenueReport = () => {
                                                                 currency: 'VND' 
                                                             }).format(item.TotalAmount)}
                                                         </td>
-                                                        <td>{item.status}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
