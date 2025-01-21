@@ -96,6 +96,18 @@ Route::prefix('admin')->group(function () {
             return view('admin.reviews');
         })->name('admin.reviews');
 
+        Route::get('/revenue-detail-report', function () {
+            return view('admin.revenue-detail-report');
+        })->name('admin.revenue-detail-report');
+        
+        Route::get('/ticket-print-history-report', function () {
+            return view('admin.ticket-print-history-report');
+        })->name('admin.ticket-print-history-report');
+
+        Route::get('/revenue-report', function () {
+            return view('admin.revenue-report');
+        })->name('admin.revenue-report');
+
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
             ->name('admin.staffs.toggle-status');

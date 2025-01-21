@@ -22,6 +22,9 @@ import CheckoutScreen from './components/admin/CheckoutScreen';
 import AddExtraShift from './components/admin/AddExtraShift';
 import StaffPayment from './components/admin/StaffPayment';
 import Review from './components/admin/Review';
+import RevenueDetailReport from './components/admin/reports/RevenueDetailReport';  
+import TicketPrintHistoryReport from './components/admin/reports/TicketPrintHistoryReport';
+import RevenueReport from './components/admin/reports/RevenueReport';
 const theme = createTheme({
     palette: {
         primary: {
@@ -88,6 +91,12 @@ const App = () => {
                 return <StaffPayment />;
             case '/admin/reviews':
                 return <Review />;
+            case '/admin/revenue-detail-report':
+                return <RevenueDetailReport />;
+            case '/admin/ticket-print-history-report':
+                return <TicketPrintHistoryReport />;
+            case '/admin/revenue-report':
+                return <RevenueReport />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

@@ -22,7 +22,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
 }
@@ -92,7 +92,7 @@
 }
 
 .sb-logo-text {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: white;
     line-height: 1.2;
@@ -103,7 +103,7 @@
 }
 
 .sb-user-name {
-    font-size: 13px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
     font-weight: 400;
     user-select: none;
@@ -163,7 +163,7 @@
 }
 
 .sb-sidebar-menu {
-    padding: 15px 0;
+    padding: 10px 0;
     display: flex;
     flex-direction: column;
     height: calc(100vh - 80px);
@@ -173,7 +173,7 @@
 .sb-menu-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
+    padding: 8px 10px;
     text-decoration: none;
     color: #ecf0f1;
     transition: background-color 0.2s ease;
@@ -183,6 +183,7 @@
     -ms-user-select: none;
     position: relative;
     overflow: hidden;
+    font-size: 14px;
 }
 
 .sb-menu-item:hover {
@@ -194,9 +195,9 @@
 }
 
 .sb-menu-icon {
-    width: 20px;
+    width: 18px;
     text-align: center;
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
 .sb-menu-text {

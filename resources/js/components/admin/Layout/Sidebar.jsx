@@ -102,6 +102,21 @@ const Sidebar = () => {
                     text: 'Lái đò đã kết ca', 
                     icon: faCircle,
                     path: '/admin/checkout-list-report'
+                },
+                { 
+                    text: 'Tổng hợp vé đã in', 
+                    icon: faCircle,
+                    path: '/admin/revenue-report'
+                },
+                { 
+                    text: 'Vé đã in theo hóa đơn', 
+                    icon: faCircle,
+                    path: '/admin/revenue-detail-report'
+                },
+                { 
+                    text: 'Lịch sử in lại vé', 
+                    icon: faCircle,
+                    path: '/admin/ticket-print-history-report'
                 }
 
             ]
