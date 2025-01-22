@@ -127,7 +127,7 @@ class TicketController extends Controller
                         return $this->errorResponse('Vé đã hết hạn');
                     }
                     if($syncTicket['issued_date'] > Carbon::now()) {
-                        return $this->errorResponse('Vé chưa được phát hành');
+                        return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
                     }
 
                     $ticketData = $syncTicket;
@@ -274,7 +274,7 @@ class TicketController extends Controller
         $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
         $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
         $serviceName = preg_replace('/đ/u', 'd', $serviceName);
-        $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
+        // $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
         $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
 
         $commission = $this->commission_configs[$serviceName]
@@ -292,7 +292,7 @@ class TicketController extends Controller
         $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
         $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
         $serviceName = preg_replace('/đ/u', 'd', $serviceName);
-        $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
+        // $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
         $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
 
         return in_array($serviceName, $this->ignore_checkin_time);
