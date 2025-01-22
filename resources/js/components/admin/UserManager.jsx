@@ -113,8 +113,11 @@ const menuItems = [
     { 
         text: 'Lịch sử in lại vé', 
         path: '/admin/ticket-print-history-report'
+    },
+    { 
+        text: 'Vé sử dụng theo giờ', 
+        path: '/admin/ticket-by-hours-report'
     }
-    
 ];
 
 const UserManager = () => {

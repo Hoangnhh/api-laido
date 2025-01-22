@@ -117,6 +117,11 @@ const Sidebar = () => {
                     text: 'Lịch sử in lại vé', 
                     icon: faCircle,
                     path: '/admin/ticket-print-history-report'
+                },
+                { 
+                    text: 'Vé sử dụng theo giờ', 
+                    icon: faCircle,
+                    path: '/admin/ticket-by-hours-report'
                 }
 
             ]
