@@ -21,7 +21,7 @@ const TicketPrintHistoryReport = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://transfer.invade.vn/api/TicketPrintHistory?date=${filters.from_date}`);
+            const response = await axios.get(`https://transfer.invade.vn/api/TicketPrintHistory?date=${filters.from_date}`);
 
             if (response.data) {
                 setData(response.data);

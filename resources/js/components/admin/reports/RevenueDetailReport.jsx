@@ -20,7 +20,7 @@ const RevenueDetailReport = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('http://transfer.invade.vn/api/Revenue/cashier', {
+            const response = await axios.post('https://transfer.invade.vn/api/Revenue/cashier', {
                 fromDate: `${filters.from_date}T00:00:00`,
                 toDate: `${filters.to_date}T23:59:59`,
                 Username: "",
