@@ -107,8 +107,8 @@ class TicketController extends Controller
                     'table' => 'tickets',
                     'before_data' => json_encode($syncTicket),
                     'after_data' => json_encode($syncTicket),
-                    'created_by' => $request->username,
-                    'created_date' => Carbon::now()
+                    'create_by' => $request->username,
+                    'create_at' => Carbon::now()
                 ]);
                 if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
