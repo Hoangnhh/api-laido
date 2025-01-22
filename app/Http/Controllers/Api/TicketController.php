@@ -15,15 +15,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SystemConfig;
 use App\Enums\SystemConfigKey;
+use App\Models\Ticket;
 class TicketController extends Controller
 {
     use ApiResponse;
 
     protected $ticketService;
     private $commission_configs = [
-        "ve_do_tuyen_huong_tich" => 70000,
-        "ve_do_tuyen_long_van" => 100000,
-        "ve_do_tuyen_tuyet_son" => 120000,
+        "phi_thang_canh_ve_do" => 70000,
+        "phi_thang_canh_uu_tien_ve_do" => 70000,
         "default" => 70000
     ];
     private $ignore_checkin_time = [
@@ -98,14 +98,29 @@ class TicketController extends Controller
                     }
                 }
 
-                // Gọi service để kiểm tra vé
-                $result = $this->ticketService->useTicket($request->code);
+                // Kiểm tra vé có tồn tại trong bảng ticket không
+                $ticket = Ticket::where('ticket_code', $request->code)->first();
+                if (!$ticket) {// Gọi service để kiểm tra vé
+                    $result = $this->ticketService->useTicket($request->code);
 
-                if (!$result['success']) {
-                    return $this->errorResponse($result['message']);
+                    if (!$result['success']) {
+                        return $this->errorResponse($result['message']);
+                    }
+                    
+                    $ticketData = $result['data']['ticket'];
+                }else{
+                    if($ticket->status == Ticket::STATUS_USED) {
+                        return $this->errorResponse('Vé đã được sử dụng');
+                    }
+                    if($ticket->expired_date < Carbon::now()) {
+                        return $this->errorResponse('Vé đã hết hạn');
+                    }
+                    if($ticket->issue_date > Carbon::now()) {
+                        return $this->errorResponse('Vé chưa được phát hành');
+                    }
+
+                    $ticketData = $ticket;
                 }
-                
-                $ticketData = $result['data']['ticket'];
                 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($ticketData['service_name']);
@@ -242,6 +257,7 @@ class TicketController extends Controller
         $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
         $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
         $serviceName = preg_replace('/đ/u', 'd', $serviceName);
+        $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
         $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
 
         $commission = $this->commission_configs[$serviceName]
@@ -259,6 +275,7 @@ class TicketController extends Controller
         $serviceName = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $serviceName);
         $serviceName = preg_replace('/[ỳýỵỷỹ]/u', 'y', $serviceName);
         $serviceName = preg_replace('/đ/u', 'd', $serviceName);
+        $serviceName = str_replace(['.', ',', '(', ')'], '', $serviceName); // Loại bỏ dấu chấm, dấu phẩy và dấu ngoặc đơn
         $serviceName = str_replace(' ', '_', trim($serviceName)); // Thay khoảng trắng bằng gạch dưới
 
         return in_array($serviceName, $this->ignore_checkin_time);
