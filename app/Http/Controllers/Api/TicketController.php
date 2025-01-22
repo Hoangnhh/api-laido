@@ -99,7 +99,7 @@ class TicketController extends Controller
                 }
 
                 // Kiểm tra vé có tồn tại trong bảng ticket không
-                $syncTicket = Ticket::where('ticket_code', $request->code)->first();
+                $syncTicket = Ticket::where('code', $request->code)->first();
                 if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
 
