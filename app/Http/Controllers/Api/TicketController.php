@@ -99,8 +99,8 @@ class TicketController extends Controller
                 }
 
                 // Kiểm tra vé có tồn tại trong bảng ticket không
-                $ticket = Ticket::where('ticket_code', $request->code)->first();
-                if (!$ticket) {// Gọi service để kiểm tra vé
+                $syncTicket = Ticket::where('ticket_code', $request->code)->first();
+                if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
 
                     if (!$result['success']) {
@@ -109,17 +109,17 @@ class TicketController extends Controller
                     
                     $ticketData = $result['data']['ticket'];
                 }else{
-                    if($ticket->status == Ticket::STATUS_USED) {
+                    if($syncTicket->status == Ticket::STATUS_USED) {
                         return $this->errorResponse('Vé đã được sử dụng');
                     }
-                    if($ticket->expired_date < Carbon::now()) {
+                    if($syncTicket->expired_date < Carbon::now()) {
                         return $this->errorResponse('Vé đã hết hạn');
                     }
-                    if($ticket->issue_date > Carbon::now()) {
+                    if($syncTicket->issue_date > Carbon::now()) {
                         return $this->errorResponse('Vé chưa được phát hành');
                     }
 
-                    $ticketData = $ticket;
+                    $ticketData = $syncTicket;
                 }
                 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
@@ -148,6 +148,12 @@ class TicketController extends Controller
                         'gate_staff_shift_id' => $activeAssignment->id,
                         'paid' => false
                     ]);
+                    
+                    if($syncTicket){
+                        $syncTicket->update([
+                            'status' => Ticket::STATUS_USED
+                        ]);
+                    }
 
                     DB::commit();
                 } catch (\Exception $e) {
