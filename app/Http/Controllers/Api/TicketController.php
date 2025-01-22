@@ -102,15 +102,6 @@ class TicketController extends Controller
                 // Kiểm tra vé có tồn tại trong bảng ticket không
                 $syncTicket = Ticket::where('code', $request->code)->first();
 
-                ActionLog::create([
-                    'action' => ActionLog::ACTION_CREATE,
-                    'table' => 'tickets',
-                    'before_data' => json_encode($syncTicket),
-                    'after_data' => json_encode($syncTicket),
-                    'create_by' => $request->username,
-                    'create_at' => Carbon::now()
-                ]);
-
                 if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
 
@@ -120,7 +111,7 @@ class TicketController extends Controller
                     
                     $ticketData = $result['data']['ticket'];
                 }else{
-                    
+
                     $ticketData = $syncTicket->toArray();
                     if($ticketData['status'] == Ticket::STATUS_USED) {
                         return $this->errorResponse('Vé đã được sử dụng');
