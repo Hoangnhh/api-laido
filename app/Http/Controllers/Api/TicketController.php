@@ -119,7 +119,7 @@ class TicketController extends Controller
                         return $this->errorResponse('Vé chưa được phát hành');
                     }
 
-                    $ticketData = $syncTicket;
+                    $ticketData = (array)$syncTicket;
                 }
                 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
