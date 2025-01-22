@@ -100,7 +100,7 @@ class TicketController extends Controller
                 }
 
                 // Kiểm tra vé có tồn tại trong bảng ticket không
-                $syncTicket = Ticket::where('code', $request->code)->first()->toArray();
+                $syncTicket = Ticket::where('code', $request->code)->first();
 
                 ActionLog::create([
                     'action' => ActionLog::ACTION_CREATE,
@@ -120,17 +120,18 @@ class TicketController extends Controller
                     
                     $ticketData = $result['data']['ticket'];
                 }else{
-                    if($syncTicket['status'] == Ticket::STATUS_USED) {
+                    
+                    $ticketData = $syncTicket->toArray();
+                    if($ticketData['status'] == Ticket::STATUS_USED) {
                         return $this->errorResponse('Vé đã được sử dụng');
                     }
-                    if($syncTicket['expired_date'] < Carbon::now()) {
+                    if($ticketData['expired_date'] < Carbon::now()) {
                         return $this->errorResponse('Vé đã hết hạn');
                     }
-                    if($syncTicket['issued_date'] > Carbon::now()) {
+                    if($ticketData['issued_date'] > Carbon::now()) {
                         return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
                     }
 
-                    $ticketData = $syncTicket;
                 }
 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
