@@ -101,6 +101,15 @@ class TicketController extends Controller
 
                 // Kiểm tra vé có tồn tại trong bảng ticket không
                 $syncTicket = Ticket::where('code', $request->code)->first()->toArray();
+
+                ActionLog::create([
+                    'action' => ActionLog::ACTION_CREATE,
+                    'table' => 'tickets',
+                    'before_data' => json_encode($syncTicket),
+                    'after_data' => json_encode($syncTicket),
+                    'created_by' => $request->username,
+                    'created_date' => Carbon::now()
+                ]);
                 if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
 
@@ -123,17 +132,6 @@ class TicketController extends Controller
                     $ticketData = $syncTicket;
                 }
 
-                ActionLog::create([
-                    'action' => ActionLog::ACTION_CREATE,
-                    'table' => 'tickets',
-                    'before_data' => json_encode($syncTicket),
-                    'after_data' => json_encode($ticketData),
-                    'created_by' => $request->username,
-                    'created_date' => Carbon::now()
-                ]);
-
-                
-                
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($ticketData['service_name']);
 
