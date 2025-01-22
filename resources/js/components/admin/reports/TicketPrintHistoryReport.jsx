@@ -204,53 +204,53 @@ const TicketPrintHistoryReport = () => {
                     </Card>
                 </div>
 
-                <Card className="rp-data-grid flex-grow-1 overflow-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                <Card className="rp-data-grid flex-grow-1 overflow-hidden">
                     <Card.Body>
                     {loading ? (
-            <p>Đang tải dữ liệu...</p>
-        ) : data.length === 0 ? ( // Kiểm tra nếu không có dữ liệu
-            <p>Không có dữ liệu để hiển thị.</p>
-        ) : (
-                            <div className="table-responsive">
-                                <Table striped bordered hover className="rp-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="text-center">STT</th>
-                                            <th>Tên dịch vụ</th>
-                                            <th>Mã vé</th>
-                                            <th>Mã hóa đơn</th>
-                                            <th>Thời gian in</th>
-                                            <th>Trạng thái</th>
-                                            <th>Tổng tiền</th>
-                                            <th>Tên đơn vị</th>
-                                            <th>Người in</th>
-                                            <th>Số lần in</th>
+                        <p>Đang tải dữ liệu...</p>
+                    ) : data.length === 0 ? (
+                        <p>Không có dữ liệu để hiển thị.</p>
+                    ) : (
+                        <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                            <Table striped bordered hover className="rp-table" style={{ width: '100%' }}>
+                                <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                                    <tr>
+                                        <th className="text-center">STT</th>
+                                        <th>Tên dịch vụ</th>
+                                        <th>Mã vé</th>
+                                        <th>Mã hóa đơn</th>
+                                        <th>Thời gian in</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Tên đơn vị</th>
+                                        <th>Người in</th>
+                                        <th>Số lần in</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.map((item, index) => (
+                                        <tr key={index}>
+                                            <td className="text-center">{index + 1}</td>
+                                            <td>{item.ticketName}</td>
+                                            <td>{item.TicketCode}</td>
+                                            <td>{item.bookingCode}</td>
+                                            <td>{new Date(item.printTime).toLocaleString('vi-VN')}</td>
+                                            <td>{item.status}</td>
+                                            <td>
+                                                {new Intl.NumberFormat('vi-VN', { 
+                                                    style: 'currency', 
+                                                    currency: 'VND' 
+                                                }).format(item.TotalAmount)}
+                                            </td>
+                                            <td>{item.Organization}</td>
+                                            <td>{item.fullName}</td>
+                                            <td>{item.printCount}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {data.map((item, index) => (
-                                            <tr key={index}>
-                                                <td className="text-center">{index + 1}</td>
-                                                <td>{item.ticketName}</td>
-                                                <td>{item.TicketCode}</td>
-                                                <td>{item.bookingCode}</td>
-                                                <td>{new Date(item.printTime).toLocaleString('vi-VN')}</td>
-                                                <td>{item.status}</td>
-                                                <td>
-                                                    {new Intl.NumberFormat('vi-VN', { 
-                                                        style: 'currency', 
-                                                        currency: 'VND' 
-                                                    }).format(item.TotalAmount)}
-                                                </td>
-                                                <td>{item.Organization}</td>
-                                                <td>{item.fullName}</td>
-                                                <td>{item.printCount}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
-                            </div>
-                        )}
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </div>
+                    )}
                     </Card.Body>
                 </Card>
             </div>

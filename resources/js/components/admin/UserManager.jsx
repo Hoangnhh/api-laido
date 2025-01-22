@@ -101,6 +101,18 @@ const menuItems = [
     { 
         text: 'Lái đò đã kết ca', 
         path: '/admin/checkout-list-report'
+    },
+    { 
+        text: 'Tổng hợp vé đã in', 
+        path: '/admin/revenue-report'
+    },
+    { 
+        text: 'Vé đã in theo thu ngân', 
+        path: '/admin/revenue-detail-report'
+    },
+    { 
+        text: 'Lịch sử in lại vé', 
+        path: '/admin/ticket-print-history-report'
     }
     
 ];
