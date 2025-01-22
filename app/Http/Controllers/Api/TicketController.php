@@ -110,6 +110,7 @@ class TicketController extends Controller
                     'create_by' => $request->username,
                     'create_at' => Carbon::now()
                 ]);
+
                 if (!$syncTicket) {// Gọi service để kiểm tra vé
                     $result = $this->ticketService->useTicket($request->code);
 
@@ -125,7 +126,7 @@ class TicketController extends Controller
                     if($syncTicket['expired_date'] < Carbon::now()) {
                         return $this->errorResponse('Vé đã hết hạn');
                     }
-                    if($syncTicket['issue_date'] > Carbon::now()) {
+                    if($syncTicket['issued_date'] > Carbon::now()) {
                         return $this->errorResponse('Vé chưa được phát hành');
                     }
 
