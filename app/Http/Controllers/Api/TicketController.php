@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SystemConfig;
 use App\Enums\SystemConfigKey;
+use App\Models\ActionLog;
 use App\Models\Ticket;
 class TicketController extends Controller
 {
@@ -121,6 +122,17 @@ class TicketController extends Controller
 
                     $ticketData = (array)$syncTicket;
                 }
+
+                ActionLog::create([
+                    'action' => ActionLog::ACTION_CREATE,
+                    'table' => 'tickets',
+                    'before_data' => json_encode($syncTicket),
+                    'after_data' => json_encode($ticketData),
+                    'created_by' => $request->username,
+                    'created_date' => Carbon::now()
+                ]);
+
+                
                 
                 // Lấy commission từ config theo tên dịch vụ đã xử lý
                 $commission = $this->calculateCommission($ticketData['service_name']);
