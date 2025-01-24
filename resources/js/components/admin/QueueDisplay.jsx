@@ -114,6 +114,12 @@ const QueueDisplay = () => {
 
     useEffect(() => {
         fetchGates();
+        // Kiểm tra tham số gate_id trên URL
+        const params = new URLSearchParams(window.location.search);
+        const gateId = params.get('gate_id');
+        if (gateId) {
+            setSelectedPosition(Number(gateId));
+        }
     }, []);
 
     useEffect(() => {
