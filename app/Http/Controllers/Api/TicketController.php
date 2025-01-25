@@ -33,10 +33,10 @@ class TicketController extends Controller
         've_do_tuyen_long_van_tre_em' => 32000,
         "default" => 32000
     ];
-    
+
     private $ignore_checkin_time = [
-        "ve_do_tuyen_long_van" => 70000,
-        've_do_tuyen_long_van_tre_em' => 32000,
+        "ve_do_tuyen_long_van",
+        've_do_tuyen_long_van_tre_em',
     ];
 
     public function __construct(TicketService $ticketService)
