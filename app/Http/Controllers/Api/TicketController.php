@@ -25,10 +25,18 @@ class TicketController extends Controller
     private $commission_configs = [
         "phi_thang_canh_ve_do" => 70000,
         "phi_thang_canh_uu_tien_ve_do" => 70000,
-        "default" => 70000
+        've_do_tuyen_huong_tich' => 70000,
+        've_do_tuyen_huong_tich_tre_em' => 42000,
+        've_do_tuyen_tuyet_son' => 55000,
+        've_do_tuyen_long_van' => 55000,
+        've_do_tuyen_tuyet_son_tre_em' => 32000,
+        've_do_tuyen_long_van_tre_em' => 32000,
+        "default" => 32000
     ];
+    
     private $ignore_checkin_time = [
         "ve_do_tuyen_long_van" => 70000,
+        've_do_tuyen_long_van_tre_em' => 32000,
     ];
 
     public function __construct(TicketService $ticketService)
