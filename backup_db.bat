@@ -9,9 +9,14 @@ set BACKUP_PATH=C:\database_backups
 :: Tạo thư mục backup nếu chưa tồn tại
 if not exist %BACKUP_PATH% mkdir %BACKUP_PATH%
 
-:: Tạo tên file với timestamp
-set TIMESTAMP=%date:~-4%-%date:~3,2%-%date:~0,2%_%time:~0,2%-%time:~3,2%
-set BACKUP_FILE=%BACKUP_PATH%\%DATABASE%_%TIMESTAMP%.sql
+:: Tạo tên file với timestamp (sửa lại phần này)
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set DATESTAMP=%%c-%%a-%%b
+)
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do (
+    set TIMESTAMP=%%a%%b
+)
+set BACKUP_FILE=%BACKUP_PATH%\%DATABASE%_%DATESTAMP%_%TIMESTAMP%.sql
 
 :: Thực hiện backup
 cd %MYSQL_PATH%
