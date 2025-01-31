@@ -80,20 +80,21 @@ const StaffCheckin = () => {
             if (e.key === 'Enter') {
                 e.preventDefault(); // Ngăn form submit
                 
-                if (currentTime - lastSubmitTime < SUBMIT_DELAY) {
-                    setCardBuffer('');
-                    return;
-                }
-
-                if (cardBuffer && !isSubmitting.current) {
-                    const scannedCode = cardBuffer;
+                // Xử lý ngay khi có mã hợp lệ
+                if (cardBuffer) {
+                    const scannedCode = cardBuffer.trim();
                     setCardId(scannedCode);
-                    setLastSubmitTime(currentTime);
                     
-                    handleSubmit(e);
+                    // Kiểm tra độ dài và xử lý ngay
+                    if (scannedCode.length === 10 || scannedCode.length > 10) {
+                        if (currentTime - lastSubmitTime >= SUBMIT_DELAY) {
+                            setLastSubmitTime(currentTime);
+                            handleSubmit(e, scannedCode); // Truyền scannedCode trực tiếp
+                        }
+                    }
                 }
                 setCardBuffer('');
-            } else {
+            } else if (e.key.length === 1) { // Chỉ nhận ký tự in được
                 setCardBuffer(prev => prev + e.key);
             }
         };
@@ -222,16 +223,18 @@ const StaffCheckin = () => {
         setMaxWaitingItems(Math.min(Math.max(maxItems, 3), 8));
     };
 
-    const handleSubmit = async (e) => {
-        // e.preventDefault();
-        if (!cardId || isProcessing) return;
+    const handleSubmit = async (e, code = null) => {
+        e.preventDefault();
+        const submitCode = code || cardId; // Sử dụng code được truyền vào hoặc cardId từ state
+        
+        if (!submitCode || isProcessing) return;
 
         setIsLoading(true);
         try {
-            if (cardId.length === 10) {
-                await handleScanTicket(cardId);
-            } else if (cardId.length > 10) {
-                await handleCheckin(cardId);
+            if (submitCode.length === 10) {
+                await handleScanTicket(submitCode);
+            } else if (submitCode.length > 10) {
+                await handleCheckin(submitCode);
             }
         } finally {
             setIsLoading(false);
