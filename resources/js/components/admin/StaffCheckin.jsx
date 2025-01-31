@@ -829,9 +829,9 @@ const StaffCheckin = () => {
                                                 <div className="sc-waiting-group">
                                                     {assignment.staff?.group_name || 'Chưa phân nhóm'}
                                                 </div>
-                                                <div className="sc-waiting-group">
+                                                {/* <div className="sc-waiting-group">
                                                     {assignment.staff?.card_id || ''}
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>
