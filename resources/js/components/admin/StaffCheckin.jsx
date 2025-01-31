@@ -223,7 +223,7 @@ const StaffCheckin = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         if (!cardId || isProcessing) return;
 
         setIsLoading(true);
