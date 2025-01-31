@@ -18,6 +18,7 @@ import {
     Stack
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import Loading from '../common/Loading';
 
 const StaffCheckin = () => {
     const [selectedPosition, setSelectedPosition] = useState(0);
@@ -43,6 +44,7 @@ const StaffCheckin = () => {
     const ticketInputRef = useRef(null);
     const isTestMode = new URLSearchParams(window.location.search).get('test') === '1';
     const [message, setMessage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const inputRef = useRef(null);
     const isSubmitting = useRef(false);
@@ -224,10 +226,15 @@ const StaffCheckin = () => {
         e.preventDefault();
         if (!cardId || isProcessing) return;
 
-        if (cardId.length === 10) {
-            handleScanTicket(cardId);
-        } else if (cardId.length > 10) {
-            handleCheckin(cardId);
+        setIsLoading(true);
+        try {
+            if (cardId.length === 10) {
+                await handleScanTicket(cardId);
+            } else if (cardId.length > 10) {
+                await handleCheckin(cardId);
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -347,6 +354,8 @@ const StaffCheckin = () => {
 
     return (
         <div className="sc-wrapper">
+            {isLoading && <Loading message={cardId.length === 10 ? "Đang xử lý vé..." : "Đang xử lý thẻ nhân viên..."} />}
+
             <div className="sc-fixed-header">
                 <h1 className="sc-title">
                     <div className="sc-controls">
@@ -429,7 +438,7 @@ const StaffCheckin = () => {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    {checkedInStaff.staff?.name}
+                                    {checkedInStaff.staff?.code}
                                 </Typography>
                                 <Stack spacing={2}>
                                     <Box sx={{ 
@@ -440,7 +449,7 @@ const StaffCheckin = () => {
                                         alignItems: 'center',
                                         justifyContent: 'space-between'
                                     }}>
-                                        <Typography variant="subtitle1" color="text.secondary" sx={{ mr: 2 }}>
+                                        <Typography variant="subtitle2" color="text.secondary" sx={{ mr: 2 }}>
                                             Số Đò:
                                         </Typography>
                                         <Typography variant="h6" sx={{ flex: 1, textAlign: 'right' }}>
@@ -484,7 +493,7 @@ const StaffCheckin = () => {
                         {/* Right Column - Tickets List */}
                         <Grid item xs={12} md={8}>
                             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                <Typography variant="h5" sx={{ mb: 3 }}>
+                                <Typography variant="h4" color="primary" sx={{ mb: 3 }}>
                                     {checkedInStaff.checked_tickets?.length} Vé
                                 </Typography>
                                 
@@ -549,8 +558,8 @@ const StaffCheckin = () => {
                                                         color: 'text.secondary'
                                                     }}
                                                 >
-                                                    <Typography variant="h6">
-                                                        Chưa có vé nào được check
+                                                    <Typography variant="h3">
+                                                        Chưa có vé nào được quẹt
                                                     </Typography>
                                                 </Box>
                                             </Grid>
@@ -562,7 +571,7 @@ const StaffCheckin = () => {
                     </Grid>
                 ) : (
                     <Box sx={{ textAlign: 'center', p: 5, color: 'text.secondary' }}>
-                        <Typography variant="h5">
+                        <Typography variant="h3">
                             Vui lòng quẹt thẻ nhân viên để checkin
                         </Typography>
                     </Box>

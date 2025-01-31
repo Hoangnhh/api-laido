@@ -354,7 +354,7 @@ class TicketController extends Controller
                 // kiểm tra thời gian checkin vé
                 $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
                 if($checkinTicketRangeTime > 0 && !$this->isIgnoreCheckinTime($ticketData['service_name'])) {
-                    $timeDiff = abs(Carbon::now()->diffInMinutes($activeAssignment->checkin_at));
+                    $timeDiff = abs(Carbon::now('Asia/Ho_Chi_Minh')->diffInMinutes($activeAssignment->checkin_at));
                     if ($timeDiff > $checkinTicketRangeTime) {
                         return $this->errorResponse("Quá thời gian cho phép quét vé, Chỉ được phép quét vé trong ({$checkinTicketRangeTime} phút)");
                     }
@@ -401,7 +401,7 @@ class TicketController extends Controller
                 }
 
                 $ticketData = $createdCheckedTicket->toArray();
-                $ticketData['checkin_time'] = Carbon::now()->format('H:i:s');
+                $ticketData['checkin_time'] = Carbon::now('Asia/Ho_Chi_Minh')->format('H:i:s');
                 $ticketData['checkout_time'] = null;
                 return $this->successResponse($ticketData,
                     'Quét vé chiều vào thành công'
@@ -410,7 +410,7 @@ class TicketController extends Controller
             } else if($existingTicket->status == CheckedTicket::STATUS_CHECKIN) { // Đã có record và chưa checkout thì là checkout
                 $checkoutDelayMinute = $systemConfigs[SystemConfigKey::CHECKOUT_DELAY_MINUTE->value];
                 // Tính số phút và giây từ lúc checkin đến hiện tại, đảm bảo luôn là số dương
-                $secondsSinceCheckin = abs(Carbon::now()->diffInSeconds($existingTicket->checkin_at));
+                $secondsSinceCheckin = abs(Carbon::now('Asia/Ho_Chi_Minh')->diffInSeconds($existingTicket->checkin_at));
                 $minutesSinceCheckin = floor($secondsSinceCheckin / 60);
                 $remainingSeconds = $secondsSinceCheckin % 60;
                 
@@ -442,7 +442,7 @@ class TicketController extends Controller
                 $existingTicket->update([
                     'status' => CheckedTicket::STATUS_CHECKOUT,
                     'is_checkout_with_other' => $existingTicket->checkin_by != $request->username,
-                    'checkout_at' => Carbon::now(),
+                    'checkout_at' => Carbon::now('Asia/Ho_Chi_Minh'),
                     'checkout_by' => $request->username,
                 ]);
 
@@ -453,10 +453,10 @@ class TicketController extends Controller
                             'code' => $request->code,
                             'name' => $existingTicket->name,
                             'status' => CheckedTicket::STATUS_CHECKOUT,
-                            'date' => Carbon::now(),
+                            'date' => Carbon::now('Asia/Ho_Chi_Minh'),
                             'checkin_at' => $existingTicket->checkin_at,
                             'checkin_by' => $existingTicket->checkin_by,
-                            'checkout_at' => Carbon::now(),
+                            'checkout_at' => Carbon::now('Asia/Ho_Chi_Minh'),
                             'checkout_by' => $request->username,
                             'price' => $existingTicket->price,
                             'commission' => $commission,
@@ -475,7 +475,7 @@ class TicketController extends Controller
 
                     $ticketData = $createdCheckedTicket->toArray();
                     $ticketData['checkin_time'] = $existingTicket->checkin_at->format('H:i:s');
-                    $ticketData['checkout_time'] = Carbon::now()->format('H:i:s');
+                    $ticketData['checkout_time'] = Carbon::now('Asia/Ho_Chi_Minh')->format('H:i:s');
                     return $this->successResponse($ticketData, 'Quét vé chiều ra thành công');
                 }
                 
@@ -486,7 +486,7 @@ class TicketController extends Controller
                 $existingTicket->increment('commission', $commission);
                 $ticketData = $existingTicket->toArray();
                 $ticketData['checkin_time'] = $existingTicket->checkin_at->format('H:i:s');
-                $ticketData['checkout_time'] = Carbon::now()->format('H:i:s');
+                $ticketData['checkout_time'] = Carbon::now('Asia/Ho_Chi_Minh')->format('H:i:s');
                 return $this->successResponse($ticketData, 'Quét vé chiều ra thành công');      
 
                 
