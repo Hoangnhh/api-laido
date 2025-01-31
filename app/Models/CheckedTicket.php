@@ -74,4 +74,27 @@ class CheckedTicket extends Model
     {
         return $this->belongsTo(Staff::class, 'checkout_by');
     }
+
+    public static function getTicketsByStaffToday($staff_id, $date = null)
+    {
+        return CheckedTicket::where('staff_id', $staff_id)
+            ->whereDate('date', $date ?? today())
+            ->orderBy('checkin_at', 'desc')
+            ->get()->map(function($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'code' => $ticket->code,
+                    'name' => $ticket->name,
+                    'status' => $ticket->status,
+                    'checkin_at' => $ticket->checkin_at?->format('H:i:s'),
+                    'checkout_at' => $ticket->checkout_at?->format('H:i:s'),
+                    'checkin_by' => $ticket->checkin_by,
+                    'checkout_by' => $ticket->checkout_by,
+                    'price' => $ticket->price,
+                    'commission' => $ticket->commission,
+                    'paid' => $ticket->paid,
+                    'is_checkout_with_other' => $ticket->is_checkout_with_other
+                ];
+            });
+    }
 } 

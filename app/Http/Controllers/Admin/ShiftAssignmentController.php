@@ -19,6 +19,8 @@ use App\Models\ActionLog;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\CheckedTicket;
+use App\Models\Ticket;
 
 class ShiftAssignmentController extends Controller
 {
@@ -784,25 +786,29 @@ class ShiftAssignmentController extends Controller
                 ]);
             }
 
-            if ($assignment->status !== GateStaffShift::STATUS_WAITING) {
-                switch ($assignment->status) {
-                    case GateStaffShift::STATUS_CHECKIN:
-                        $message = 'Nhân viên đã checkin';
-                        break;
-                    default:
-                        $message = 'Nhân viên không trong hàng đợi';
-                }
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $message,
-                    'data' => [
-                        'staff' => $staff,
-                        'assignment' => [
-                            'index' => $assignment->index || "000",
-                        ]
-                    ]
-                ]);
-            }
+             // Lấy danh sách vé đã check trong ngày của ca này và của staff này
+             $checkedTickets = CheckedTicket::getTicketsByStaffToday($staff->id);
+
+            // if ($assignment->status !== GateStaffShift::STATUS_WAITING) {
+            //     switch ($assignment->status) {
+            //         case GateStaffShift::STATUS_CHECKIN:
+            //             $message = 'Nhân viên đã checkin';
+            //             break;
+            //         default:
+            //             $message = 'Nhân viên không trong hàng đợi';
+            //     }
+            //     return response()->json([
+            //         'status' => 'error',
+            //         'message' => $message,
+            //         'data' => [
+            //             'staff' => $staff,
+            //             'assignment' => [
+            //                 'index' => $assignment->index || "000",
+            //             ],
+            //             'checked_tickets' => $checkedTickets
+            //         ]
+            //     ]);
+            // }
             
             // Lấy thông tin gateShift và kiểm tra trạng thái
             $gateShift = GateShift::where('id', $request->gate_shift_id)
@@ -879,7 +885,8 @@ class ShiftAssignmentController extends Controller
                         'index' => $assignment->index,
                         'status' => GateStaffShift::STATUS_CHECKIN,
                         'checkin_at' => now()->format('H:i:s'),
-                    ]
+                    ],
+                    'checked_tickets' => $checkedTickets
                 ]
             ]);
 
@@ -1287,6 +1294,4 @@ class ShiftAssignmentController extends Controller
             ], 500);
         }
     }
-
-    
 } 

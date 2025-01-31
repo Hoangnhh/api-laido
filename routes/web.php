@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Middleware\VerifyAjaxRequest;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Api\TicketController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {
@@ -181,6 +182,13 @@ Route::prefix('api/admin')->group(function () {
 Route::get('/api/admin/get-assignments-by-gate', [ShiftAssignmentController::class, 'getAssignmentByGate']);
 Route::post('api/admin/staff-checkin', [ShiftAssignmentController::class, 'staffCheckin']);
 Route::get('api/admin/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
+Route::post('api/admin/use-ticket', [TicketController::class, 'useTicketInGate']);
+Route::get('api/admin/staff-checked-tickets', [TicketController::class, 'getCheckedTicketsByStaff']);
+
 Route::get('admin/queue-display', function () {
     return view('admin.queue-display');
 })->name('admin.queue-display');
+
+Route::get('admin/staff-checkin', function () {
+    return view('admin.staff-checkin');
+})->name('admin.staff-checkin');
