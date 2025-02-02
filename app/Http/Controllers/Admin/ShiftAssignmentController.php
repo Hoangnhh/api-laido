@@ -714,7 +714,7 @@ class ShiftAssignmentController extends Controller
             if (!$gateStaffShift) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Không tìm thấy ca làm việc của nhân viên',
+                    'message' => 'Nhân viên không trong ca làm việc',
                     'data' => [
                         'staff' => $staff
                     ]

@@ -77,10 +77,19 @@ class CheckedTicket extends Model
 
     public static function getTicketsByStaffToday($staff_id, $date = null)
     {
-        return CheckedTicket::where('staff_id', $staff_id)
+        $tickets = CheckedTicket::where('staff_id', $staff_id)
             ->whereDate('date', $date ?? today())
             ->orderBy('checkin_at', 'desc')
-            ->get()->map(function($ticket) {
+            ->get();
+
+        $staff = Staff::find($staff_id);
+        $staffUsername = $staff->username;
+
+        $totalTicketIn = $tickets->where('checkin_by', $staffUsername)->count();
+        $totalTicketOut = $tickets->where('checkout_by', $staffUsername)->count();
+
+        return [
+            'data' => $tickets->map(function($ticket) {
                 return [
                     'id' => $ticket->id,
                     'code' => $ticket->code,
@@ -95,6 +104,9 @@ class CheckedTicket extends Model
                     'paid' => $ticket->paid,
                     'is_checkout_with_other' => $ticket->is_checkout_with_other
                 ];
-            });
+            }),
+            'total_ticket_in' => $totalTicketIn,
+            'total_ticket_out' => $totalTicketOut
+        ];
     }
 } 

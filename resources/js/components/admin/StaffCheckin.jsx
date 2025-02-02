@@ -27,6 +27,11 @@ const StaffCheckin = () => {
     const [positions, setPositions] = useState([]);
     const [maxWaitingItems, setMaxWaitingItems] = useState(5);
     const [checkedInStaff, setCheckedInStaff] = useState(null);
+    const [checkedTickets, setCheckedTickets] = useState([]);
+    const [ticketStats, setTicketStats] = useState({
+        total_ticket_in: 0,
+        total_ticket_out: 0
+    });
     const [showModal, setShowModal] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [cardBuffer, setCardBuffer] = useState('');
@@ -157,15 +162,6 @@ const StaffCheckin = () => {
         }
     }, [showCheckinModal, cardBuffer, lastKeyTime]);
 
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => {
-                setMessage(null);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [message]);
-
     const handleCheckin = async (code) => {
         if (isProcessing || isSubmitting.current) return;
         
@@ -182,18 +178,27 @@ const StaffCheckin = () => {
             if (response.data.status === 'success') {
                 setShowCheckinModal(false);
                 
+                const { checked_tickets, ...staffData } = response.data.data;
+                
                 setCheckedInStaff({
-                    ...response.data.data,
+                    ...staffData,
                     success: true
                 });
+                
+                setCheckedTickets(checked_tickets?.data || []);
+                setTicketStats({
+                    total_ticket_in: checked_tickets?.total_ticket_in || 0,
+                    total_ticket_out: checked_tickets?.total_ticket_out || 0
+                });
+
                 setShowCheckinModal(true);
                 setMessage({ type: 'success', text: response.data.message });
             } else {
-                setError(response.data.message);
                 setCheckedInStaff({
-                    ...response.data.data,
+                    staff: response.data.data.staff,
                     error: true
                 });
+                setMessage({ type: 'error', text: response.data.message });
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi checkin');
@@ -276,25 +281,22 @@ const StaffCheckin = () => {
                     checkout_at: newTicketData.checkout_time
                 };
 
-                setCheckedInStaff(prev => {
-                    const existingTicketIndex = prev.checked_tickets?.findIndex(
-                        ticket => ticket.code === code
-                    );
+                const existingTicketIndex = checkedTickets.findIndex(
+                    ticket => ticket.code === code
+                );
 
-                    if (existingTicketIndex >= 0) {
-                        const updatedTickets = [...prev.checked_tickets];
-                        updatedTickets[existingTicketIndex] = newTicket;
-                        return {
-                            ...prev,
-                            checked_tickets: updatedTickets
-                        };
-                    } else {
-                        return {
-                            ...prev,
-                            checked_tickets: [newTicket, ...(prev.checked_tickets || [])]
-                        };
-                    }
-                });
+                if (existingTicketIndex >= 0) {
+                    const updatedTickets = [...checkedTickets];
+                    updatedTickets[existingTicketIndex] = newTicket;
+                    setCheckedTickets(updatedTickets);
+                } else {
+                    setCheckedTickets([newTicket, ...checkedTickets]);
+                }
+
+                setTicketStats(prev => ({
+                    total_ticket_in: newTicket.status === 'CHECKIN' ? prev.total_ticket_in + 1 : prev.total_ticket_in,
+                    total_ticket_out: newTicket.status === 'CHECKOUT' ? prev.total_ticket_out + 1 : prev.total_ticket_out
+                }));
 
                 setMessage({ type: 'success', text: response.data.message });
             } else {
@@ -441,7 +443,7 @@ const StaffCheckin = () => {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    {checkedInStaff.staff?.code}
+                                    #{checkedInStaff.assignment?.index || 0}
                                 </Typography>
                                 <Stack spacing={2}>
                                     <Box sx={{ 
@@ -497,7 +499,7 @@ const StaffCheckin = () => {
                         <Grid item xs={12} md={8}>
                             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                                 <Typography variant="h4" color="primary" sx={{ mb: 3 }}>
-                                    {checkedInStaff.checked_tickets?.length} Vé
+                                    Vé vào: {ticketStats.total_ticket_in} - Vé ra: {ticketStats.total_ticket_out}
                                 </Typography>
                                 
                                 <Box 
@@ -509,7 +511,7 @@ const StaffCheckin = () => {
                                     }}
                                 >
                                     <Grid container spacing={2}>
-                                        {checkedInStaff.checked_tickets?.map((ticket, index) => (
+                                        {checkedTickets.map((ticket, index) => (
                                             <Grid item xs={12} md={6} lg={4} key={ticket.id}>
                                                 <Card 
                                                     sx={{ 
@@ -552,7 +554,7 @@ const StaffCheckin = () => {
                                                 </Card>
                                             </Grid>
                                         ))}
-                                        {(!checkedInStaff.checked_tickets || checkedInStaff.checked_tickets.length === 0) && (
+                                        {(!checkedTickets.length && checkedInStaff.checked_tickets?.data?.length === 0) && (
                                             <Grid item xs={12}>
                                                 <Box 
                                                     sx={{ 
