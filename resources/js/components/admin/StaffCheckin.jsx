@@ -349,12 +349,23 @@ const StaffCheckin = () => {
         }
     }));
 
-    const StyledAvatar = styled(Avatar)(({ theme }) => ({
+    const StyledAvatar = styled(Avatar)(({ theme, hasIndex }) => ({
         width: 300,
         height: 300,
         border: `4px solid ${theme.palette.primary.main}`,
         margin: '0 auto',
-        boxShadow: theme.shadows[3]
+        boxShadow: theme.shadows[3],
+        position: 'relative',
+        '&::after': !hasIndex ? {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `linear-gradient(45deg, transparent 45%, ${theme.palette.error.main} 45%, ${theme.palette.error.main} 55%, transparent 55%)`,
+            pointerEvents: 'none'
+        } : {}
     }));
 
     return (
@@ -433,6 +444,7 @@ const StaffCheckin = () => {
                                 <StyledAvatar
                                     src={`http://admin-laido.invade.vn/${checkedInStaff.staff?.avatar_url}`}
                                     alt={checkedInStaff.staff?.name}
+                                    hasIndex={!!checkedInStaff.assignment?.index}
                                 />
                                 <Typography 
                                     variant="h2" 
