@@ -6,10 +6,10 @@ import '../../../css/AccountsPayable.css';
 import AdminLayout from './Layout/AdminLayout';
 
 const AccountsPayable = () => {
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
     const [keyword, setKeyword] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('');
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [statistics, setStatistics] = useState({
@@ -23,7 +23,12 @@ const AccountsPayable = () => {
             setLoading(true);
             try {
                 const response = await axios.get('/api/admin/get-staff-payments', {
-                    params: { search: keyword }
+                    params: { 
+                        search: keyword,
+                        status: filterStatus,
+                        per_page: perPage,
+                        page: currentPage
+                    }
                 });
                 setData(response.data.data);
             } catch (error) {
@@ -34,7 +39,7 @@ const AccountsPayable = () => {
         };
 
         fetchStaffPayments();
-    }, [keyword]);
+    }, [keyword, filterStatus, currentPage, perPage]);
 
     useEffect(() => {
         const fetchStatistics = async () => {
@@ -49,17 +54,8 @@ const AccountsPayable = () => {
         fetchStatistics();
     }, []);
 
-    const handleChangePage = (newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
-    };
-
     const handleSearch = () => {
-        setPage(0);
+        setCurrentPage(1);
     };
 
     const getStatusColor = (status) => {
@@ -138,48 +134,39 @@ const AccountsPayable = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item) => (
-                                <tr key={item.id}>
-                                    <td>{item.code}</td>
-                                    <td>{item.name}</td>
-                                    <td>{item.phone}</td>
-                                    <td align="right">
-                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total_commission)}
-                                    </td>
-                                    <td align="right">
-                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total_paid)}
-                                    </td>
-                                    <td>
-                                        <span style={{ color: getStatusColor(item.status) }}>{item.status}</span>
-                                    </td>
-                                    <td align="center">
-                                        <button title="Xem chi tiết">
-                                            <FontAwesomeIcon icon={faEye} />
-                                        </button>
-                                    </td>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="7" align="center">Đang tải dữ liệu...</td>
                                 </tr>
-                            ))}
+                            ) : data.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" align="center">Không có dữ liệu</td>
+                                </tr>
+                            ) : (
+                                data.map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{item.code}</td>
+                                        <td>{item.name}</td>
+                                        <td>{item.phone}</td>
+                                        <td align="right">
+                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total_commission)}
+                                        </td>
+                                        <td align="right">
+                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total_paid)}
+                                        </td>
+                                        <td>
+                                            <span style={{ color: getStatusColor(item.status) }}>{item.status}</span>
+                                        </td>
+                                        <td align="center">
+                                            <button title="Xem chi tiết">
+                                                <FontAwesomeIcon icon={faEye} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
-                </div>
-                <div className="ap-data-table__footer">
-                    <span>Số dòng mỗi trang:</span>
-                    <select value={rowsPerPage} onChange={handleChangeRowsPerPage}>
-                        {[5, 10, 25, 50].map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
-                    <span>
-                        {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, data.length)} trên {data.length}
-                    </span>
-                    <button onClick={() => handleChangePage(page - 1)} disabled={page === 0}>
-                        Trang trước
-                    </button>
-                    <button onClick={() => handleChangePage(page + 1)} disabled={(page + 1) * rowsPerPage >= data.length}>
-                        Trang sau
-                    </button>
                 </div>
             </div>
         </AdminLayout>

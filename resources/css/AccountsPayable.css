@@ -325,3 +325,67 @@
     opacity: 0.7;
     transition: opacity 0.2s ease-in-out;
 }
+
+.ap-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    border-top: 1px solid #e5e7eb;
+}
+
+.ap-pagination__info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ap-pagination__select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: #fff;
+}
+
+.ap-pagination__total {
+    color: #6b7280;
+}
+
+.ap-pagination__buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.ap-pagination__button {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ap-pagination__button:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.ap-pagination__button:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.ap-pagination__button.active {
+    background-color: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.ap-pagination__dots {
+    color: #6b7280;
+    padding: 0 0.5rem;
+}

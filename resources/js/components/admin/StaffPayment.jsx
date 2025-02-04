@@ -24,6 +24,11 @@ const StaffPayment = () => {
     const pageSizeOptions = [20,50, 100,200];
     const [showPopup, setShowPopup] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        total: 0
+    });
 
     useEffect(() => {
         fetchSummary();
@@ -31,7 +36,7 @@ const StaffPayment = () => {
 
     useEffect(() => {
         fetchData();
-    }, [filters.payment_status]);
+    }, [filters.payment_status, currentPage, itemsPerPage]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -45,8 +50,11 @@ const StaffPayment = () => {
                 }
             });
             setData(response.data.data);
-            setCurrentPage(response.data.current_page);
-            setTotalItems(response.data.total);
+            setPagination({
+                current_page: response.data.current_page,
+                last_page: response.data.last_page,
+                total: response.data.total
+            });
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -68,91 +76,91 @@ const StaffPayment = () => {
     };
 
     const handlePageSizeChange = (e) => {
-        setItemsPerPage(parseInt(e.target.value));
+        const newPerPage = parseInt(e.target.value);
+        setItemsPerPage(newPerPage);
         setCurrentPage(1);
-        fetchData();
     };
 
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-        fetchData();
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= pagination.last_page && !loading) {
+            setCurrentPage(newPage);
+        }
     };
 
     const renderPaginationItems = () => {
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        let items = [];
+        const items = [];
+        
+        // Nút First và Previous
         items.push(
+            <Pagination.First
+                key="first"
+                disabled={currentPage === 1 || loading}
+                onClick={() => handlePageChange(1)}
+            />,
             <Pagination.Prev 
                 key="prev"
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || loading}
                 onClick={() => handlePageChange(currentPage - 1)}
             />
         );
 
-        if (totalPages <= 10) {
-            for (let number = 1; number <= totalPages; number++) {
-                items.push(
-                    <Pagination.Item
-                        key={number}
-                        active={number === currentPage}
-                        onClick={() => handlePageChange(number)}
-                    >
-                        {number}
-                    </Pagination.Item>
-                );
-            }
-        } else {
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, currentPage + 2);
+        // Hiển thị số trang
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(pagination.last_page, currentPage + 2);
 
-            if (startPage > 1) {
-                items.push(
-                    <Pagination.Item
-                        key={1}
-                        active={1 === currentPage}
-                        onClick={() => handlePageChange(1)}
-                    >
-                        1
-                    </Pagination.Item>
-                );
-                if (startPage > 2) {
-                    items.push(<Pagination.Ellipsis key="start-ellipsis" />);
-                }
-            }
-
-            for (let number = startPage; number <= endPage; number++) {
-                items.push(
-                    <Pagination.Item
-                        key={number}
-                        active={number === currentPage}
-                        onClick={() => handlePageChange(number)}
-                    >
-                        {number}
-                    </Pagination.Item>
-                );
-            }
-
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    items.push(<Pagination.Ellipsis key="end-ellipsis" />);
-                }
-                items.push(
-                    <Pagination.Item
-                        key={totalPages}
-                        active={totalPages === currentPage}
-                        onClick={() => handlePageChange(totalPages)}
-                    >
-                        {totalPages}
-                    </Pagination.Item>
-                );
+        if (startPage > 1) {
+            items.push(
+                <Pagination.Item
+                    key={1}
+                    active={1 === currentPage}
+                    onClick={() => handlePageChange(1)}
+                >
+                    1
+                </Pagination.Item>
+            );
+            if (startPage > 2) {
+                items.push(<Pagination.Ellipsis key="start-ellipsis" />);
             }
         }
 
+        for (let number = startPage; number <= endPage; number++) {
+            items.push(
+                <Pagination.Item
+                    key={number}
+                    active={number === currentPage}
+                    onClick={() => handlePageChange(number)}
+                >
+                    {number}
+                </Pagination.Item>
+            );
+        }
+
+        if (endPage < pagination.last_page) {
+            if (endPage < pagination.last_page - 1) {
+                items.push(<Pagination.Ellipsis key="end-ellipsis" />);
+            }
+            items.push(
+                <Pagination.Item
+                    key={pagination.last_page}
+                    active={pagination.last_page === currentPage}
+                    onClick={() => handlePageChange(pagination.last_page)}
+                >
+                    {pagination.last_page}
+                </Pagination.Item>
+            );
+        }
+
+        // Nút Next và Last
         items.push(
             <Pagination.Next
                 key="next"
-                disabled={currentPage === totalPages}
+                disabled={currentPage === pagination.last_page || loading}
                 onClick={() => handlePageChange(currentPage + 1)}
+            />,
+            <Pagination.Last
+                key="last"
+                disabled={currentPage === pagination.last_page || loading}
+                onClick={() => handlePageChange(pagination.last_page)}
             />
         );
 
@@ -312,10 +320,12 @@ const StaffPayment = () => {
                                                 </Form.Select>
                                             </Form.Group>
                                             <div>
-                                                Hiển thị {(currentPage - 1) * itemsPerPage + 1} đến {Math.min(currentPage * itemsPerPage, totalItems)} trong tổng số {totalItems} bản ghi
+                                                Hiển thị {pagination.total > 0 ? `${(currentPage - 1) * itemsPerPage + 1} đến ${Math.min(currentPage * itemsPerPage, pagination.total)} trong tổng số ${pagination.total}` : '0-0 trong tổng số 0'} bản ghi
                                             </div>
                                         </div>
-                                        <Pagination className="sp-pagination">{renderPaginationItems()}</Pagination>
+                                        <Pagination className="sp-pagination mb-0">
+                                            {renderPaginationItems()}
+                                        </Pagination>
                                     </div>
                                 )}
                             </>
