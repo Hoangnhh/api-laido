@@ -1028,70 +1028,52 @@ class ShiftAssignmentController extends Controller
     public function deleteGateShift(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'gate_shift_id' => 'required|exists:gate_shift,id'
-            ]);
-
-            $gateShift = GateShift::where('id', $request->gate_shift_id)
-                ->where('status', GateShift::STATUS_ACTIVE)
-                ->first();
-
+            $gateShiftId = $request->input('gate_shift_id');
+            
+            DB::beginTransaction();
+            
+            $gateShift = GateShift::find($gateShiftId);
             if (!$gateShift) {
                 return response()->json([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'Không tìm thấy ca làm việc'
-                ]);
+                ], 404);
             }
 
-            if ($gateShift->queue_status !== GateShift::QUEUE_STATUS_WAITING) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ca đang hoạt động, không được phép xóa'
+            // Trường hợp 1: GateShift đang có queue_status = 'WAITING'
+            if ($gateShift->queue_status === GateShift::QUEUE_STATUS_WAITING) {
+                $gateShift->update([
+                    'status' => GateShift::STATUS_INACTIVE,
+                    'updated_by' => Auth::user()->username
                 ]);
             }
-
-            DB::beginTransaction();
-            try {
-                // Lưu dữ liệu trước khi xóa để ghi log
-                $beforeData = [
-                    'gate_shift' => $gateShift->toArray(),
-                    'gate_staff_shifts' => GateStaffShift::where('gate_shift_id', $request->gate_shift_id)
-                        ->get()
-                        ->toArray()
-                ];
-
-                // Update gate shift status
-                $gateShift->update(['status' => GateShift::STATUS_INACTIVE]);
-
-                // Xóa tất cả gate staff shifts liên quan
-                GateStaffShift::where('gate_shift_id', $request->gate_shift_id)->delete();
-
-                // Tạo log
-                ActionLog::create([
-                    'action' => ActionLog::ACTION_DELETE,
-                    'table' => 'gate_shift',
-                    'before_data' => $beforeData,
-                    'after_data' => null,
-                    'create_by' => Auth::user()->username
+            
+            // Trường hợp 2: GateShift có queue_status != WAITING và status = ACTIVE
+            else if ($gateShift->queue_status !== GateShift::QUEUE_STATUS_WAITING && $gateShift->status === GateShift::STATUS_ACTIVE) {
+                // Cập nhật queue_status thành COMPLETED
+                $gateShift->update([
+                    'queue_status' => GateShift::QUEUE_STATUS_COMPLETED,
+                    'updated_by' => Auth::user()->username
                 ]);
 
-                DB::commit();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Xóa ca làm việc thành công'
-                ]);
-
-            } catch (Exception $e) {
-                DB::rollBack();
-                throw $e;
+                // Xóa tất cả gate_staff_shift có gate_shift_id tương ứng và status = WAITING
+                GateStaffShift::where('gate_shift_id', $gateShiftId)
+                    ->where('status', GateStaffShift::STATUS_WAITING)
+                    ->delete();
             }
 
-        } catch (Exception $e) {
+            DB::commit();
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'Xóa ca làm việc thất bại',
-                'error' => $e->getMessage()
+                'success' => true,
+                'message' => 'Xóa ca làm việc thành công'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
