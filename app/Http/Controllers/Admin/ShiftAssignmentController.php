@@ -813,7 +813,7 @@ class ShiftAssignmentController extends Controller
             // Lấy thông tin gateShift và kiểm tra trạng thái
             $gateShift = GateShift::where('id', $request->gate_shift_id)
                 ->where('status', GateShift::STATUS_ACTIVE)
-                ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING])
+                ->whereIn('queue_status', [GateShift::QUEUE_STATUS_RUNNING, GateShift::QUEUE_STATUS_WAITING, GateShift::QUEUE_STATUS_CHECKIN_ALL])
                 ->first();
             
 
