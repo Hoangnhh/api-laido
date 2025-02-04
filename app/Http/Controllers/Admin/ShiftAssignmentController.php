@@ -853,12 +853,18 @@ class ShiftAssignmentController extends Controller
 
             DB::beginTransaction();
 
-            $assignment->update([
+            $updateData = [
                 'status' => GateStaffShift::STATUS_CHECKIN,
                 'checkin_gate_id' => $originalGateId,
-                'checkin_at' => now(),
                 'checked_ticket_num' => 0
-            ]);
+            ];
+
+            // nếu trong ca bổ sung hoặc nhân viên chưa checkin thì mới set checkin_at
+            if($extraShifts->where('staff_id', $staff->id)->count() > 0 || $assignment->status !== GateStaffShift::STATUS_CHECKIN) {
+                $updateData['checkin_at'] = now();
+            }
+
+            $assignment->update($updateData);
 
             if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] == 0 && $assignment->index > $gateShift->current_index) {
                 $gateShift->update(['current_index' => $assignment->index]);
