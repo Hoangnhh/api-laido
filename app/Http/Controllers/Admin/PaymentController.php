@@ -26,54 +26,61 @@ class PaymentController extends Controller
             $search = $request->input('search', '');
             $status = $request->input('status', null);
             
-            $staffs = Staff::query()
-                ->withCount(['checkedTickets as checked_ticket_count'])
-                ->where(function($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%");
-                })
-                ->where('status', Staff::STATUS_ACTIVE)
-                ->when($status === 'unpaid', function($query) {
-                    $query->whereHas('checkedTickets', function($query) {
-                        $query->where('paid', false);
-                    });
-                })
-                ->when($status === 'paid', function($query) {
-                    $query->whereHas('payment', function($query) {
-                        $query->where('status', Payment::STATUS_ACTIVE);
-                    })->whereDoesntHave('checkedTickets', function($query) {
-                        $query->where('paid', false);
-                    });
-                })
-                ->when($status === null || $status === '', function($query) {
-                    // Không thêm điều kiện gì, lấy tất cả Staff
-                })
-                ->withCount([
-                    'checkedTickets as total_commission' => function($query) {
-                        $query->select(DB::raw('COALESCE(SUM(commission), 0)'))
-                              ->where('paid', false);
-                    },
-                    'payment as total_paid' => function($query) {
-                        $query->select(DB::raw('COALESCE(SUM(amount), 0)'))
-                              ->where('status', Payment::STATUS_ACTIVE);
-                    }
+            // Tạo query builder cơ bản
+            $query = Staff::query()
+                ->select([
+                    'staff.*',
+                    DB::raw('COUNT(DISTINCT ct.id) as checked_ticket_count'),
+                    DB::raw('COALESCE(SUM(CASE WHEN ct.paid = 0 THEN ct.commission ELSE 0 END), 0) as total_commission'),
+                    DB::raw('COALESCE(SUM(CASE WHEN p.status = "ACTIVE" THEN p.amount ELSE 0 END), 0) as total_paid')
                 ])
-                ->having('checked_ticket_count', '>', 0)
-                ->orderBy('code', 'asc')
-                ->paginate($perPage);
+                ->leftJoin('checked_ticket as ct', 'staff.id', '=', 'ct.staff_id')
+                ->leftJoin('payment as p', 'staff.id', '=', 'p.staff_id')
+                ->where('staff.status', Staff::STATUS_ACTIVE);
 
-            $data = $staffs->toArray();
-            if (isset($data['data'])) {
-                $data = $data['data'];
-            } else {
-                $data = [];
+            // Thêm điều kiện tìm kiếm
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('staff.name', 'like', "%{$search}%")
+                        ->orWhere('staff.code', 'like', "%{$search}%")
+                        ->orWhere('staff.phone', 'like', "%{$search}%");
+                });
             }
+
+            // Thêm điều kiện lọc theo trạng thái
+            if ($status === 'unpaid') {
+                $query->whereExists(function ($q) {
+                    $q->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', false);
+                });
+            } elseif ($status === 'paid') {
+                $query->whereExists(function ($q) {
+                    $q->select(DB::raw(1))
+                        ->from('payment')
+                        ->whereColumn('payment.staff_id', 'staff.id')
+                        ->where('payment.status', Payment::STATUS_ACTIVE);
+                })->whereNotExists(function ($q) {
+                    $q->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', false);
+                });
+            }
+
+            // Group by và having để lọc các staff có vé
+            $query->groupBy('staff.id')
+                ->having('checked_ticket_count', '>', 0)
+                ->orderBy('staff.code', 'asc');
+
+            // Thực hiện phân trang
+            $staffs = $query->paginate($perPage);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách thành công',
-                'data' => $data,
+                'data' => $staffs->items(),
                 'current_page' => $staffs->currentPage(),
                 'last_page' => $staffs->lastPage(),
                 'total' => $staffs->total()
