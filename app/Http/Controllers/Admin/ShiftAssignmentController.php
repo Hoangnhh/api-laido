@@ -886,7 +886,7 @@ class ShiftAssignmentController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message_color' => $lastStatus == GateStaffShift::STATUS_CHECKIN ? 'text-warning' : 'text-success',
+                'message_color' => $lastStatus == GateStaffShift::STATUS_CHECKIN ? 'warning' : 'success',
                 'message' => $lastStatus == GateStaffShift::STATUS_CHECKIN ? 'Mời quét vé' : 'Checkin thành công',
                 'data' => [
                     'staff' => $staff,
