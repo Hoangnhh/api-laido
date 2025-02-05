@@ -192,7 +192,7 @@ const StaffCheckin = () => {
                 });
 
                 setShowCheckinModal(true);
-                setMessage({ type: 'success', text: response.data.message });
+                setMessage({ type: response.data.message_color, text: response.data.message });
             } else {
                 setCheckedInStaff({
                     staff: response.data.data.staff,

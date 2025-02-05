@@ -508,7 +508,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
 
+.sc-message.warning {
+    background-color: #facc15;
+    color: red;
 }
 
 .sc-message.success {
