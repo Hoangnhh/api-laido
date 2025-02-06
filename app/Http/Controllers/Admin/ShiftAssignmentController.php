@@ -1042,28 +1042,17 @@ class ShiftAssignmentController extends Controller
                     'message' => 'Không tìm thấy ca làm việc'
                 ], 404);
             }
-
-            // Trường hợp 1: GateShift đang có queue_status = 'WAITING'
-            if ($gateShift->queue_status === GateShift::QUEUE_STATUS_WAITING) {
-                $gateShift->update([
-                    'status' => GateShift::STATUS_INACTIVE,
-                    'updated_by' => Auth::user()->username
-                ]);
-            }
             
-            // Trường hợp 2: GateShift có queue_status != WAITING và status = ACTIVE
-            else if ($gateShift->queue_status !== GateShift::QUEUE_STATUS_WAITING && $gateShift->status === GateShift::STATUS_ACTIVE) {
-                // Cập nhật queue_status thành COMPLETED
-                $gateShift->update([
-                    'queue_status' => GateShift::QUEUE_STATUS_COMPLETED,
-                    'updated_by' => Auth::user()->username
-                ]);
+            // Cập nhật queue_status thành COMPLETED
+            $gateShift->update([
+                'queue_status' => GateShift::QUEUE_STATUS_COMPLETED,
+                'updated_by' => Auth::user()->username
+            ]);
 
-                // Xóa tất cả gate_staff_shift có gate_shift_id tương ứng và status = WAITING
-                GateStaffShift::where('gate_shift_id', $gateShiftId)
-                    ->where('status', GateStaffShift::STATUS_WAITING)
-                    ->delete();
-            }
+            // Xóa tất cả gate_staff_shift có gate_shift_id tương ứng và status = WAITING
+            GateStaffShift::where('gate_shift_id', $gateShiftId)
+                ->where('status', GateStaffShift::STATUS_WAITING)
+                ->delete();
 
             DB::commit();
 
