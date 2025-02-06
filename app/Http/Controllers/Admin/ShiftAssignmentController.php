@@ -736,6 +736,11 @@ class ShiftAssignmentController extends Controller
                     'checked_ticket_num' => -50
                 ]);
 
+                $gateShift = GateShift::where('id', $gateStaffShift->gate_shift_id)->first();
+                $gateShift->update([
+                    'queue_status' => GateShift::QUEUE_STATUS_RUNNING,
+                ]);
+
                 $extraShifts->update([
                     'recheckin_times' => $extraShifts->recheckin_times + 1,
                 ]);
