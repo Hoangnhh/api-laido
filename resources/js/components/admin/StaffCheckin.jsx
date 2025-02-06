@@ -455,7 +455,7 @@ const StaffCheckin = () => {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    #{checkedInStaff.assignment?.index || 0}
+                                    {checkedInStaff.staff?.code}
                                 </Typography>
                                 <Stack spacing={2}>
                                     <Box sx={{ 

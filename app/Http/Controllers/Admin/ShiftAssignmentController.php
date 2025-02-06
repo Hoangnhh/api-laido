@@ -724,19 +724,26 @@ class ShiftAssignmentController extends Controller
             // ========== XỬ LÝ CHECKIN EXTRA SHIFT ==========
             // Lấy danh sách ExtraShift của ngày hiện tại
             $extraShifts = ExtraShift::where('date', Carbon::today()->format('Y-m-d'))
+                ->where('staff_id', $staff->id)
                 ->where('status', ExtraShift::STATUS_ACTIVE)
-                ->get();
+                ->first();
 
-            if($extraShifts->where('staff_id', $staff->id)->count() > 0 && $gateStaffShift->status == GateStaffShift::STATUS_CHECKIN){
+            if($extraShifts && $gateStaffShift->status == GateStaffShift::STATUS_CHECKIN){
                 $gateStaffShift->update([
                     'status' => GateStaffShift::STATUS_CHECKIN,
                     'checkin_at' => now(),
                     'checkin_gate_id' => $originalGateId,
                     'checked_ticket_num' => -50
                 ]);
+
+                $extraShifts->update([
+                    'recheckin_times' => $extraShifts->recheckin_times + 1,
+                ]);
+                
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Checkin lượt bổ sung thành công',
+                    'message_color' => 'success',
+                    'message' => 'Checkin thành công lần thứ ' . $extraShifts->recheckin_times,
                     'data' => [
                         'staff' => $staff,
                         'assignment' => [
@@ -855,18 +862,11 @@ class ShiftAssignmentController extends Controller
 
             DB::beginTransaction();
 
-            $updateData = [
+            $assignment->update([
                 'status' => GateStaffShift::STATUS_CHECKIN,
                 'checkin_gate_id' => $originalGateId,
                 'checked_ticket_num' => 0
-            ];
-
-            // nếu trong ca bổ sung hoặc nhân viên chưa checkin thì mới set checkin_at
-            if($extraShifts->where('staff_id', $staff->id)->count() > 0 || $assignment->status !== GateStaffShift::STATUS_CHECKIN) {
-                $updateData['checkin_at'] = now();
-            }
-
-            $assignment->update($updateData);
+            ]);
 
             if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] == 0 && $assignment->index > $gateShift->current_index) {
                 $gateShift->update(['current_index' => $assignment->index]);
