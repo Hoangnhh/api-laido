@@ -886,6 +886,8 @@ class ShiftAssignmentController extends Controller
             // Nếu không còn nhân viên nào WAITING, cập nhật trạng thái GateShift
             if ($waitingStaffCount == 0) {
                 $gateShift->update(['queue_status' => GateShift::QUEUE_STATUS_CHECKIN_ALL]);
+            }else{
+                $gateShift->update(['queue_status' => GateShift::QUEUE_STATUS_RUNNING]);
             }
 
             DB::commit();
