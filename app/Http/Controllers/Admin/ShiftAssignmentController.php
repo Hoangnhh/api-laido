@@ -870,7 +870,8 @@ class ShiftAssignmentController extends Controller
             $assignment->update([
                 'status' => GateStaffShift::STATUS_CHECKIN,
                 'checkin_gate_id' => $originalGateId,
-                'checked_ticket_num' => 0
+                'checked_ticket_num' => 0,
+                'checkin_at' => Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('H:i:s'),
             ]);
 
             if ($systemConfigs[SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value] == 0 && $assignment->index > $gateShift->current_index) {
