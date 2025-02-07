@@ -44,10 +44,11 @@ const Dashboard = () => {
     
     const [dateRange, setDateRange] = useState(() => {
         const today = new Date();
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 6);
         
         return {
-            fromDate: firstDayOfMonth.toISOString().split('T')[0],
+            fromDate: sevenDaysAgo.toISOString().split('T')[0],
             toDate: today.toISOString().split('T')[0]
         };
     });
