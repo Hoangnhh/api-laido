@@ -155,12 +155,18 @@ class StaffController extends Controller
     {
         try {
             $userId = $request->user_id;
-            $fromDate = $request->fromDate ?? Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
-            $toDate = $request->toDate ?? Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
+            
+            // Xử lý fromDate và toDate theo múi giờ GMT+7
+            $fromDate = $request->fromDate 
+                ? Carbon::parse($request->fromDate)->setTimezone('Asia/Ho_Chi_Minh')->startOfDay()
+                : Carbon::now('Asia/Ho_Chi_Minh')->startOfDay();
+            
+            $toDate = $request->toDate 
+                ? Carbon::parse($request->toDate)->setTimezone('Asia/Ho_Chi_Minh')->endOfDay()
+                : Carbon::now('Asia/Ho_Chi_Minh')->endOfDay();
 
             $tickets = CheckedTicket::where('staff_id', $userId)
-                ->whereDate('checkin_at', '>=', $fromDate)
-                ->whereDate('checkin_at', '<=', $toDate)
+                ->whereBetween('checkin_at', [$fromDate, $toDate])
                 ->orderByRaw('CASE 
                     WHEN status = ? THEN checkout_at 
                     ELSE checkin_at 
@@ -172,8 +178,14 @@ class StaffController extends Controller
                         'code' => $ticket->code,
                         'name' => $ticket->name,
                         'status' => $ticket->status,
-                        'checkin_at' => $ticket->checkin_at,
-                        'checkout_at' => $ticket->checkout_at,
+                        'checkin_at' => Carbon::parse($ticket->checkin_at)
+                            ->setTimezone('Asia/Ho_Chi_Minh')
+                            ->format('H:i:s d/m/Y'),
+                        'checkout_at' => $ticket->checkout_at 
+                            ? Carbon::parse($ticket->checkout_at)
+                                ->setTimezone('Asia/Ho_Chi_Minh')
+                                ->format('H:i:s d/m/Y')
+                            : null,
                         'price' => $ticket->price,
                         'commission' => $ticket->commission,
                         'is_checkout_with_other' => $ticket->is_checkout_with_other,
