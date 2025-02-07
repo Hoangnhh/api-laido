@@ -155,8 +155,8 @@ class StaffController extends Controller
     {
         try {
             $userId = $request->user_id;
-            $fromDate = $request->fromDate ?? now()->toDateString();
-            $toDate = $request->toDate ?? $fromDate;
+            $fromDate = $request->fromDate ?? Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
+            $toDate = $request->toDate ?? Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
 
             $tickets = CheckedTicket::where('staff_id', $userId)
                 ->whereDate('checkin_at', '>=', $fromDate)
