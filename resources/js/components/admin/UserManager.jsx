@@ -204,13 +204,13 @@ const UserManager = () => {
     // Handle delete
     const handleDelete = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-            try {
-                await axios.delete(`/api/admin/users/${id}`);
-                showAlert('Xóa người dùng thành công');
-                fetchUsers();
-            } catch (error) {
-                showAlert('Lỗi khi xóa người dùng', 'error');
-            }
+            // try {
+            //     await axios.delete(`/api/admin/users/${id}`);
+            //     showAlert('Xóa người dùng thành công');
+            //     fetchUsers();
+            // } catch (error) {
+            //     showAlert('Lỗi khi xóa người dùng', 'error');
+            // }
         }
     };
 
