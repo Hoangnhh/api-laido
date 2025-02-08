@@ -96,26 +96,28 @@ class PaymentController extends Controller
 
     public function getPaymentSummary()
     {
-        $totalPaid = Payment::where('status', Payment::STATUS_ACTIVE)
-            ->sum('amount');
+        try {
+            // Sử dụng single query với subquery để tối ưu hiệu năng
+            $summary = DB::table('staff')
+                ->select([
+                    DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE status = "'.Payment::STATUS_ACTIVE.'") as total_paid'),
+                    DB::raw('(SELECT COALESCE(SUM(commission), 0) FROM checked_ticket WHERE paid = 0) as total_unpaid'),
+                    DB::raw('(SELECT COUNT(*) FROM checked_ticket WHERE paid = 0) as total_unpaid_num')
+                ])
+                ->first();
 
-        $totalUnpaid = Staff::with(['checkedTickets' => function($query) {
-            $query->where('paid', false);
-        }])->get()->sum(function($staff) {
-            return $staff->checkedTickets->sum('commission');
-        });
+            return response()->json([
+                'total_paid' => $summary->total_paid,
+                'total_unpaid' => $summary->total_unpaid,
+                'total_unpaid_num' => $summary->total_unpaid_num    
+            ]);
 
-        $totalUnpaidNum = Staff::with(['checkedTickets' => function($query) {
-            $query->where('paid', false);
-        }])->get()->sum(function($staff) {
-            return $staff->checkedTickets->count();
-        });
-
-        return response()->json([
-            'total_paid' => $totalPaid,
-            'total_unpaid' => $totalUnpaid,
-            'total_unpaid_num' => $totalUnpaidNum
-        ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getCheckedTicketsByStaff(Request $request)
