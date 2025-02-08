@@ -184,6 +184,7 @@ Route::post('api/admin/staff-checkin', [ShiftAssignmentController::class, 'staff
 Route::get('api/admin/get-checked-tickets-by-gate', [DashboardController::class, 'getCheckedTicketsByGate']);
 Route::post('api/admin/use-ticket', [TicketController::class, 'useTicketInGate']);
 Route::get('api/admin/staff-checked-tickets', [TicketController::class, 'getCheckedTicketsByStaff']);
+Route::get('api/admin/check-ticket', [TicketController::class, 'checkTicket']);
 
 Route::get('admin/queue-display', function () {
     return view('admin.queue-display');

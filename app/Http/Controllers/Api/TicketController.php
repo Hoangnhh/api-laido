@@ -541,4 +541,73 @@ class TicketController extends Controller
 
         return in_array($serviceName, $this->ignore_checkin_time);
     }
+
+    public function checkTicket(Request $request) 
+    {
+        try {
+            // Decode ticket code từ base64
+            $ticketCode = base64_decode($request->ticket_code);
+            if (!$ticketCode) {
+                return $this->errorResponse('Mã vé không hợp lệ');
+            }
+
+            // Kiểm tra trong bảng checked_ticket trước
+            $checkedTicket = CheckedTicket::where('code', $ticketCode)->first();
+            
+            if ($checkedTicket) {
+                return $this->successResponse([
+                    'exists' => true,
+                    'source' => 'checked_ticket',
+                    'ticket' => [
+                        'code' => $checkedTicket->code,
+                        'name' => $checkedTicket->name,
+                        'status' => $checkedTicket->status,
+                        'checkin_at' => $checkedTicket->checkin_at ? 
+                            Carbon::parse($checkedTicket->checkin_at)
+                                ->setTimezone('Asia/Ho_Chi_Minh')
+                                ->format('H:i:s d/m/Y') : null,
+                        'checkout_at' => $checkedTicket->checkout_at ?
+                            Carbon::parse($checkedTicket->checkout_at)
+                                ->setTimezone('Asia/Ho_Chi_Minh')
+                                ->format('H:i:s d/m/Y') : null,
+                        'checkin_by' => $checkedTicket->checkin_by,
+                        'checkout_by' => $checkedTicket->checkout_by,
+                        'staff_id' => $checkedTicket->staff_id
+                    ]
+                ], 'Kiểm tra vé thành công');
+            }
+
+            // Nếu không có trong checked_ticket, kiểm tra trong bảng tickets
+            $ticket = Ticket::where('code', $ticketCode)->first();
+            
+            if ($ticket) {
+                return $this->successResponse([
+                    'exists' => true,
+                    'source' => 'tickets',
+                    'ticket' => [
+                        'code' => $ticket->code,
+                        'name' => $ticket->service_name,
+                        'status' => $ticket->status,
+                        'issue_date' => Carbon::parse($ticket->issued_date)
+                            ->setTimezone('Asia/Ho_Chi_Minh')
+                            ->format('d/m/Y'),
+                        'expired_date' => Carbon::parse($ticket->expired_date)
+                            ->setTimezone('Asia/Ho_Chi_Minh')
+                            ->format('d/m/Y'),
+                        'price' => $ticket->price
+                    ]
+                ], 'Kiểm tra vé thành công');
+            }
+
+            // Không tìm thấy vé trong cả 2 bảng
+            return $this->successResponse([
+                'exists' => false,
+                'source' => null,
+                'ticket' => null
+            ], 'Không tìm thấy thông tin vé');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
 } 
