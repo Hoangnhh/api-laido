@@ -32,12 +32,12 @@ class PaymentController extends Controller
                     'staff.*',
                     DB::raw('COUNT(DISTINCT ct.id) as checked_ticket_count'),
                     DB::raw('COALESCE(SUM(CASE WHEN ct.paid = 0 THEN ct.commission ELSE 0 END), 0) as total_commission'),
-                    DB::raw('COALESCE(SUM(CASE WHEN p.status = "ACTIVE" THEN p.amount ELSE 0 END), 0) as total_paid')
+                    DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE staff_id = staff.id) as total_paid')
                 ])
                 ->leftJoin('checked_ticket as ct', 'staff.id', '=', 'ct.staff_id')
-                ->leftJoin('payment as p', 'staff.id', '=', 'p.staff_id')
                 ->where('staff.status', Staff::STATUS_ACTIVE);
 
+            // dd($query->toSql());
             // Thêm điều kiện tìm kiếm
             if ($search) {
                 $query->where(function($q) use ($search) {
