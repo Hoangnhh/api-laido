@@ -66,56 +66,39 @@ class ReportController extends Controller
 
     public function getStaffReport(Request $request)
     {
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
-        $staffGroupId = $request->input('staff_group_id');
-        $status = $request->input('status');
-        $fromDate = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
-        $toDate = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $staffGroupId = $request->input('staff_group_id');
+            $status = $request->input('status');
+            $staffId = $request->input('staff_id');
+            
+            $fromDate = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+            $toDate = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
 
-        $query = GateStaffShift::query()
-            ->select([
-                'staff.code as staff_code',
-                'staff.name as staff_name',
-                'staff_group.name as staff_group_name',
-                'gate_staff_shift.date as date_raw',
-                DB::raw("DATE_FORMAT(gate_staff_shift.date, '%d/%m/%Y') as date_display"),
-                DB::raw("DATE_FORMAT(gate_staff_shift.checkin_at, '%H:%i %d/%m/%Y') as checkin_at_display"),
-                DB::raw("DATE_FORMAT(gate_staff_shift.checkout_at, '%H:%i %d/%m/%Y') as checkout_at_display"),
-                DB::raw("(SELECT COUNT(*) FROM checked_ticket 
-                    WHERE gate_staff_shift_id = gate_staff_shift.id 
-                    AND checkin_by = staff.username) as checkin_count"),
-                DB::raw("(SELECT COUNT(*) FROM checked_ticket 
-                    WHERE gate_staff_shift_id = gate_staff_shift.id 
-                    AND checkout_by = staff.username) as checkout_count")
-            ])
-            ->join('staff', 'gate_staff_shift.staff_id', '=', 'staff.id')
-            ->join('staff_group', 'staff.group_id', '=', 'staff_group.id');
+            $result = DB::select(
+                'CALL sp_get_staff_report(?, ?, ?, ?, ?)',
+                [
+                    $fromDate,
+                    $toDate,
+                    $staffGroupId ?: null,
+                    $status ?: null,
+                    $staffId ?: null
+                ]
+            );
 
-        if ($status) {
-            $query->where('gate_staff_shift.status', $status);
+            return response()->json([
+                'success' => true,
+                'message' => 'Lấy dữ liệu thành công',
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        if($fromDate && $toDate) {
-            if($status == GateStaffShift::STATUS_CHECKIN) {
-                $query->whereBetween('gate_staff_shift.checkin_at', [$fromDate, $toDate]);
-            } elseif($status == GateStaffShift::STATUS_CHECKOUT) {
-                $query->whereBetween('gate_staff_shift.checkout_at', [$fromDate, $toDate]);
-            }else{
-                $query->whereBetween('gate_staff_shift.date', [$fromDate, $toDate]);
-            }
-        }
-
-        if ($staffGroupId) {
-            $query->where('staff_group.id', $staffGroupId);
-        }
-
-        $result = $query->orderBy('staff.code', 'asc')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $result
-        ]);
     }
 
     public function getTicketReport(Request $request)

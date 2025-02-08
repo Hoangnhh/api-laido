@@ -13,7 +13,8 @@ const CheckoutListReport = () => {
         from_date: today,
         to_date: today,
         staff_group_id: '',
-        status: 'CHECKOUT'
+        status: 'CHECKOUT',
+        staff_id: ''
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -194,7 +195,7 @@ const CheckoutListReport = () => {
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3}>
+                                    <Col md={2}>
                                         <Form.Group>
                                             <Form.Label>Nhóm</Form.Label>
                                             <Form.Select
@@ -210,7 +211,18 @@ const CheckoutListReport = () => {
                                             </Form.Select>
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3} className="d-flex align-items-end">
+                                    <Col md={2}>
+                                        <Form.Group>
+                                            <Form.Label>Mã nhân viên</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Nhập mã nhân viên..."
+                                                value={filters.staff_id}
+                                                onChange={(e) => setFilters({...filters, staff_id: e.target.value})}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={2} className="d-flex align-items-end">
                                         <Button 
                                             variant="primary" 
                                             className="me-2"
