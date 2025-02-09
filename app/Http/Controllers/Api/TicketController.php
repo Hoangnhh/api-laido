@@ -101,27 +101,19 @@ class TicketController extends Controller
                 // Kiểm tra vé có tồn tại trong bảng ticket không
                 $syncTicket = Ticket::where('code', $request->code)->first();
 
-                if (!$syncTicket) {// Gọi service để kiểm tra vé
-                    $result = $this->ticketService->useTicket($request->code);
+                if (!$syncTicket) {
+                    return $this->errorResponse('Vé không tồn tại');
+                }
 
-                    if (!$result['success']) {
-                        return $this->errorResponse($result['message']);
-                    }
-                    
-                    $ticketData = $result['data']['ticket'];
-                }else{
-
-                    $ticketData = $syncTicket->toArray();
-                    if($ticketData['status'] == Ticket::STATUS_USED) {
-                        return $this->errorResponse('Vé đã được sử dụng');
-                    }
-                    if($ticketData['expired_date'] < Carbon::now()) {
-                        return $this->errorResponse('Vé đã hết hạn');
-                    }
-                    if($ticketData['issued_date'] > Carbon::now()) {
-                        return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
-                    }
-
+                $ticketData = $syncTicket->toArray();
+                if($ticketData['status'] == Ticket::STATUS_USED) {
+                    return $this->errorResponse('Vé đã được sử dụng');
+                }
+                if($ticketData['expired_date'] < Carbon::now()) {
+                    return $this->errorResponse('Vé đã hết hạn');
+                }
+                if($ticketData['issued_date'] > Carbon::now()) {
+                    return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
                 }
 
                 // kiểm tra thời gian checkin vé
