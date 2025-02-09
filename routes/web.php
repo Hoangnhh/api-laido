@@ -113,6 +113,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.ticket-by-hours-report');
         })->name('admin.ticket-by-hours-report');
 
+        Route::get('/ticket-by-name-report', function () {
+            return view('admin.ticket-by-name-report');
+        })->name('admin.ticket-by-name-report');
+
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
             ->name('admin.staffs.toggle-status');
@@ -176,6 +180,7 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/create-default-gate-assignment', [ShiftAssignmentController::class, 'createDefaultGateAssignment']);
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/export', [ReviewController::class, 'export']);
+    Route::get('/get-ticket-by-name', [ReportController::class, 'getTicketByName']);
 });
 
 // Route không cần xác thực

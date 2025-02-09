@@ -122,6 +122,11 @@ const Sidebar = () => {
                     text: 'Vé sử dụng theo giờ', 
                     icon: faCircle,
                     path: '/admin/ticket-by-hours-report'
+                },
+                { 
+                    text: 'Vé sử dụng theo tên', 
+                    icon: faCircle,
+                    path: '/admin/ticket-by-name-report'
                 }
 
             ]

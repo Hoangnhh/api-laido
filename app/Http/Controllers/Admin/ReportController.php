@@ -254,6 +254,78 @@ class ReportController extends Controller
         ]);
     }
 
+    public function getTicketByName(Request $request)
+    {
+        try {
+            $date = $request->input('date', Carbon::today()->format('Y-m-d'));
+
+            $result = DB::table('checked_ticket')
+                ->select([
+                    'checked_ticket.name as ticket_name',
+                    DB::raw('COUNT(*) as total_count'),
+                    DB::raw('ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM checked_ticket WHERE DATE(date) = ?)), 2) as percentage')
+                ])
+                ->whereDate('checked_ticket.date', $date)
+                ->groupBy('checked_ticket.name')
+                ->orderBy('total_count', 'desc')
+                ->setBindings([$date, $date])
+                ->get()
+                ->map(function($item) {
+                    // Tạo màu ngẫu nhiên cho từng loại vé
+                    $hue = rand(0, 360);
+                    return [
+                        'name' => $item->ticket_name,
+                        'value' => $item->total_count,
+                        'percentage' => $item->percentage,
+                        'color' => "hsl({$hue}, 70%, 50%)",
+                        // Thêm các thuộc tính cho tooltip
+                        'tooltip' => [
+                            'title' => $item->ticket_name,
+                            'content' => [
+                                'Số lượng: ' . number_format($item->total_count),
+                                'Tỷ lệ: ' . number_format($item->percentage, 2) . '%'
+                            ]
+                        ]
+                    ];
+                });
+
+            // Tính tổng số vé
+            $totalTickets = $result->sum('value');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'items' => $result,
+                    'total' => $totalTickets,
+                    'date' => $date,
+                    'chart_config' => [
+                        'type' => 'pie',
+                        'options' => [
+                            'legend' => [
+                                'position' => 'right',
+                                'align' => 'center'
+                            ],
+                            'tooltips' => [
+                                'enabled' => true,
+                                'mode' => 'point'
+                            ],
+                            'animation' => [
+                                'animateScale' => true,
+                                'animateRotate' => true
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi lấy thống kê vé: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function formatPaymentMethod($method)
     {
         $methods = [
