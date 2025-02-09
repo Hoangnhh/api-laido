@@ -331,8 +331,9 @@ class TicketController extends Controller
                 if($ticketData['expired_date'] < Carbon::now()) {
                     return $this->errorResponse('Vé đã hết hạn');
                 }
-                if($ticketData['issued_date'] > Carbon::now()) {
-                
+                if($ticketData['issued_date'] > Carbon::now()) {    
+                    return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
+                }
 
                 // kiểm tra thời gian checkin vé
                 $checkinTicketRangeTime = $systemConfigs[SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value];
