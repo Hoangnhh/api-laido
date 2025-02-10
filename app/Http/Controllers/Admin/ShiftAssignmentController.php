@@ -1050,12 +1050,19 @@ class ShiftAssignmentController extends Controller
                     'message' => 'Không tìm thấy ca làm việc'
                 ], 404);
             }
+
+            // Kiểm tra xem có nhân viên nào đang checkin không
+            $hasCheckinStaff = GateStaffShift::where('gate_shift_id', $gateShiftId)
+                ->where('status', GateStaffShift::STATUS_CHECKIN)
+                ->exists();
             
-            // Cập nhật queue_status thành COMPLETED
-            $gateShift->update([
-                'queue_status' => GateShift::QUEUE_STATUS_COMPLETED,
-                'updated_by' => Auth::user()->username
-            ]);
+            // Chỉ cập nhật queue_status thành COMPLETED nếu không có ai đang checkin
+            if (!$hasCheckinStaff) {
+                $gateShift->update([
+                    'queue_status' => GateShift::QUEUE_STATUS_COMPLETED,
+                    'updated_by' => Auth::user()->username
+                ]);
+            }
 
             // Xóa tất cả gate_staff_shift có gate_shift_id tương ứng và status = WAITING
             GateStaffShift::where('gate_shift_id', $gateShiftId)
