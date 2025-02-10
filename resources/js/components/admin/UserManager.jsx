@@ -61,7 +61,10 @@ const menuItems = [
         text: 'Quản lý người dùng', 
         path: '/admin/users'
     },
-    
+    { 
+        text: 'Đánh giá từ khách hàng', 
+        path: '/admin/reviews'
+    },
     { 
         text: 'Quản lý nhóm nhân viên', 
         path: '/admin/staff-group'
@@ -117,7 +120,11 @@ const menuItems = [
     { 
         text: 'Vé sử dụng theo giờ', 
         path: '/admin/ticket-by-hours-report'
-    }
+    },
+    { 
+        text: 'Vé sử dụng theo tên', 
+        path: '/admin/ticket-by-name-report'
+    },
 ];
 
 const UserManager = () => {
