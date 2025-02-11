@@ -556,7 +556,7 @@ class TicketController extends Controller
                                 ->format('H:i:s d/m/Y') : null,
                         'checkin_by' => $checkedTicket->checkin_by,
                         'checkout_by' => $checkedTicket->checkout_by,
-                        'staff_id' => $checkedTicket->staff_id
+                        'staff_id' => $checkedTicket->staff->code
                     ]
                 ], 'Kiểm tra vé thành công');
             }
