@@ -335,6 +335,114 @@ class ReportController extends Controller
         }
     }
 
+    public function getStaffReportByCode(Request $request)
+    {
+        try {
+            $staffCode = $request->input('staff_code');
+            
+            if (!$staffCode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập mã nhân viên'
+                ], 422);
+            }
+
+            // Lấy thông tin staff và các ca làm việc
+            $result = DB::select("
+                SELECT 
+                    s.code as staff_code,
+                    s.name as staff_name,
+                    s.username,
+                    sg.name as staff_group_name,
+                    s.vehical_type,
+                    gss.date,
+                    DATE_FORMAT(gss.date, '%d/%m/%Y') as date_display,
+                    g.name as gate_name,
+                    gss.checkin_at,
+                    gss.checkout_at,
+                    CASE 
+                        WHEN gss.status = 'WAITING' THEN 'Đang chờ'
+                        WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
+                        WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
+                        ELSE gss.status
+                    END as status,
+                    (
+                        SELECT COUNT(*)
+                        FROM checked_ticket ct
+                        WHERE ct.checkin_by = s.username
+                        AND DATE(ct.date) = DATE(gss.date)
+                    ) as total_checkin,
+                    (
+                        SELECT COUNT(*)
+                        FROM checked_ticket ct
+                        WHERE ct.checkout_by = s.username
+                        AND DATE(ct.date) = DATE(gss.date)
+                    ) as total_checkout
+                FROM staff s
+                LEFT JOIN staff_group sg ON s.group_id = sg.id
+                LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
+                LEFT JOIN gate g ON gss.gate_id = g.id
+                WHERE s.code = ?
+                ORDER BY gss.date DESC, gss.checkin_at DESC
+            ", [$staffCode]);
+
+            if (empty($result)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin nhân viên'
+                ], 404);
+            }
+
+            // Lấy thông tin cơ bản của nhân viên từ bản ghi đầu tiên
+            $staffInfo = [
+                'staff_code' => $result[0]->staff_code,
+                'staff_name' => $result[0]->staff_name,
+                'staff_group_name' => $result[0]->staff_group_name,
+                'vehical_type' => Staff::getVehicalTypeName($result[0]->vehical_type)
+            ];
+
+            // Xử lý danh sách ca làm việc
+            $shifts = collect($result)->map(function($item) {
+                return [
+                    'date' => $item->date,
+                    'date_display' => $item->date_display,
+                    'gate_name' => $item->gate_name,
+                    'checkin_at' => $item->checkin_at ? Carbon::parse($item->checkin_at)->format('H:i:s') : null,
+                    'checkout_at' => $item->checkout_at ? Carbon::parse($item->checkout_at)->format('H:i:s') : null,
+                    'status' => $item->status,
+                    'tickets' => [
+                        'checkin' => (int)$item->total_checkin,
+                        'checkout' => (int)$item->total_checkout
+                    ]
+                ];
+            })->filter(function($shift) {
+                return $shift['gate_name'] !== null; // Lọc bỏ các bản ghi không có ca làm việc
+            })->values();
+
+            // Tính toán thống kê
+            $statistics = [
+                'total_shifts' => $shifts->count(),
+                'total_tickets_checkin' => $shifts->sum('tickets.checkin'),
+                'total_tickets_checkout' => $shifts->sum('tickets.checkout')
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'staff_info' => $staffInfo,
+                    'shifts' => $shifts,
+                    'statistics' => $statistics
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function formatPaymentMethod($method)
     {
         $methods = [

@@ -190,6 +190,7 @@ Route::get('api/admin/get-checked-tickets-by-gate', [DashboardController::class,
 Route::post('api/admin/use-ticket', [TicketController::class, 'useTicketInGate']);
 Route::get('api/admin/staff-checked-tickets', [TicketController::class, 'getCheckedTicketsByStaff']);
 Route::get('api/admin/check-ticket', [TicketController::class, 'checkTicket']);
+Route::get('api/admin/get-staff-report-by-code', [ReportController::class, 'getStaffReportByCode']);
 
 Route::get('admin/queue-display', function () {
     return view('admin.queue-display');
