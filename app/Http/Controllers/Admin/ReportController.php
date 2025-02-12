@@ -257,18 +257,24 @@ class ReportController extends Controller
     public function getTicketByName(Request $request)
     {
         try {
-            $date = $request->input('date', Carbon::today()->format('Y-m-d'));
+            // Lấy tham số từ request
+            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d'));
+            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d'));
+
+            // Chuyển đổi thành đối tượng Carbon để xử lý ngày
+            $fromDate = Carbon::parse($fromDate)->startOfDay();
+            $toDate = Carbon::parse($toDate)->endOfDay();
 
             $result = DB::table('checked_ticket')
                 ->select([
                     'checked_ticket.name as ticket_name',
                     DB::raw('COUNT(*) as total_count'),
-                    DB::raw('ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM checked_ticket WHERE DATE(date) = ?)), 2) as percentage')
+                    DB::raw('ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
                 ])
-                ->whereDate('checked_ticket.date', $date)
+                ->whereBetween('checked_ticket.date', [$fromDate, $toDate])
                 ->groupBy('checked_ticket.name')
                 ->orderBy('total_count', 'desc')
-                ->setBindings([$date, $date])
+                ->setBindings([$fromDate, $toDate, $fromDate, $toDate])
                 ->get()
                 ->map(function($item) {
                     // Tạo màu ngẫu nhiên cho từng loại vé
@@ -297,7 +303,10 @@ class ReportController extends Controller
                 'data' => [
                     'items' => $result,
                     'total' => $totalTickets,
-                    'date' => $date,
+                    'date_range' => [
+                        'from_date' => $fromDate->format('Y-m-d'),
+                        'to_date' => $toDate->format('Y-m-d')
+                    ],
                     'chart_config' => [
                         'type' => 'pie',
                         'options' => [

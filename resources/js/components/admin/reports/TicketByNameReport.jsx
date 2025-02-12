@@ -36,20 +36,24 @@ const PASTEL_COLORS = [
 
 const TicketByNameReport = () => {
     const [filters, setFilters] = useState({
-        date: new Date().toISOString().split('T')[0]
+        from_date: new Date().toISOString().split('T')[0],
+        to_date: new Date().toISOString().split('T')[0]
     });
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchData();
-    }, [filters]);
+    }, []);
 
     const fetchData = async () => {
         setLoading(true);
         try {
             const response = await axios.get('/api/admin/get-ticket-by-name', {
-                params: { date: filters.date }
+                params: { 
+                    from_date: filters.from_date,
+                    to_date: filters.to_date
+                }
             });
             
             if (response.data.success) {
@@ -114,7 +118,7 @@ const TicketByNameReport = () => {
             },
             title: {
                 display: true,
-                text: 'Tỷ lệ sử dụng vé theo loại',
+                text: '',
                 font: {
                     size: 18,
                     weight: 'bold',
@@ -213,7 +217,7 @@ const TicketByNameReport = () => {
 
     return (
         <AdminLayout>
-            <div className="rp-container d-flex flex-column vh-100">
+            <div className="rp-container">
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header className="d-flex justify-content-between align-items-center">
@@ -229,11 +233,21 @@ const TicketByNameReport = () => {
                                 <Row>
                                     <Col md={3}>
                                         <Form.Group>
-                                            <Form.Label>Ngày</Form.Label>
+                                            <Form.Label>Từ ngày</Form.Label>
                                             <Form.Control 
                                                 type="date"
-                                                value={filters.date}
-                                                onChange={(e) => setFilters({...filters, date: e.target.value})}
+                                                value={filters.from_date}
+                                                onChange={(e) => setFilters({...filters, from_date: e.target.value})}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={3}>
+                                        <Form.Group>
+                                            <Form.Label>Đến ngày</Form.Label>
+                                            <Form.Control 
+                                                type="date"
+                                                value={filters.to_date}
+                                                onChange={(e) => setFilters({...filters, to_date: e.target.value})}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -241,8 +255,9 @@ const TicketByNameReport = () => {
                                         <Button 
                                             variant="primary" 
                                             onClick={fetchData}
+                                            disabled={loading}
                                         >
-                                            Tìm kiếm
+                                            {loading ? 'Đang tải...' : 'Tìm kiếm'}
                                         </Button>
                                     </Col>
                                 </Row>
@@ -251,26 +266,85 @@ const TicketByNameReport = () => {
                     </Card>
                 </div>
 
-                <Card className="rp-data-grid flex-grow-1">
+                <Card className="rp-data-grid">
                     <Card.Body>
                         {loading ? (
                             <p>Đang tải dữ liệu...</p>
                         ) : !data ? (
                             <p>Không có dữ liệu để hiển thị.</p>
                         ) : (
-                            <div style={{ 
-                                height: 'calc(100vh - 300px)',
-                                padding: '20px',
-                                backgroundColor: 'white',
-                                borderRadius: '8px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}>
-                                <Pie data={prepareChartData()} options={chartOptions} />
-                            </div>
+                            <>
+                                <div className="mb-3">
+                                    <h5>Thống kê từ ngày {new Date(data.date_range.from_date).toLocaleDateString('vi-VN')} đến ngày {new Date(data.date_range.to_date).toLocaleDateString('vi-VN')}</h5>
+                                </div>
+                                <div style={{ 
+                                    height: '600px',
+                                    padding: '20px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    marginBottom: '20px'
+                                }}>
+                                    <Pie data={prepareChartData()} options={chartOptions} />
+                                </div>
+
+                                {/* Bảng dữ liệu */}
+                                <div className="table-responsive">
+                                    <table className="table table-bordered table-hover">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Tên vé</th>
+                                                <th className="text-end">Số lượng</th>
+                                                <th className="text-end">Tỷ lệ (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.items.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{item.name}</td>
+                                                    <td className="text-end">{item.value.toLocaleString()}</td>
+                                                    <td className="text-end">{Number(item.percentage).toFixed(2)}%</td>
+                                                </tr>
+                                            ))}
+                                            <tr className="table-info fw-bold">
+                                                <td colSpan={2}>Tổng cộng</td>
+                                                <td className="text-end">{data.total.toLocaleString()}</td>
+                                                <td className="text-end">100%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </>
                         )}
                     </Card.Body>
                 </Card>
             </div>
+
+            <style jsx>{`
+                .rp-container {
+                    padding: 24px;
+                    height: 100%;
+                    overflow-y: auto;
+                }
+                .rp-header {
+                    position: sticky;
+                    top: 0;
+                    z-index: 100;
+                    background: #f8f9fa;
+                    padding-top: 10px;
+                }
+                .table-responsive {
+                    margin-bottom: 24px;
+                }
+                .rp-data-grid {
+                    margin-bottom: 24px;
+                }
+                .rp-data-grid .card-body {
+                    padding: 24px;
+                }
+            `}</style>
         </AdminLayout>
     );
 };
