@@ -367,17 +367,17 @@ class ReportController extends Controller
                         ELSE gss.status
                     END as status,
                     (
-                        SELECT COUNT(*)
-                        FROM checked_ticket ct
-                        WHERE ct.checkin_by = s.username
-                        AND DATE(ct.date) = DATE(gss.date)
-                    ) as total_checkin,
+                        SELECT COUNT(*) 
+                        FROM checked_ticket 
+                        WHERE gate_staff_shift_id = gss.id 
+                        AND checkin_by = s.username
+                    ) as checkin_count,
                     (
-                        SELECT COUNT(*)
-                        FROM checked_ticket ct
-                        WHERE ct.checkout_by = s.username
-                        AND DATE(ct.date) = DATE(gss.date)
-                    ) as total_checkout
+                        SELECT COUNT(*) 
+                        FROM checked_ticket 
+                        WHERE gate_staff_shift_id = gss.id 
+                        AND checkout_by = s.username
+                    ) as checkout_count 
                 FROM staff s
                 LEFT JOIN staff_group sg ON s.group_id = sg.id
                 LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
@@ -407,12 +407,12 @@ class ReportController extends Controller
                     'date' => $item->date,
                     'date_display' => $item->date_display,
                     'gate_name' => $item->gate_name,
-                    'checkin_at' => $item->checkin_at ? Carbon::parse($item->checkin_at)->format('H:i:s') : null,
-                    'checkout_at' => $item->checkout_at ? Carbon::parse($item->checkout_at)->format('H:i:s') : null,
+                    'checkin_at' => $item->checkin_at ? Carbon::parse($item->checkin_at)->format('d/m/Y H:i:s') : null,
+                    'checkout_at' => $item->checkout_at ? Carbon::parse($item->checkout_at)->format('d/m/Y H:i:s') : null,
                     'status' => $item->status,
                     'tickets' => [
-                        'checkin' => (int)$item->total_checkin,
-                        'checkout' => (int)$item->total_checkout
+                        'checkin' => (int)$item->checkin_count,
+                        'checkout' => (int)$item->checkout_count
                     ]
                 ];
             })->filter(function($shift) {
