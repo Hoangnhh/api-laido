@@ -339,6 +339,7 @@ class ReportController extends Controller
     {
         try {
             $staffCode = $request->input('staff_code');
+            $limit = $request->input('limit', 10);
             
             if (!$staffCode) {
                 return response()->json([
@@ -349,42 +350,46 @@ class ReportController extends Controller
 
             // Lấy thông tin staff và các ca làm việc
             $result = DB::select("
-                SELECT 
-                    s.code as staff_code,
-                    s.name as staff_name,
-                    s.username,
-                    sg.name as staff_group_name,
-                    s.vehical_type,
-                    gss.date,
-                    DATE_FORMAT(gss.date, '%d/%m/%Y') as date_display,
-                    g.name as gate_name,
-                    gss.checkin_at,
-                    gss.checkout_at,
-                    CASE 
-                        WHEN gss.status = 'WAITING' THEN 'Đang chờ'
-                        WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
-                        WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
-                        ELSE gss.status
-                    END as status,
-                    (
-                        SELECT COUNT(*) 
-                        FROM checked_ticket 
-                        WHERE gate_staff_shift_id = gss.id 
-                        AND checkin_by = s.username
-                    ) as checkin_count,
-                    (
-                        SELECT COUNT(*) 
-                        FROM checked_ticket 
-                        WHERE gate_staff_shift_id = gss.id 
-                        AND checkout_by = s.username
-                    ) as checkout_count 
-                FROM staff s
-                LEFT JOIN staff_group sg ON s.group_id = sg.id
-                LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
-                LEFT JOIN gate g ON gss.gate_id = g.id
-                WHERE s.code = ?
-                ORDER BY gss.date DESC, gss.checkin_at DESC
-            ", [$staffCode]);
+                WITH staff_shifts AS (
+                    SELECT 
+                        s.code as staff_code,
+                        s.name as staff_name,
+                        s.username,
+                        sg.name as staff_group_name,
+                        s.vehical_type,
+                        gss.date,
+                        DATE_FORMAT(gss.date, '%d/%m/%Y') as date_display,
+                        g.name as gate_name,
+                        gss.checkin_at,
+                        gss.checkout_at,
+                        CASE 
+                            WHEN gss.status = 'WAITING' THEN 'Đang chờ'
+                            WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
+                            WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
+                            ELSE gss.status
+                        END as status,
+                        (
+                            SELECT COUNT(*) 
+                            FROM checked_ticket 
+                            WHERE gate_staff_shift_id = gss.id 
+                            AND checkin_by = s.username
+                        ) as checkin_count,
+                        (
+                            SELECT COUNT(*) 
+                            FROM checked_ticket 
+                            WHERE gate_staff_shift_id = gss.id 
+                            AND checkout_by = s.username
+                        ) as checkout_count 
+                    FROM staff s
+                    LEFT JOIN staff_group sg ON s.group_id = sg.id
+                    LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
+                    LEFT JOIN gate g ON gss.gate_id = g.id
+                    WHERE s.code = ?
+                    ORDER BY gss.date DESC, gss.checkin_at DESC
+                    LIMIT ?
+                )
+                SELECT * FROM staff_shifts
+            ", [$staffCode, $limit]);
 
             if (empty($result)) {
                 return response()->json([
