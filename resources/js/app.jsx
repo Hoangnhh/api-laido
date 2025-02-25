@@ -28,6 +28,8 @@ import RevenueReport from './components/admin/reports/RevenueReport';
 import TicketByHoursReport from './components/admin/reports/TicketByHoursReport';
 import StaffCheckin from './components/admin/StaffCheckin';
 import TicketByNameReport from './components/admin/reports/TicketByNameReport';
+import PaymentAll from './components/admin/PaymentAll';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -106,6 +108,8 @@ const App = () => {
                 return <StaffCheckin />;
             case '/admin/ticket-by-name-report':
                 return <TicketByNameReport />;
+            case '/admin/payment-all':
+                return <PaymentAll />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }

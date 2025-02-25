@@ -73,6 +73,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.payment-report');
         })->name('admin.payment-report');
 
+        Route::get('/payment-all', function () {
+            return view('admin.payment-all');
+        })->name('admin.payment-all');
+
         Route::get('/waiting-list-for-checkin-report', function () {
             return view('admin.waiting-list-for-checkin-report');
         })->name('admin.waiting-list-for-checkin-report');
