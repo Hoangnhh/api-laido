@@ -42,12 +42,12 @@ const Sidebar = () => {
         },
 
         {
-            text: 'Quản lý nhân viên',
+            text: 'Thanh toán',
             icon: faUsers,
             path: '#',
             children: [
                 { 
-                    text: 'Thanh toán', 
+                    text: 'Thanh toán theo lái đò', 
                     icon: faMoneyBillWave,
                     path: '/admin/accounts-payable'
                 },
