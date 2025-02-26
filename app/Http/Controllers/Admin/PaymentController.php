@@ -487,6 +487,7 @@ class PaymentController extends Controller
     {
         try {
             $maxStaffPerBatch = 500; // Giới hạn số lượng nhân viên mỗi lần
+            $today = Carbon::today();
 
             // Lấy danh sách nhân viên có commission chưa thanh toán
             $staffWithUnpaidCommission = Staff::query()
@@ -506,15 +507,22 @@ class PaymentController extends Controller
                         WHERE checked_ticket.staff_id = staff.id 
                         AND checked_ticket.paid = 0) as total_unpaid_amount')
                 ])
+                // Loại bỏ những staff đã có thanh toán trong ngày
+                ->whereNotExists(function ($query) use ($today) {
+                    $query->select(DB::raw(1))
+                        ->from('payment')
+                        ->whereColumn('payment.staff_id', 'staff.id')
+                        ->whereDate('payment.date', $today)
+                        ->where('payment.status', Payment::STATUS_ACTIVE);
+                })
                 ->whereExists(function ($query) {
                     $query->select(DB::raw(1))
                         ->from('checked_ticket')
                         ->whereColumn('checked_ticket.staff_id', 'staff.id')
                         ->where('checked_ticket.paid', 0);
                 })
-                ->having('total_unpaid_amount', '>', 0)
-                ->orderBy('total_unpaid_amount', 'desc') // Ưu tiên thanh toán cho người có số tiền lớn trước
-                ->limit($maxStaffPerBatch) // Giới hạn số lượng nhân viên
+                ->orderBy('total_unpaid_amount', 'desc')
+                ->limit($maxStaffPerBatch)
                 ->get();
 
             if ($staffWithUnpaidCommission->isEmpty()) {
