@@ -49,34 +49,82 @@ const PaymentReport = () => {
     };
 
     const handleExportExcel = () => {
+        // Chuẩn bị dữ liệu cho Excel
         const excelData = data.map((item, index) => ({
             'STT': index + 1,
-            'Mã thanh toán': item.payment_code,
-            'Ngày': item.payment_date,
-            'Mã NV': item.staff_code,
-            'Tên nhân viên': item.staff_name,
+            'Dịch vụ': 'HYR',
+            'Số TK nguồn': '1500201108004',
+            'Số TK thụ hưởng': item.received_account || '',
+            'Tên TK thụ hưởng': item.staff_name,
+            'Tên viết tắt ngân hàng thụ hưởng': '',
+            'Tên ngân hàng thụ hưởng': '',
+            'Tên chi nhánh ngân hàng thụ hưởng': '',
+            'Loại tiền': 'VND',
             'Số tiền': item.amount,
-            'Hình thức thanh toán': item.payment_method,
-            'Người tạo': item.created_by
+            'Số tham chiếu KH': '',
+            'Ghi chú': 'Chuyen khoan noi bo',
+            'Ngày giao dịch': item.payment_date
         }));
 
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(excelData);
+        const ws = XLSX.utils.json_to_sheet(excelData, { header: Object.keys(excelData[0]) });
 
-        const colWidths = [
-            { wch: 5 },  // STT
-            { wch: 15 }, // Mã thanh toán
-            { wch: 15 }, // Ngày
-            { wch: 10 }, // Mã NV
-            { wch: 20 }, // Tên nhân viên
-            { wch: 15 }, // Số tiền
-            { wch: 20 }, // Hình thức thanh toán
-            { wch: 20 }  // Người tạo
+        // Định dạng các cột
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const address = XLSX.utils.encode_col(C) + "1";
+            if (!ws[address]) continue;
+            ws[address].s = {
+                font: { bold: true },
+                alignment: { horizontal: "center", vertical: "center" },
+                fill: { fgColor: { rgb: "CCCCCC" } }
+            };
+        }
+
+        // Định dạng từng cột
+        for (let R = range.s.r + 1; R <= range.e.r; R++) {
+            // STT - căn giữa
+            ws[XLSX.utils.encode_cell({r: R, c: 0})].s = {
+                alignment: { horizontal: "center" }
+            };
+
+            // Số tiền - căn phải và định dạng số
+            const amountCell = XLSX.utils.encode_cell({r: R, c: 9});
+            ws[amountCell].s = {
+                alignment: { horizontal: "right" },
+                numFmt: "#,##0"
+            };
+            
+            // Các cột khác - căn trái
+            for (let C of [1,2,3,4,5,6,7,8,10,11,12]) {
+                ws[XLSX.utils.encode_cell({r: R, c: C})].s = {
+                    alignment: { horizontal: "left" }
+                };
+            }
+        }
+
+        // Thiết lập độ rộng cột
+        ws['!cols'] = [
+            { wch: 5 },   // STT
+            { wch: 10 },  // Dịch vụ
+            { wch: 15 },  // Số TK nguồn
+            { wch: 15 },  // Số TK thụ hưởng
+            { wch: 30 },  // Tên TK thụ hưởng
+            { wch: 15 },  // Tên viết tắt ngân hàng
+            { wch: 20 },  // Tên ngân hàng
+            { wch: 25 },  // Tên chi nhánh
+            { wch: 10 },  // Loại tiền
+            { wch: 15 },  // Số tiền
+            { wch: 15 },  // Số tham chiếu
+            { wch: 25 },  // Ghi chú
+            { wch: 15 }   // Ngày giao dịch
         ];
-        ws['!cols'] = colWidths;
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo thanh toán');
-        XLSX.writeFile(wb, `bao_cao_thanh_toan_${filters.from_date}_${filters.to_date}.xlsx`);
+        // Thiết lập chiều cao hàng
+        ws['!rows'] = [{ hpt: 25 }]; // Chiều cao cho hàng tiêu đề
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách chuyển khoản');
+        XLSX.writeFile(wb, `danh_sach_chuyen_khoan_${filters.from_date}_${filters.to_date}.xlsx`);
     };
 
     const handleShowTickets = (payment) => {
@@ -319,24 +367,26 @@ const PaymentReport = () => {
                 </div>
 
                 <Card className="rp-data-grid flex-grow-1 overflow-hidden">
-                    <Card.Body>
+                    <Card.Body className="p-0">
                         {loading ? (
-                            <p>Đang tải dữ liệu...</p>
+                            <div className="p-3">
+                                <p>Đang tải dữ liệu...</p>
+                            </div>
                         ) : (
                             <>
-                                <div className="table-responsive">
-                                    <Table striped bordered hover className="rp-table">
+                                <div className="table-container">
+                                    <Table striped bordered hover className="rp-table mb-0">
                                         <thead>
                                             <tr>
-                                                <th className="text-center">STT</th>
-                                                <th>Mã thanh toán</th>
-                                                <th>Ngày</th>
-                                                <th>Mã NV</th>
-                                                <th>Tên nhân viên</th>
-                                                <th className="text-end">Số tiền</th>
-                                                <th>Hình thức thanh toán</th>
-                                                <th>Người tạo</th>
-                                                <th className="text-center">Thao tác</th>
+                                                <th className="text-center" style={{minWidth: '60px'}}>STT</th>
+                                                <th style={{minWidth: '150px'}}>Mã thanh toán</th>
+                                                <th style={{minWidth: '100px'}}>Ngày</th>
+                                                <th style={{minWidth: '100px'}}>Mã NV</th>
+                                                <th style={{minWidth: '200px'}}>Tên nhân viên</th>
+                                                <th className="text-end" style={{minWidth: '120px'}}>Số tiền</th>
+                                                <th style={{minWidth: '150px'}}>Hình thức thanh toán</th>
+                                                <th style={{minWidth: '120px'}}>Người tạo</th>
+                                                <th className="text-center" style={{minWidth: '80px'}}>Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -371,7 +421,7 @@ const PaymentReport = () => {
                                 </div>
                                 
                                 {data.length > 0 && (
-                                    <div className="mt-3 d-flex justify-content-between align-items-center">
+                                    <div className="pagination-container p-3 bg-white border-top">
                                         <div className="d-flex align-items-center">
                                             <Form.Group className="rp-form-group d-flex align-items-center me-3">
                                                 <Form.Label className="me-2 mb-0">Hiển thị:</Form.Label>
@@ -401,6 +451,42 @@ const PaymentReport = () => {
                 </Card>
                 <TicketDetailsModal />
             </div>
+            <style jsx>{`
+                .rp-container {
+                    padding: 24px;
+                    height: 100vh;
+                    overflow: hidden;
+                }
+                .rp-header {
+                    margin-bottom: 1rem;
+                }
+                .table-container {
+                    height: calc(100vh - 250px);
+                    overflow-y: auto;
+                    overflow-x: auto;
+                }
+                .table-container table {
+                    margin-bottom: 0;
+                }
+                .table-container thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                    background: white;
+                }
+                .pagination-container {
+                    position: sticky;
+                    bottom: 0;
+                    z-index: 1;
+                }
+                .rp-table th {
+                    white-space: nowrap;
+                    background: #f8f9fa;
+                }
+                .rp-table td {
+                    white-space: nowrap;
+                }
+            `}</style>
         </AdminLayout>
     );
 };
