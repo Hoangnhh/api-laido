@@ -186,6 +186,7 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/reviews/export', [ReviewController::class, 'export']);
     Route::get('/get-ticket-by-name', [ReportController::class, 'getTicketByName']);
     Route::get('/get-payment-all-data', [PaymentController::class, 'getPaymentAllData']);
+    Route::post('/create-payment-all', [PaymentController::class, 'createPaymentAll']);
 });
 
 // Route không cần xác thực

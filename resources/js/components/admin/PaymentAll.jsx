@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from './Layout/AdminLayout';
-import { Card, Row, Col, Form, Button, Table, Pagination } from 'react-bootstrap';
+import { Card, Row, Col, Form, Button, Table, Pagination, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faMoneyCheckAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 const PaymentAll = () => {
     const [data, setData] = useState([]);
@@ -11,11 +11,9 @@ const PaymentAll = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(20);
     const [pagination, setPagination] = useState({});
-    const [summary, setSummary] = useState({
-        total_unpaid_tickets: 0,
-        total_unpaid_amount: 0
-    });
     const [search, setSearch] = useState('');
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const pageSizeOptions = [20, 50, 100, 200];
 
     useEffect(() => {
@@ -28,19 +26,37 @@ const PaymentAll = () => {
             const response = await axios.get('/api/admin/get-payment-all-data', {
                 params: {
                     page: currentPage,
-                    per_page: perPage
+                    per_page: perPage,
+                    search: search
                 }
             });
 
             if (response.data.success) {
                 setData(response.data.data.items);
                 setPagination(response.data.data.pagination);
-                setSummary(response.data.data.summary);
             }
         } catch (error) {
             console.error('Lỗi khi tải dữ liệu:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreatePaymentAll = async () => {
+        setProcessing(true);
+        try {
+            const response = await axios.post('/api/admin/create-payment-all');
+            if (response.data.success) {
+                alert(response.data.message);
+                fetchData(); // Tải lại dữ liệu sau khi thanh toán
+            } else {
+                alert(response.data.message || 'Có lỗi xảy ra khi tạo thanh toán');
+            }
+        } catch (error) {
+            alert(error.response?.data?.message || 'Có lỗi xảy ra khi tạo thanh toán');
+        } finally {
+            setProcessing(false);
+            setShowConfirm(false);
         }
     };
 
@@ -158,9 +174,17 @@ const PaymentAll = () => {
                         <Col md="auto">
                             <Button 
                                 variant="primary" 
+                                className="me-2"
                                 onClick={fetchData}
                             >
                                 <FontAwesomeIcon icon={faSearch} /> Tìm kiếm
+                            </Button>
+                            <Button 
+                                variant="success"
+                                onClick={() => setShowConfirm(true)}
+                                disabled={processing || data.length === 0}
+                            >
+                                {processing ? 'Đang xử lý...' : 'Thanh toán tất cả'}
                             </Button>
                         </Col>
                     </Row>
@@ -179,17 +203,16 @@ const PaymentAll = () => {
                                         <th>Số tài khoản</th>
                                         <th className="text-center">Số vé chưa TT</th>
                                         <th className="text-end">Số tiền chưa TT</th>
-                                        <th className="text-center">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {loading ? (
                                         <tr>
-                                            <td colSpan="8" className="text-center">Đang tải dữ liệu...</td>
+                                            <td colSpan="7" className="text-center">Đang tải dữ liệu...</td>
                                         </tr>
                                     ) : data.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="text-center">Không có dữ liệu</td>
+                                            <td colSpan="7" className="text-center">Không có dữ liệu</td>
                                         </tr>
                                     ) : (
                                         data.map((item, index) => (
@@ -203,16 +226,7 @@ const PaymentAll = () => {
                                                 <td>{item.bank_account} {item.bank_name}</td>
                                                 <td className="text-center">{item.unpaid_ticket_count}</td>
                                                 <td className="text-end">
-                                                    {formatCurrency(item.total_unpaid_amount)}
-                                                </td>
-                                                <td className="text-center">
-                                                    <Button 
-                                                        variant="success" 
-                                                        size="sm"
-                                                        disabled={item.total_unpaid_amount <= 0}
-                                                    >
-                                                        <FontAwesomeIcon icon={faMoneyCheckAlt} />
-                                                    </Button>
+                                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total_unpaid_amount)}
                                                 </td>
                                             </tr>
                                         ))
@@ -252,6 +266,28 @@ const PaymentAll = () => {
                     </Card.Body>
                 </Card>
             </div>
+
+            {/* Modal xác nhận thanh toán */}
+            <Modal show={showConfirm} onHide={() => setShowConfirm(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xác nhận thanh toán</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Bạn có chắc chắn muốn tạo thanh toán cho tất cả nhân viên?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+                        Hủy
+                    </Button>
+                    <Button 
+                        variant="success" 
+                        onClick={handleCreatePaymentAll}
+                        disabled={processing}
+                    >
+                        {processing ? 'Đang xử lý...' : 'Xác nhận'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             <style jsx>{`
                 .pa-container {

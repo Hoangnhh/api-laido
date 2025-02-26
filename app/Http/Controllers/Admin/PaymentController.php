@@ -413,6 +413,7 @@ class PaymentController extends Controller
         try {
             $perPage = $request->input('per_page', 20);
             $page = $request->input('page', 1);
+            $search = $request->input('search');
 
             $query = Staff::query()
                 ->leftJoin('checked_ticket', function($join) {
@@ -439,6 +440,16 @@ class PaymentController extends Controller
                     'staff.bank_name'
                 ]);
 
+            // Thêm điều kiện tìm kiếm
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('staff.code', 'like', "%{$search}%")
+                      ->orWhere('staff.name', 'like', "%{$search}%")
+                      ->orWhere('staff.card_id', 'like', "%{$search}%")
+                      ->orWhere('staff.bank_account', 'like', "%{$search}%");
+                });
+            }
+
             // Chỉ lấy những nhân viên có số tiền chưa thanh toán > 0
             $query->having('total_unpaid_amount', '>', 0);
 
@@ -446,7 +457,7 @@ class PaymentController extends Controller
             $query->orderBy('total_unpaid_amount', 'desc');
 
             // Cache kết quả trong 5 phút
-            $cacheKey = 'payment_all_data_' . $page . '_' . $perPage;
+            $cacheKey = 'payment_all_data_' . $page . '_' . $perPage . '_' . $search;
             $result = Cache::remember($cacheKey, 300, function() use ($query, $perPage, $page) {
                 return $query->paginate($perPage, ['*'], 'page', $page);
             });
@@ -472,143 +483,39 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * Xuất dữ liệu thanh toán ra file Excel
-     */
-    private function exportPaymentToExcel($staffPayments, $fromDate = null)
-    {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        
-        // Set font chữ mặc định
-        $spreadsheet->getDefaultStyle()->getFont()->setName('Times New Roman')->setSize(11);
-        
-        // Thiết lập tiêu đề
-        $sheet->mergeCells('A1:J1');
-        $sheet->setCellValue('A1', 'DANH SÁCH THANH TOÁN');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        
-        // Thiết lập ngày thanh toán
-        $sheet->mergeCells('A2:J2');
-        $sheet->setCellValue('A2', 'Ngày thanh toán: ' . ($fromDate ? date('d/m/Y', strtotime($fromDate)) : date('d/m/Y')));
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        // Headers
-        $headers = [
-            'STT',
-            'Mã nhân viên',
-            'Tên nhân viên',
-            'CCCD',
-            'Số tài khoản',
-            'Ngân hàng',
-            'Số vé thanh toán',
-            'Số tiền thanh toán',
-            'Mã giao dịch',
-            'Thời gian'
-        ];
-
-        // Thiết lập headers
-        foreach ($headers as $idx => $header) {
-            $col = chr(65 + $idx); // A, B, C, ...
-            $sheet->setCellValue($col . '4', $header);
-            $sheet->getStyle($col . '4')->getFont()->setBold(true);
-            $sheet->getStyle($col . '4')->getFill()
-                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('CCCCCC');
-        }
-
-        // Đổ dữ liệu
-        $row = 5;
-        foreach ($staffPayments as $index => $payment) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $payment['staff_code']);
-            $sheet->setCellValue('C' . $row, $payment['staff_name']);
-            $sheet->setCellValue('D' . $row, $payment['card_id']);
-            $sheet->setCellValue('E' . $row, $payment['bank_account']);
-            $sheet->setCellValue('F' . $row, $payment['bank_name']);
-            $sheet->setCellValue('G' . $row, $payment['ticket_count']);
-            $sheet->setCellValue('H' . $row, $payment['amount']);
-            $sheet->setCellValue('I' . $row, $payment['transaction_code']);
-            $sheet->setCellValue('J' . $row, date('d/m/Y H:i:s', strtotime($payment['created_at'])));
-
-            // Format số tiền
-            $sheet->getStyle('H' . $row)->getNumberFormat()
-                ->setFormatCode('#,##0');
-            
-            $row++;
-        }
-
-        // Thiết lập độ rộng cột tự động
-        foreach (range('A', 'J') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // Tạo border cho toàn bộ bảng
-        $lastRow = $row - 1;
-        $sheet->getStyle('A4:J' . $lastRow)->getBorders()->getAllBorders()
-            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-
-        // Căn giữa các cột STT, Mã NV, CCCD, Số vé
-        $sheet->getStyle('A4:A' . $lastRow)->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('B4:B' . $lastRow)->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('D4:D' . $lastRow)->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('G4:G' . $lastRow)->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        // Căn phải cột số tiền
-        $sheet->getStyle('H4:H' . $lastRow)->getAlignment()
-            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-
-        // Tạo writer
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        
-        // Tạo response
-        $filename = 'thanh-toan-' . date('Y-m-d-H-i-s') . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        // Trả về callback để stream file
-        return [
-            function() use ($writer) {
-                $writer->save('php://output');
-            },
-            []
-        ];
-    }
-
     public function createPaymentAll(Request $request)
     {
         try {
+            $maxStaffPerBatch = 20; // Giới hạn số lượng nhân viên mỗi lần
+
             // Lấy danh sách nhân viên có commission chưa thanh toán
-            $staffWithUnpaidCommission = Staff::select([
-                'staff.id',
-                'staff.code',
-                'staff.name',
-                'staff.card_id',
-                'staff.bank_account',
-                'staff.bank_name',
-                DB::raw('(
-                    SELECT COUNT(*)
-                    FROM checked_ticket
-                    WHERE checked_ticket.staff_id = staff.id
-                    AND checked_ticket.paid = 0
-                    AND checked_ticket.status = "' . CheckedTicket::STATUS_CHECKOUT . '"
-                ) as unpaid_ticket_count'),
-                DB::raw('(
-                    SELECT SUM(commission)
-                    FROM checked_ticket
-                    WHERE checked_ticket.staff_id = staff.id
-                    AND checked_ticket.paid = 0
-                    AND checked_ticket.status = "' . CheckedTicket::STATUS_CHECKOUT . '"
-                ) as total_unpaid_amount')
-            ])
-            ->havingRaw('total_unpaid_amount > 0')
-            ->get();
+            $staffWithUnpaidCommission = Staff::query()
+                ->select([
+                    'staff.id',
+                    'staff.code',
+                    'staff.name',
+                    'staff.card_id',
+                    'staff.bank_account',
+                    'staff.bank_name',
+                ])
+                ->addSelect([
+                    DB::raw('(SELECT COUNT(*) FROM checked_ticket 
+                        WHERE checked_ticket.staff_id = staff.id 
+                        AND checked_ticket.paid = 0) as unpaid_ticket_count'),
+                    DB::raw('(SELECT COALESCE(SUM(commission), 0) FROM checked_ticket 
+                        WHERE checked_ticket.staff_id = staff.id 
+                        AND checked_ticket.paid = 0) as total_unpaid_amount')
+                ])
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', 0);
+                })
+                ->having('total_unpaid_amount', '>', 0)
+                ->orderBy('total_unpaid_amount', 'desc') // Ưu tiên thanh toán cho người có số tiền lớn trước
+                ->limit($maxStaffPerBatch) // Giới hạn số lượng nhân viên
+                ->get();
 
             if ($staffWithUnpaidCommission->isEmpty()) {
                 return response()->json([
@@ -617,63 +524,78 @@ class PaymentController extends Controller
                 ]);
             }
 
+            // Đếm tổng số nhân viên còn lại cần thanh toán
+            $remainingStaff = Staff::query()
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', 0);
+                })
+                ->whereNotIn('id', $staffWithUnpaidCommission->pluck('id'))
+                ->count();
+
             $paymentDate = date('Y-m-d H:i:s');
-            $staffPayments = [];
             $user = Auth::user();
+            $successCount = 0;
 
             DB::beginTransaction();
             try {
                 foreach ($staffWithUnpaidCommission as $staff) {
-                    // Lấy danh sách vé chưa thanh toán
-                    $unpaidTickets = CheckedTicket::where('staff_id', $staff->id)
-                        ->where('paid', 0)
-                        ->where('status', CheckedTicket::STATUS_CHECKOUT)
-                        ->get();
-
-                    if ($unpaidTickets->isNotEmpty()) {
+                    if ($staff->total_unpaid_amount > 0) {
                         $transactionCode = $this->generateTransactionCode();
                         
                         // Tạo payment record
                         $payment = new Payment([
                             'staff_id' => $staff->id,
                             'amount' => $staff->total_unpaid_amount,
+                            'bank' => $staff->bank_name,
+                            'received_account' => $staff->bank_account,
                             'transaction_code' => $transactionCode,
+                            'date' => $paymentDate,
                             'created_by' => $user->username,
-                            'updated_by' => $user->username
+                            'updated_by' => $user->username,
+                            'note' => 'Thanh toán tự động'
                         ]);
                         $payment->save();
 
-                        // Cập nhật trạng thái đã thanh toán cho các vé
-                        CheckedTicket::where('staff_id', $staff->id)
-                            ->where('paid', 0)
-                            ->where('status', CheckedTicket::STATUS_CHECKOUT)
-                            ->update([
-                                'paid' => 1,
-                                'payment_id' => $payment->id,
-                                'updated_by' => $user->username
-                            ]);
+                        // Cập nhật trạng thái đã thanh toán cho các vé theo batch
+                        $processedCount = 0;
+                        do {
+                            $affectedRows = DB::table('checked_ticket')
+                                ->where('staff_id', $staff->id)
+                                ->where('paid', 0)
+                                ->update([
+                                    'paid' => 1,
+                                    'payment_id' => $payment->id,
+                                    'updated_at' => now()
+                                ]);
+                            
+                            $processedCount += $affectedRows;
+                            
+                        } while ($affectedRows > 0);
 
-                        // Thêm vào danh sách để xuất Excel
-                        $staffPayments[] = [
-                            'staff_code' => $staff->code,
-                            'staff_name' => $staff->name,
-                            'card_id' => $staff->card_id,
-                            'bank_account' => $staff->bank_account,
-                            'bank_name' => $staff->bank_name,
-                            'ticket_count' => $unpaidTickets->count(),
-                            'amount' => $staff->total_unpaid_amount,
-                            'transaction_code' => $transactionCode,
-                            'created_at' => $paymentDate
-                        ];
+                        if ($processedCount > 0) {
+                            $successCount++;
+                            
+                            // Gửi thông báo thanh toán
+                            // $this->notificationService->pushPaymentNoti($payment->id);
+                        }
                     }
                 }
 
                 DB::commit();
 
-                // Xuất file Excel
-                list($callback, $headers) = $this->exportPaymentToExcel($staffPayments, $paymentDate);
-                
-                return response()->stream($callback, 200, $headers);
+                $message = "Đã tạo thanh toán thành công cho {$successCount} nhân viên";
+                if ($remainingStaff > 0) {
+                    $message .= ". Còn {$remainingStaff} nhân viên chưa được thanh toán, vui lòng thực hiện thêm lần nữa";
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'remaining_staff' => $remainingStaff
+                ]);
 
             } catch (\Exception $e) {
                 DB::rollback();
