@@ -486,7 +486,7 @@ class PaymentController extends Controller
     public function createPaymentAll(Request $request)
     {
         try {
-            $maxStaffPerBatch = 20; // Giới hạn số lượng nhân viên mỗi lần
+            $maxStaffPerBatch = 500; // Giới hạn số lượng nhân viên mỗi lần
 
             // Lấy danh sách nhân viên có commission chưa thanh toán
             $staffWithUnpaidCommission = Staff::query()
