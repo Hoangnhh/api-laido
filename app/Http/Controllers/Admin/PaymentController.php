@@ -458,7 +458,7 @@ class PaymentController extends Controller
 
             // Cache kết quả trong 5 phút
             $cacheKey = 'payment_all_data_' . $page . '_' . $perPage . '_' . $search;
-            $result = Cache::remember($cacheKey, 300, function() use ($query, $perPage, $page) {
+            $result = Cache::remember($cacheKey, 60, function() use ($query, $perPage, $page) {
                 return $query->paginate($perPage, ['*'], 'page', $page);
             });
 
