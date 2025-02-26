@@ -63,7 +63,8 @@ const PaymentReport = () => {
             'Số tiền': item.amount,
             'Số tham chiếu KH': '',
             'Ghi chú': 'Chuyen khoan noi bo',
-            'Ngày giao dịch': item.payment_date
+            'Ngày giao dịch': item.payment_date,
+            'CCCD': item.card_id
         }));
 
         const wb = XLSX.utils.book_new();
@@ -117,7 +118,8 @@ const PaymentReport = () => {
             { wch: 15 },  // Số tiền
             { wch: 15 },  // Số tham chiếu
             { wch: 25 },  // Ghi chú
-            { wch: 15 }   // Ngày giao dịch
+            { wch: 15 },  // Ngày giao dịch
+            { wch: 15 }   // CCCD
         ];
 
         // Thiết lập chiều cao hàng

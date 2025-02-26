@@ -179,6 +179,7 @@ class ReportController extends Controller
                 'staff.code as staff_code',
                 'staff.username as staff_username',
                 'staff.name as staff_name',
+                'staff.card_id',
                 'payment.created_by'
             ])
             ->join('staff', 'payment.staff_id', '=', 'staff.id')
