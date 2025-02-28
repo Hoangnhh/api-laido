@@ -418,8 +418,7 @@ class PaymentController extends Controller
             $query = Staff::query()
                 ->leftJoin('checked_ticket', function($join) {
                     $join->on('staff.id', '=', 'checked_ticket.staff_id')
-                        ->where('checked_ticket.paid', '=', 0)
-                        ->where('checked_ticket.status', '=', CheckedTicket::STATUS_CHECKOUT);
+                        ->where('checked_ticket.paid', '=', 0);
                 })
                 ->select([
                     'staff.id',
