@@ -272,8 +272,8 @@ class ReportController extends Controller
             $result = DB::table('checked_ticket')
                 ->select([
                     'checked_ticket.name as ticket_name',
-                    DB::raw('COUNT(*) as total_count'),
-                    DB::raw('ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
+                    DB::raw('COUNT(DISTINCT checked_ticket.code) as total_count'),
+                    DB::raw('ROUND((COUNT(DISTINCT checked_ticket.code) * 100.0 / (SELECT COUNT(DISTINCT code) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
                 ])
                 ->whereBetween('checked_ticket.date', [$fromDate, $toDate])
                 ->groupBy('checked_ticket.name')
