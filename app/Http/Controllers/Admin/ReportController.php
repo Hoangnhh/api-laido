@@ -262,8 +262,8 @@ class ReportController extends Controller
     {
         try {
             // Lấy tham số từ request
-            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d'));
-            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d'));
+            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d')) . ' 00:00:00';
+            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d')) . ' 23:59:59';
 
             // Chuyển đổi thành đối tượng Carbon để xử lý ngày
             $fromDate = Carbon::parse($fromDate)->startOfDay();
@@ -275,7 +275,7 @@ class ReportController extends Controller
                     DB::raw('COUNT(DISTINCT checked_ticket.code) as total_count'),
                     DB::raw('ROUND((COUNT(DISTINCT checked_ticket.code) * 100.0 / (SELECT COUNT(DISTINCT code) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
                 ])
-                ->whereBetween('checked_ticket.date', [$fromDate, $toDate])
+                ->whereBetween('checked_ticket.checkin_at', [$fromDate, $toDate])
                 ->groupBy('checked_ticket.name')
                 ->orderBy('total_count', 'desc')
                 ->setBindings([$fromDate, $toDate, $fromDate, $toDate])
