@@ -225,7 +225,7 @@ class StaffController extends Controller
 
 
             // Tổng số vé
-            $totalTickets = $tickets->count();
+            $totalTickets = $tickets->unique('code')->count();
 
             // Tổng tiền commission
             $totalCommission = $tickets->sum('commission');
