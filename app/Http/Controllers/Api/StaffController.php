@@ -166,7 +166,6 @@ class StaffController extends Controller
                 : Carbon::now('Asia/Ho_Chi_Minh')->endOfDay();
 
             $tickets = CheckedTicket::where('staff_id', $userId)
-                ->distinct('code')
                 ->whereBetween('checkin_at', [$fromDate, $toDate])
                 ->orderByRaw('CASE 
                     WHEN status = ? THEN checkout_at 
