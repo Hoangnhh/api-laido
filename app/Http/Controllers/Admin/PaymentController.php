@@ -36,7 +36,7 @@ class PaymentController extends Controller
             $query = Staff::query()
                 ->select([
                     'staff.*',
-                    DB::raw('COUNT(DISTINCT ct.id) as checked_ticket_count'),
+                    DB::raw('COUNT(DISTINCT ct.code) as checked_ticket_count'),
                     DB::raw('COALESCE(SUM(CASE WHEN ct.paid = 0 THEN ct.commission ELSE 0 END), 0) as total_commission'),
                     DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE staff_id = staff.id) as total_paid')
                 ])
@@ -108,7 +108,7 @@ class PaymentController extends Controller
                 ->select([
                     DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE status = "'.Payment::STATUS_ACTIVE.'") as total_paid'),
                     DB::raw('(SELECT COALESCE(SUM(commission), 0) FROM checked_ticket WHERE paid = 0) as total_unpaid'),
-                    DB::raw('(SELECT COUNT(*) FROM checked_ticket WHERE paid = 0) as total_unpaid_num')
+                    DB::raw('(SELECT COUNT(DISTINCT code) FROM checked_ticket WHERE paid = 0) as total_unpaid_num')
                 ])
                 ->first();
 
