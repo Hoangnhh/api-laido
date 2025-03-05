@@ -121,6 +121,8 @@ const PaymentReport = () => {
             { wch: 15 },  // Số tham chiếu
             { wch: 25 },  // Ghi chú
             { wch: 15 },  // Ngày giao dịch
+            { wch: 15 },  // Số đò
+            { wch: 15 },  // SĐT
             { wch: 15 }   // CCCD
         ];
 
