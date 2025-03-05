@@ -3,7 +3,6 @@ import AdminLayout from '.././Layout/AdminLayout';
 import { Card, Row, Col, Form, Button, Table, Modal, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
-import moment from 'moment';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../../../css/Report.css';
@@ -64,7 +63,7 @@ const PaymentReport = () => {
             'Số tiền': item.amount,
             'Số tham chiếu KH': '',
             'Ghi chú': 'Chuyen khoan noi bo',
-            'Ngày giao dịch': moment(item.payment_date).format('YYYY/MM/DD'),
+            'Ngày giao dịch': item.payment_date.substring(0,10).split('-').join('/'),
             'Số đò': item.code,
             'SĐT': item.username,
             'CCCD': item.card_id
