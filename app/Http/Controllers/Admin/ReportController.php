@@ -180,7 +180,7 @@ class ReportController extends Controller
                 'staff.code as code',
                 'staff.username as staff_username',
                 'staff.name as staff_name',
-                'staff.username as username',
+                'staff.username',
                 'staff.card_id',
                 'payment.created_by'
             ])
