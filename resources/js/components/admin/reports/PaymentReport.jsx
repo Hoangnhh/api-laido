@@ -63,7 +63,9 @@ const PaymentReport = () => {
             'Số tiền': item.amount,
             'Số tham chiếu KH': '',
             'Ghi chú': 'Chuyen khoan noi bo',
-            'Ngày giao dịch': item.payment_date,
+            'Ngày giao dịch': moment(item.payment_date).format('YYYY/MM/DD'),
+            'Số đò': item.code,
+            'SĐT': item.username,
             'CCCD': item.card_id
         }));
 
