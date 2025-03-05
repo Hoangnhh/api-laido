@@ -206,45 +206,9 @@ class ReportController extends Controller
                         ->get()
                         ->map(function ($payment) {
                             $payment->payment_method = $this->formatPaymentMethod($payment->payment_method);
-
-                            // Lấy danh sách vé trực tiếp từ database
-                            $tickets = CheckedTicket::select([
-                                'checked_ticket.code as ticket_code',
-                                'checked_ticket.name as ticket_name',
-                                'checked_ticket.commission',
-                                'checked_ticket.checkin_by',
-                                'checked_ticket.checkout_by',
-                                DB::raw("DATE_FORMAT(checked_ticket.date, '%d/%m/%Y') as ticket_date")
-                            ])
-                            ->where('checked_ticket.payment_id', $payment->id)
-                            ->get()
-                            ->map(function ($ticket, $index) use ($payment) {
-                                // Xác định chiều vé
-                                $direction = 'Không xác định';
-                                $isCheckinByStaff = isset($ticket->checkin_by) && 
-                                    $ticket->checkin_by === $payment->staff_username;
-                                $isCheckoutByStaff = isset($ticket->checkout_by) && 
-                                    $ticket->checkout_by === $payment->staff_username;
-                                if ($isCheckinByStaff && $isCheckoutByStaff) {
-                                    $direction = '2 Chiều';
-                                } elseif ($isCheckinByStaff) {
-                                    $direction = 'Chiều vào';
-                                } elseif ($isCheckoutByStaff) {
-                                    $direction = 'Chiều ra';
-                                }
                             
-                                return [
-                                    'stt' => $index + 1,
-                                    'ticket_code' => $ticket->ticket_code,
-                                    'ticket_date' => $ticket->ticket_date,
-                                    'ticket_name' => $ticket->ticket_name,
-                                    'direction' => $direction,
-                                    'commission' => $ticket->commission
-                                ];
-                            });
-                            
-                            $payment->tickets = $tickets;
-                            $payment->total_commission = $tickets->sum('commission');
+                            $payment->tickets = [];
+                            $payment->total_commission = 0;
                             
                             // Xóa id khỏi response
                             unset($payment->id);
