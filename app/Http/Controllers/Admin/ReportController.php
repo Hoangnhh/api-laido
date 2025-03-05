@@ -175,7 +175,7 @@ class ReportController extends Controller
                 'payment.note',
                 'payment.bank',
                 'payment.received_account',
-                DB::raw("DATE_FORMAT(payment.date, '%d/%m/%Y') as payment_date"),
+                DB::raw("DATE_FORMAT(payment.date, '%Y/%m/%d') as payment_date"),
                 'staff.code as staff_code',
                 'staff.username as staff_username',
                 'staff.name as staff_name',
