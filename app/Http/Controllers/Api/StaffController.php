@@ -208,10 +208,11 @@ class StaffController extends Controller
                     ];
                     
                     $totalCheckin++;
-                    $totalCheckout++;
                     
                     if ($ticket->status == CheckedTicket::STATUS_CHECKIN) {
                         $totalIncomplete++;
+                    }else{
+                        $totalCheckout++;
                     }
                     
                     $processedTickets[] = $processedTicket;
