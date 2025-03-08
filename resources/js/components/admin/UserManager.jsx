@@ -102,6 +102,10 @@ const menuItems = [
         path: '/admin/accounts-payable'
     },
     { 
+        text: 'Thanh toán toàn bộ', 
+        path: '/admin/payment-all'
+    },
+    { 
         text: 'Lái đò đã kết ca', 
         path: '/admin/checkout-list-report'
     },

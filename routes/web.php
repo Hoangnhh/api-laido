@@ -73,6 +73,10 @@ Route::prefix('admin')->group(function () {
             return view('admin.payment-report');
         })->name('admin.payment-report');
 
+        Route::get('/payment-all', function () {
+            return view('admin.payment-all');
+        })->name('admin.payment-all');
+
         Route::get('/waiting-list-for-checkin-report', function () {
             return view('admin.waiting-list-for-checkin-report');
         })->name('admin.waiting-list-for-checkin-report');
@@ -181,6 +185,8 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/export', [ReviewController::class, 'export']);
     Route::get('/get-ticket-by-name', [ReportController::class, 'getTicketByName']);
+    Route::get('/get-payment-all-data', [PaymentController::class, 'getPaymentAllData']);
+    Route::post('/create-payment-all', [PaymentController::class, 'createPaymentAll']);
 });
 
 // Route không cần xác thực

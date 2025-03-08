@@ -40,10 +40,23 @@ const Sidebar = () => {
             icon: faCalendarAlt,
             path: '/admin/shift-assignments'
         },
-        { 
-            text: 'Thanh toán', 
-            icon: faMoneyBillWave,
-            path: '/admin/accounts-payable'
+
+        {
+            text: 'Thanh toán',
+            icon: faUsers,
+            path: '#',
+            children: [
+                { 
+                    text: 'Thanh toán theo lái đò', 
+                    icon: faMoneyBillWave,
+                    path: '/admin/accounts-payable'
+                },
+                { 
+                    text: 'Thanh toán toàn bộ', 
+                    icon: faMoneyBillWave,
+                    path: '/admin/payment-all'
+                }
+            ]
         },
         { 
             text: 'Màn hình checkin', 

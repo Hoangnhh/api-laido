@@ -48,6 +48,7 @@ class StaffController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('code', 'like', "%{$search}%")
                   ->orWhere('card_id', 'like', "%{$search}%")
+                  ->orWhere('bank_account', 'like', "%{$search}%")
                   ->orWhereHas('group', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%");
                   });

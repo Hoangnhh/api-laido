@@ -12,6 +12,12 @@ use App\Models\Payment;
 use Carbon\Carbon;
 use App\Services\NotificationService;
 use App\Models\ActionLog;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends Controller
 {
@@ -30,7 +36,7 @@ class PaymentController extends Controller
             $query = Staff::query()
                 ->select([
                     'staff.*',
-                    DB::raw('COUNT(DISTINCT ct.id) as checked_ticket_count'),
+                    DB::raw('COUNT(DISTINCT ct.code) as checked_ticket_count'),
                     DB::raw('COALESCE(SUM(CASE WHEN ct.paid = 0 THEN ct.commission ELSE 0 END), 0) as total_commission'),
                     DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE staff_id = staff.id) as total_paid')
                 ])
@@ -102,7 +108,7 @@ class PaymentController extends Controller
                 ->select([
                     DB::raw('(SELECT COALESCE(SUM(amount), 0) FROM payment WHERE status = "'.Payment::STATUS_ACTIVE.'") as total_paid'),
                     DB::raw('(SELECT COALESCE(SUM(commission), 0) FROM checked_ticket WHERE paid = 0) as total_unpaid'),
-                    DB::raw('(SELECT COUNT(*) FROM checked_ticket WHERE paid = 0) as total_unpaid_num')
+                    DB::raw('(SELECT COUNT(DISTINCT code) FROM checked_ticket WHERE paid = 0) as total_unpaid_num')
                 ])
                 ->first();
 
@@ -400,5 +406,212 @@ class PaymentController extends Controller
     private function generateTransactionCode()
     {
         return 'TT' . date('Ymd') . rand(10000, 99999);
+    }
+
+    public function getPaymentAllData(Request $request)
+    {
+        try {
+            $perPage = $request->input('per_page', 20);
+            $page = $request->input('page', 1);
+            $search = $request->input('search');
+
+            $query = Staff::query()
+                ->leftJoin('checked_ticket', function($join) {
+                    $join->on('staff.id', '=', 'checked_ticket.staff_id')
+                        ->where('checked_ticket.paid', '=', 0);
+                })
+                ->select([
+                    'staff.id',
+                    'staff.code',
+                    'staff.name',
+                    'staff.card_id',
+                    'staff.bank_account',
+                    'staff.bank_name',
+                    DB::raw('COUNT(checked_ticket.id) as unpaid_ticket_count'),
+                    DB::raw('COALESCE(SUM(checked_ticket.commission), 0) as total_unpaid_amount')
+                ])
+                ->groupBy([
+                    'staff.id',
+                    'staff.code',
+                    'staff.name',
+                    'staff.card_id',
+                    'staff.bank_account',
+                    'staff.bank_name'
+                ]);
+
+            // Thêm điều kiện tìm kiếm
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('staff.code', 'like', "%{$search}%")
+                      ->orWhere('staff.name', 'like', "%{$search}%")
+                      ->orWhere('staff.card_id', 'like', "%{$search}%")
+                      ->orWhere('staff.bank_account', 'like', "%{$search}%");
+                });
+            }
+
+            // Chỉ lấy những nhân viên có số tiền chưa thanh toán > 0
+            $query->having('total_unpaid_amount', '>', 0);
+
+            // Sắp xếp theo số tiền chưa thanh toán giảm dần
+            $query->orderBy('total_unpaid_amount', 'desc');
+
+            // Cache kết quả trong 5 phút
+            $cacheKey = 'payment_all_data_' . $page . '_' . $perPage . '_' . $search;
+            $result = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'items' => $result->items(),
+                    'pagination' => [
+                        'current_page' => $result->currentPage(),
+                        'last_page' => $result->lastPage(),
+                        'per_page' => $result->perPage(),
+                        'total' => $result->total()
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createPaymentAll(Request $request)
+    {
+        try {
+            $maxStaffPerBatch = 5000; // Giới hạn số lượng nhân viên mỗi lần
+            $today = Carbon::today();
+
+            // Lấy danh sách nhân viên có commission chưa thanh toán
+            $staffWithUnpaidCommission = Staff::query()
+                ->select([
+                    'staff.id',
+                    'staff.code',
+                    'staff.name',
+                    'staff.card_id',
+                    'staff.bank_account',
+                    'staff.bank_name',
+                ])
+                ->addSelect([
+                    DB::raw('(SELECT COUNT(*) FROM checked_ticket 
+                        WHERE checked_ticket.staff_id = staff.id 
+                        AND checked_ticket.paid = 0) as unpaid_ticket_count'),
+                    DB::raw('(SELECT COALESCE(SUM(commission), 0) FROM checked_ticket 
+                        WHERE checked_ticket.staff_id = staff.id 
+                        AND checked_ticket.paid = 0) as total_unpaid_amount')
+                ])
+                // Loại bỏ những staff đã có thanh toán trong ngày
+                ->whereNotExists(function ($query) use ($today) {
+                    $query->select(DB::raw(1))
+                        ->from('payment')
+                        ->whereColumn('payment.staff_id', 'staff.id')
+                        ->whereDate('payment.date', $today)
+                        ->where('payment.status', Payment::STATUS_ACTIVE);
+                })
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', 0);
+                })
+                ->orderBy('total_unpaid_amount', 'desc')
+                ->limit($maxStaffPerBatch)
+                ->get();
+
+            if ($staffWithUnpaidCommission->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có nhân viên nào cần thanh toán'
+                ]);
+            }
+
+            // Đếm tổng số nhân viên còn lại cần thanh toán
+            $remainingStaff = Staff::query()
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('checked_ticket')
+                        ->whereColumn('checked_ticket.staff_id', 'staff.id')
+                        ->where('checked_ticket.paid', 0);
+                })
+                ->whereNotIn('id', $staffWithUnpaidCommission->pluck('id'))
+                ->count();
+
+            $paymentDate = date('Y-m-d H:i:s');
+            $user = Auth::user();
+            $successCount = 0;
+
+            DB::beginTransaction();
+            try {
+                foreach ($staffWithUnpaidCommission as $staff) {
+                    if ($staff->total_unpaid_amount > 0) {
+                        $transactionCode = $this->generateTransactionCode();
+                        
+                        // Tạo payment record
+                        $payment = new Payment([
+                            'staff_id' => $staff->id,
+                            'amount' => $staff->total_unpaid_amount,
+                            'bank' => $staff->bank_name,
+                            'received_account' => $staff->bank_account,
+                            'transaction_code' => $transactionCode,
+                            'date' => $paymentDate,
+                            'created_by' => $user->username,
+                            'updated_by' => $user->username,
+                            'note' => 'Thanh toán tự động'
+                        ]);
+                        $payment->save();
+
+                        // Cập nhật trạng thái đã thanh toán cho các vé theo batch
+                        $processedCount = 0;
+                        do {
+                            $affectedRows = DB::table('checked_ticket')
+                                ->where('staff_id', $staff->id)
+                                ->where('paid', 0)
+                                ->update([
+                                    'paid' => 1,
+                                    'payment_id' => $payment->id,
+                                    'updated_at' => now()
+                                ]);
+                            
+                            $processedCount += $affectedRows;
+                            
+                        } while ($affectedRows > 0);
+
+                        if ($processedCount > 0) {
+                            $successCount++;
+                            
+                            // Gửi thông báo thanh toán
+                            // $this->notificationService->pushPaymentNoti($payment->id);
+                        }
+                    }
+                }
+
+                DB::commit();
+
+                $message = "Đã tạo thanh toán thành công cho {$successCount} nhân viên";
+                if ($remainingStaff > 0) {
+                    $message .= ". Còn {$remainingStaff} nhân viên chưa được thanh toán, vui lòng thực hiện thêm lần nữa";
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'remaining_staff' => $remainingStaff
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                throw $e;
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 

@@ -282,17 +282,17 @@ class StaffController extends Controller
     {
         try {
             $userId = $request->user_id;
-            $fromDate = $request->fromDate ?? now()->toDateString();
-            $toDate = $request->toDate ?? $fromDate;
+            $fromDate = $request->fromDate ?? now()->toDateString() . ' 00:00:00';
+            $toDate = $request->toDate ?? $fromDate . ' 23:59:59';
 
             $tickets = CheckedTicket::where('staff_id', $userId)
-                ->whereDate('date', '>=', $fromDate)
-                ->whereDate('date', '<=', $toDate)
+                ->whereDate('checkin_at', '>=', $fromDate)
+                ->whereDate('checkin_at', '<=', $toDate)
                 ->get();
 
 
             // Tổng số vé
-            $totalTickets = $tickets->count();
+            $totalTickets = $tickets->unique('code')->count();
 
             // Tổng tiền commission
             $totalCommission = $tickets->sum('commission');

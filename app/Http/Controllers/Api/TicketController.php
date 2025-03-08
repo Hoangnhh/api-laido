@@ -209,7 +209,7 @@ class TicketController extends Controller
 
                 // Nếu vé đã thanh toán hoặc người checkout khác người checkin thì tạo vé mới
                 if(($existingTicket->paid || $existingTicket->checkin_by != $request->username)) {
-                    if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1){
+                    if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1 || $existingTicket->checkin_by == $request->username){
                         $createdCheckedTicket = CheckedTicket::create([
                             'code' => $request->code,
                             'name' => $existingTicket->name,
@@ -432,7 +432,7 @@ class TicketController extends Controller
 
                 // Nếu vé đã thanh toán hoặc người checkout khác người checkin thì tạo vé mới
                 if(($existingTicket->paid || $existingTicket->checkin_by != $request->username)) {
-                    if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1){
+                    if($systemConfigs[SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value] == 1 || $existingTicket->checkin_by == $request->username){
                         $createdCheckedTicket = CheckedTicket::create([
                             'code' => $request->code,
                             'name' => $existingTicket->name,

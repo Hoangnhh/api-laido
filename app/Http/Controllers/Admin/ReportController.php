@@ -172,10 +172,16 @@ class ReportController extends Controller
                 'payment.amount',
                 'payment.payment_method',
                 'payment.date',
-                DB::raw("DATE_FORMAT(payment.date, '%d/%m/%Y') as payment_date"),
+                'payment.note',
+                'payment.bank',
+                'payment.received_account',
+                DB::raw("DATE_FORMAT(payment.date, '%Y/%m/%d') as payment_date"),
                 'staff.code as staff_code',
+                'staff.code as code',
                 'staff.username as staff_username',
                 'staff.name as staff_name',
+                'staff.username',
+                'staff.card_id',
                 'payment.created_by'
             ])
             ->join('staff', 'payment.staff_id', '=', 'staff.id')
@@ -202,45 +208,9 @@ class ReportController extends Controller
                         ->get()
                         ->map(function ($payment) {
                             $payment->payment_method = $this->formatPaymentMethod($payment->payment_method);
-
-                            // Lấy danh sách vé trực tiếp từ database
-                            $tickets = CheckedTicket::select([
-                                'checked_ticket.code as ticket_code',
-                                'checked_ticket.name as ticket_name',
-                                'checked_ticket.commission',
-                                'checked_ticket.checkin_by',
-                                'checked_ticket.checkout_by',
-                                DB::raw("DATE_FORMAT(checked_ticket.date, '%d/%m/%Y') as ticket_date")
-                            ])
-                            ->where('checked_ticket.payment_id', $payment->id)
-                            ->get()
-                            ->map(function ($ticket, $index) use ($payment) {
-                                // Xác định chiều vé
-                                $direction = 'Không xác định';
-                                $isCheckinByStaff = isset($ticket->checkin_by) && 
-                                    $ticket->checkin_by === $payment->staff_username;
-                                $isCheckoutByStaff = isset($ticket->checkout_by) && 
-                                    $ticket->checkout_by === $payment->staff_username;
-                                if ($isCheckinByStaff && $isCheckoutByStaff) {
-                                    $direction = '2 Chiều';
-                                } elseif ($isCheckinByStaff) {
-                                    $direction = 'Chiều vào';
-                                } elseif ($isCheckoutByStaff) {
-                                    $direction = 'Chiều ra';
-                                }
                             
-                                return [
-                                    'stt' => $index + 1,
-                                    'ticket_code' => $ticket->ticket_code,
-                                    'ticket_date' => $ticket->ticket_date,
-                                    'ticket_name' => $ticket->ticket_name,
-                                    'direction' => $direction,
-                                    'commission' => $ticket->commission
-                                ];
-                            });
-                            
-                            $payment->tickets = $tickets;
-                            $payment->total_commission = $tickets->sum('commission');
+                            $payment->tickets = [];
+                            $payment->total_commission = 0;
                             
                             // Xóa id khỏi response
                             unset($payment->id);
@@ -258,8 +228,8 @@ class ReportController extends Controller
     {
         try {
             // Lấy tham số từ request
-            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d'));
-            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d'));
+            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d')) . ' 00:00:00';
+            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d')) . ' 23:59:59';
 
             // Chuyển đổi thành đối tượng Carbon để xử lý ngày
             $fromDate = Carbon::parse($fromDate)->startOfDay();
@@ -268,10 +238,10 @@ class ReportController extends Controller
             $result = DB::table('checked_ticket')
                 ->select([
                     'checked_ticket.name as ticket_name',
-                    DB::raw('COUNT(*) as total_count'),
-                    DB::raw('ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
+                    DB::raw('COUNT(DISTINCT checked_ticket.code) as total_count'),
+                    DB::raw('ROUND((COUNT(DISTINCT checked_ticket.code) * 100.0 / (SELECT COUNT(DISTINCT code) FROM checked_ticket WHERE date >= ? AND date <= ?)), 2) as percentage')
                 ])
-                ->whereBetween('checked_ticket.date', [$fromDate, $toDate])
+                ->whereBetween('checked_ticket.checkin_at', [$fromDate, $toDate])
                 ->groupBy('checked_ticket.name')
                 ->orderBy('total_count', 'desc')
                 ->setBindings([$fromDate, $toDate, $fromDate, $toDate])
@@ -339,6 +309,7 @@ class ReportController extends Controller
     {
         try {
             $staffCode = $request->input('staff_code');
+            $limit = $request->input('limit', 10);
             
             if (!$staffCode) {
                 return response()->json([
@@ -349,42 +320,46 @@ class ReportController extends Controller
 
             // Lấy thông tin staff và các ca làm việc
             $result = DB::select("
-                SELECT 
-                    s.code as staff_code,
-                    s.name as staff_name,
-                    s.username,
-                    sg.name as staff_group_name,
-                    s.vehical_type,
-                    gss.date,
-                    DATE_FORMAT(gss.date, '%d/%m/%Y') as date_display,
-                    g.name as gate_name,
-                    gss.checkin_at,
-                    gss.checkout_at,
-                    CASE 
-                        WHEN gss.status = 'WAITING' THEN 'Đang chờ'
-                        WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
-                        WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
-                        ELSE gss.status
-                    END as status,
-                    (
-                        SELECT COUNT(*)
-                        FROM checked_ticket ct
-                        WHERE ct.checkin_by = s.username
-                        AND DATE(ct.date) = DATE(gss.date)
-                    ) as total_checkin,
-                    (
-                        SELECT COUNT(*)
-                        FROM checked_ticket ct
-                        WHERE ct.checkout_by = s.username
-                        AND DATE(ct.date) = DATE(gss.date)
-                    ) as total_checkout
-                FROM staff s
-                LEFT JOIN staff_group sg ON s.group_id = sg.id
-                LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
-                LEFT JOIN gate g ON gss.gate_id = g.id
-                WHERE s.code = ?
-                ORDER BY gss.date DESC, gss.checkin_at DESC
-            ", [$staffCode]);
+                WITH staff_shifts AS (
+                    SELECT 
+                        s.code as staff_code,
+                        s.name as staff_name,
+                        s.username,
+                        sg.name as staff_group_name,
+                        s.vehical_type,
+                        gss.date,
+                        DATE_FORMAT(gss.date, '%d/%m/%Y') as date_display,
+                        g.name as gate_name,
+                        gss.checkin_at,
+                        gss.checkout_at,
+                        CASE 
+                            WHEN gss.status = 'WAITING' THEN 'Đang chờ'
+                            WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
+                            WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
+                            ELSE gss.status
+                        END as status,
+                        (
+                            SELECT COUNT(*) 
+                            FROM checked_ticket 
+                            WHERE gate_staff_shift_id = gss.id 
+                            AND checkin_by = s.username
+                        ) as checkin_count,
+                        (
+                            SELECT COUNT(*) 
+                            FROM checked_ticket 
+                            WHERE gate_staff_shift_id = gss.id 
+                            AND checkout_by = s.username
+                        ) as checkout_count 
+                    FROM staff s
+                    LEFT JOIN staff_group sg ON s.group_id = sg.id
+                    LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
+                    LEFT JOIN gate g ON gss.gate_id = g.id
+                    WHERE s.code = ?
+                    ORDER BY gss.date DESC, gss.checkin_at DESC
+                    LIMIT ?
+                )
+                SELECT * FROM staff_shifts
+            ", [$staffCode, $limit]);
 
             if (empty($result)) {
                 return response()->json([
@@ -407,12 +382,12 @@ class ReportController extends Controller
                     'date' => $item->date,
                     'date_display' => $item->date_display,
                     'gate_name' => $item->gate_name,
-                    'checkin_at' => $item->checkin_at ? Carbon::parse($item->checkin_at)->format('H:i:s') : null,
-                    'checkout_at' => $item->checkout_at ? Carbon::parse($item->checkout_at)->format('H:i:s') : null,
+                    'checkin_at' => $item->checkin_at ? Carbon::parse($item->checkin_at)->format('d/m/Y H:i:s') : null,
+                    'checkout_at' => $item->checkout_at ? Carbon::parse($item->checkout_at)->format('d/m/Y H:i:s') : null,
                     'status' => $item->status,
                     'tickets' => [
-                        'checkin' => (int)$item->total_checkin,
-                        'checkout' => (int)$item->total_checkout
+                        'checkin' => (int)$item->checkin_count,
+                        'checkout' => (int)$item->checkout_count
                     ]
                 ];
             })->filter(function($shift) {
