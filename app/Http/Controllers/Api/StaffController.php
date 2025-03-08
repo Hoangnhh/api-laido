@@ -165,15 +165,28 @@ class StaffController extends Controller
                 ? Carbon::parse($request->toDate)->setTimezone('Asia/Ho_Chi_Minh')->endOfDay()
                 : Carbon::now('Asia/Ho_Chi_Minh')->endOfDay();
 
+            // Lấy tất cả vé và đếm số lượng vé trùng mã
             $tickets = CheckedTicket::where('staff_id', $userId)
                 ->whereBetween('checkin_at', [$fromDate, $toDate])
                 ->orderByRaw('CASE 
                     WHEN status = ? THEN checkout_at 
                     ELSE checkin_at 
                     END DESC', [CheckedTicket::STATUS_CHECKOUT])
-                ->get()
-                ->map(function ($ticket) {
-                    return [
+                ->get();
+
+            // Nhóm vé theo code để xử lý
+            $ticketGroups = $tickets->groupBy('code');
+            
+            $processedTickets = [];
+            $totalCheckin = 0;
+            $totalCheckout = 0;
+            $totalIncomplete = 0;
+
+            foreach ($ticketGroups as $code => $group) {
+                if ($group->count() == 1) {
+                    // Trường hợp vé duy nhất
+                    $ticket = $group->first();
+                    $processedTicket = [
                         'id' => $ticket->id,
                         'code' => $ticket->code,
                         'name' => $ticket->name,
@@ -189,21 +202,75 @@ class StaffController extends Controller
                         'price' => $ticket->price,
                         'commission' => $ticket->commission,
                         'is_checkout_with_other' => $ticket->is_checkout_with_other,
-                        'paid' => $ticket->paid
+                        'paid' => $ticket->paid,
+                        'is_checkin' => true,
+                        'is_checkout' => true
                     ];
-                });
+                    
+                    $totalCheckin++;
+                    $totalCheckout++;
+                    
+                    if ($ticket->status == CheckedTicket::STATUS_CHECKIN) {
+                        $totalIncomplete++;
+                    }
+                    
+                    $processedTickets[] = $processedTicket;
+                } else {
+                    // Trường hợp có 2 vé cùng mã
+                    $sortedTickets = $group->sortBy('id');
+                    
+                    foreach ($sortedTickets as $index => $ticket) {
+                        $isFirstTicket = $index === 0;
+                        
+                        $processedTicket = [
+                            'id' => $ticket->id,
+                            'code' => $ticket->code,
+                            'name' => $ticket->name,
+                            'status' => $ticket->status,
+                            'checkin_at' => Carbon::parse($ticket->checkin_at)
+                                ->setTimezone('Asia/Ho_Chi_Minh')
+                                ->format('H:i:s d/m/Y'),
+                            'checkout_at' => $ticket->checkout_at 
+                                ? Carbon::parse($ticket->checkout_at)
+                                    ->setTimezone('Asia/Ho_Chi_Minh')
+                                    ->format('H:i:s d/m/Y')
+                                : null,
+                            'price' => $ticket->price,
+                            'commission' => $ticket->commission,
+                            'is_checkout_with_other' => $ticket->is_checkout_with_other,
+                            'paid' => $ticket->paid,
+                            'is_checkin' => $isFirstTicket,
+                            'is_checkout' => !$isFirstTicket
+                        ];
+                        
+                        if ($isFirstTicket) {
+                            $totalCheckin++;
+                        } else {
+                            $totalCheckout++;
+                        }
+                        
+                        $processedTickets[] = $processedTicket;
+                    }
+                }
+            }
+
             // Ẩn 4 số giữa của code vé
-            $tickets = $tickets->map(function($ticket) {
+            $processedTickets = collect($processedTickets)->map(function($ticket) {
                 $code = $ticket['code'];
                 if (strlen($code) == 10) {
                     $ticket['code'] = substr($code, 0, 3) . '****' . substr($code, 7);
                 }
                 return $ticket;
-            });
+            })->values()->all();
 
             return $this->successResponse([
-                'tickets' => $tickets,
-                'total' => $tickets->count()
+                'tickets' => $processedTickets,
+                'total' => count($processedTickets),
+                'summary' => [
+                    'total_checkin' => $totalCheckin,
+                    'total_checkout' => $totalCheckout,
+                    'total_incomplete' => $totalIncomplete
+                ]
             ], 'Lấy danh sách vé thành công');
 
         } catch (\Exception $e) {
