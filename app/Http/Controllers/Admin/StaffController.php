@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActionLog;
 use App\Models\Staff;
 use App\Services\StaffService;
 use Illuminate\Http\Request;
 use App\Models\GateStaffShift;
+use Illuminate\Support\Facades\Auth;
+
 class StaffController extends Controller
 {
     protected $staffService;
@@ -108,6 +111,15 @@ class StaffController extends Controller
             }
 
             $staff = $this->staffService->createOrUpdate($validated);
+
+            ActionLog::create([
+                'action' => ActionLog::ACTION_CREATE,
+                'table' => 'staff',
+                'before_data' => null,
+                'after_data' => $staff->toArray(),
+                'create_by' => Auth::user()->username
+            ]);
+
             return response()->json($staff, 201);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Có lỗi xảy ra khi tạo nhân viên'], 500);
@@ -163,6 +175,14 @@ class StaffController extends Controller
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar_url'] = '/storage/' . $path;
             }
+            
+            ActionLog::create([
+                'action' => ActionLog::ACTION_UPDATE,
+                'table' => 'staff',
+                'before_data' => $staff->toArray(),
+                'after_data' => $validated,
+                'create_by' => Auth::user()->username
+            ]);
 
             $staff = $this->staffService->createOrUpdate($validated, $staff);
             return response()->json($staff);
