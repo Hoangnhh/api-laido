@@ -409,3 +409,8 @@
 .staff-manager-avatar-wrapper:hover .staff-manager-avatar {
     filter: brightness(0.8);
 }
+
+.staff-manager-export-btn {
+    height: 40px;
+    text-transform: none !important;
+}

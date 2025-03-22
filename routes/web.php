@@ -151,6 +151,7 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermission']);
     Route::apiResource('staffs', StaffController::class);
     Route::apiResource('staff-groups', StaffGroupController::class);
+    Route::get('/export-staffs', [StaffController::class, 'exportStaff']);
     Route::apiResource('gates', GateController::class);
     Route::get('/shift-assignments-data', [ShiftAssignmentController::class, 'getData']);
     Route::get('/staffs-by-group/{groupId}', [StaffController::class, 'getStaffsByGroup']);

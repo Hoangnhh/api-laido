@@ -35,10 +35,12 @@ import {
     faImage,
     faUser,
     faIdCard,
-    faCreditCard
+    faCreditCard,
+    faFileExcel
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../css/staff-manager.css';
+import * as XLSX from 'xlsx';
 
 // Thêm constant cho danh sách ngân hàng
 const BANK_OPTIONS = [
@@ -487,6 +489,53 @@ const StaffManager = () => {
         setFormData({ ...formData, card_date: inputDate });
     };
 
+    // Thêm hàm handleExportExcel vào trong component StaffManager
+    const handleExportExcel = async () => {
+        try {
+            // Lấy dữ liệu từ API với các filter hiện tại
+            const response = await axios.get('/api/admin/export-staffs', {
+                params: {
+                    search: filters.search,
+                    group_id: filters.groupId,
+                    status: filters.status,
+                    vehical_type: filters.vehicalType,
+                    default_gate_id: filters.defaultGateId
+                }
+            });
+
+            if (response.data.success && response.data.data.length > 0) {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(response.data.data);
+
+                // Đặt độ rộng cột
+                const colWidths = [
+                    { wch: 5 },  // STT
+                    { wch: 12 }, // Mã nhân viên
+                    { wch: 25 }, // Tên nhân viên
+                    { wch: 20 }, // Nhóm
+                    { wch: 15 }, // Số điện thoại
+                    { wch: 15 }, // CMND/CCCD
+                    { wch: 12 }, // Ngày cấp
+                    { wch: 12 }, // Ngày sinh
+                    { wch: 30 }, // Địa chỉ
+                    { wch: 10 }, // Tải trọng
+                    { wch: 15 }, // Loại phương tiện
+                    { wch: 15 }, // Ngân hàng
+                    { wch: 20 }, // Số tài khoản
+                    { wch: 15 }  // Trạng thái
+                ];
+                ws['!cols'] = colWidths;
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Danh sách nhân viên');
+                XLSX.writeFile(wb, `danh_sach_nhan_vien_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } else {
+                showAlert('Không có dữ liệu để xuất', 'warning');
+            }
+        } catch (error) {
+            showAlert('Có lỗi xảy ra khi xuất file Excel', 'error');
+        }
+    };
+
     return (
         <AdminLayout>
             <Box className="staff-manager">
@@ -580,6 +629,23 @@ const StaffManager = () => {
                                 )
                             }}
                         />
+
+                        {/* Export Excel Button */}
+                        <Button
+                            variant="contained"
+                            startIcon={<FontAwesomeIcon icon={faFileExcel} />}
+                            onClick={handleExportExcel}
+                            className="staff-manager-export-btn"
+                            sx={{ 
+                                bgcolor: '#217346',
+                                '&:hover': {
+                                    bgcolor: '#1a5a38'
+                                },
+                                mr: 1
+                            }}
+                        >
+                            Xuất Excel
+                        </Button>
 
                         {/* Add Button */}
                         <Button

@@ -9,6 +9,7 @@ use App\Services\StaffService;
 use Illuminate\Http\Request;
 use App\Models\GateStaffShift;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StaffController extends Controller
 {
@@ -175,7 +176,7 @@ class StaffController extends Controller
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar_url'] = '/storage/' . $path;
             }
-            
+
             ActionLog::create([
                 'action' => ActionLog::ACTION_UPDATE,
                 'table' => 'staff',
@@ -256,7 +257,7 @@ class StaffController extends Controller
                 'target_gate_shift_id' => 'required|exists:gate_shift,id'
             ]);
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
             try {
                 // Cập nhật gate_shift_id cho các nhân viên được chọn
                 $updatedCount = GateStaffShift::where('gate_shift_id', $validated['from_gate_shift_id'])
@@ -266,7 +267,7 @@ class StaffController extends Controller
                         'gate_shift_id' => $validated['target_gate_shift_id']
                     ]);
 
-                \DB::commit();
+                DB::commit();
 
                 return response()->json([
                     'status' => 'success',
@@ -277,13 +278,86 @@ class StaffController extends Controller
                 ]);
 
             } catch (\Exception $e) {
-                \DB::rollBack();
+                DB::rollBack();
                 throw $e;
             }
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Có lỗi xảy ra khi chuyển cổng cho nhân viên: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function exportStaff(Request $request)
+    {
+        try {
+            // Lấy các tham số tìm kiếm
+            $search = $request->input('search');
+            $groupId = $request->input('group_id');
+            $status = $request->input('status');
+            $vehicalType = $request->input('vehical_type');
+            $defaultGateId = $request->input('default_gate_id');
+            
+            $query = Staff::with('group');
+
+            // Áp dụng các điều kiện lọc
+            if ($groupId) {
+                $query->where('group_id', $groupId);
+            }
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+
+            if ($vehicalType) {
+                $query->where('vehical_type', $vehicalType);
+            }
+
+            if ($defaultGateId) {
+                $query->where('default_gate_id', $defaultGateId);
+            }
+
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%")
+                      ->orWhere('card_id', 'like', "%{$search}%")
+                      ->orWhere('bank_account', 'like', "%{$search}%")
+                      ->orWhereHas('group', function($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $staffs = $query->get()->map(function($staff, $index) {
+                return [
+                    'STT' => $index + 1,
+                    'Mã nhân viên' => $staff->code,
+                    'Tên nhân viên' => $staff->name,
+                    'Nhóm' => $staff->group ? $staff->group->name : '',
+                    'Số điện thoại' => $staff->phone,
+                    'CMND/CCCD' => $staff->card_id,
+                    'Ngày cấp' => $staff->card_date ? date('d/m/Y', strtotime($staff->card_date)) : '',
+                    'Ngày sinh' => $staff->birthdate ? date('d/m/Y', strtotime($staff->birthdate)) : '',
+                    'Địa chỉ' => $staff->address,
+                    'Tải trọng' => $staff->vehical_size,
+                    'Loại phương tiện' => $staff->vehical_type == 1 ? 'Đò' : 'Xuồng',
+                    'Ngân hàng' => $staff->bank_name,
+                    'Số tài khoản' => $staff->bank_account,
+                    'Trạng thái' => $staff->status == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'
+                ];
+            })->toArray();
+
+            return response()->json([
+                'success' => true,
+                'data' => $staffs
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xuất dữ liệu: ' . $e->getMessage()
             ], 500);
         }
     }
