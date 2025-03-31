@@ -237,6 +237,7 @@ const StaffManager = () => {
                 card_id: null,
                 status: 'ACTIVE',
                 vehical_size: 0,
+                vehical_type: 0,
                 phone: null,
                 card_date: null,
                 bank_name: null,
@@ -264,6 +265,7 @@ const StaffManager = () => {
             if (!selectedStaff) {
                 requiredFields.push('password');
             }
+            console.log("formData",formData);
 
             // Kiểm tra password confirmation
             if (formData.password && formData.password !== formData.password_confirmation) {
