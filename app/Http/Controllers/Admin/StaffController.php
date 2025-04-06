@@ -123,7 +123,7 @@ class StaffController extends Controller
 
             return response()->json($staff, 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Có lỗi xảy ra khi tạo nhân viên'], 500);
+            return response()->json(['message' => 'Có lỗi xảy ra khi tạo nhân viên','error' => $e->getMessage()], 500);
         }
     }
 
