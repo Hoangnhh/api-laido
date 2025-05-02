@@ -48,7 +48,7 @@ enum SystemConfigKey: string
             self::ENABLE_CHECKIN_ALL_GATE => 'Cho phép Lái đò Check-in tại tất cả cổng',
             self::CHECKIN_TICKET_RANGE_MINUTE => 'Thời gian cho phép checkin vé sau khi nhân viên checkin tại cổng(phút)',
             self::ENABLE_CHECKOUT_WITH_OTHER => 'Cho phép lái đò checkout vé hộ (checkin và checkout vé bởi 2 lái đò)',
-            self::ENABLE_LOCK_STAFF_CHECKIN => 'Cho phép checkin lái đò',
+            self::ENABLE_LOCK_STAFF_CHECKIN => 'Khóa checkin lái đò',
         };
     }
 } 
