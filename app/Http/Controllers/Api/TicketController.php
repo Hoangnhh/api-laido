@@ -60,7 +60,6 @@ class TicketController extends Controller
             return $this->errorResponse($validator->errors()->first());
         }
         $staffId = $request->user_id;
-
         try {
             
             // Kiểm tra vé trong bảng checked_ticket
@@ -255,6 +254,73 @@ class TicketController extends Controller
         }
     }
 
+    public function masterUseTicket(int $staffId, string $code)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $staff = Staff::find($staffId);
+            if(!$staff){
+                return $this->errorResponse('Nhân viên không tồn tại');
+            }
+
+            // Kiểm tra vé trong bảng checked_ticket
+            $existingTicket = CheckedTicket::where('code', $code)->first();
+
+            // Nếu chưa có record hoặc đã checkout thì là checkin
+            if (!$existingTicket || $existingTicket->status == CheckedTicket::STATUS_CHECKOUT) {
+                // Kiểm tra vé có tồn tại trong bảng ticket không
+                $syncTicket = Ticket::where('code', $code)->first();
+
+                if (!$syncTicket) {
+                    return $this->errorResponse('Vé không tồn tại');
+                }
+
+                $ticketData = $syncTicket->toArray();
+                if($ticketData['status'] == Ticket::STATUS_USED) {
+                    return $this->errorResponse('Vé đã được sử dụng');
+                }
+                if($ticketData['expired_date'] < Carbon::now()) {
+                    return $this->errorResponse('Vé đã hết hạn');
+                }
+                if($ticketData['issued_date'] > Carbon::now()) {
+                    return $this->errorResponse('Vé chưa được sử dụng theo hạn quy định');
+                }
+
+                // Tạo checked ticket mới
+                $checkedTicket = CheckedTicket::create([
+                    'code' => $code,
+                    'name' => $syncTicket->name,
+                    'status' => CheckedTicket::STATUS_CHECKOUT,
+                    'date' => Carbon::now(),
+                    'checkin_at' => Carbon::now(),
+                    'checkin_by' => $staff->username,
+                    'checkout_at' => Carbon::now(),
+                    'checkout_by' => $staff->username,
+                    'price' => $syncTicket->price,
+                    'commission' => 0,
+                    'staff_id' => $staffId,
+                    'paid' => false,
+                    'is_checkout_with_other' => 0,
+                    'is_checkin_with_other' => 0
+                ]);
+
+                DB::commit();
+                
+                $checkedTicket['checkin_time'] = Carbon::parse($checkedTicket->checkin_at)->format('H:i:s');
+                $checkedTicket['checkout_time'] = Carbon::parse($checkedTicket->checkout_at)->format('H:i:s');
+                return $this->successResponse($checkedTicket, 'Quét vé thành công');
+            }
+
+            DB::commit();
+            return $this->errorResponse('Vé đã được sử dụng');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
     /**
      * Sử dụng vé
      *
@@ -272,6 +338,11 @@ class TicketController extends Controller
             return $this->errorResponse($validator->errors()->first());
         }
         $staffId = $request->staff_id;
+        $isMaster = $request->is_master ?? 0;
+        if($isMaster == 1){
+            return $this->masterUseTicket($staffId, $request->code);
+        }
+
         $staff = Staff::find($staffId);
 
         if($staff){

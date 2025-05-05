@@ -706,7 +706,8 @@ class ShiftAssignmentController extends Controller
             $staff->group_name = $staff->group ? $staff->group->name : 'Chưa phân nhóm';
             $systemConfigs = SystemConfig::getConfigs([SystemConfigKey::ENABLE_LOCK_STAFF_CHECKIN->value,SystemConfigKey::ENABLE_CHECKIN_BY_INDEX->value, SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value]);
 
-            if($systemConfigs[SystemConfigKey::ENABLE_LOCK_STAFF_CHECKIN->value] == 1){
+            // nếu hệ thống khóa checkin và nhân viên không phải master thì không cho phép checkin
+            if($systemConfigs[SystemConfigKey::ENABLE_LOCK_STAFF_CHECKIN->value] == 1 && $staff->is_master == 0){
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Hệ thống đã khóa, không được phép checkin',
@@ -715,6 +716,21 @@ class ShiftAssignmentController extends Controller
                 ]);
                     
             }
+            
+            if($staff->is_master == 1){
+             $checkedTickets = CheckedTicket::getTicketsByStaffToday($staff->id);
+                return response()->json([
+                    'status' => 'success',
+                    'message_color' => 'success',
+                    'message' => 'Mời quét vé',
+                    'data' => [
+                        'staff' => $staff,
+                        'assignment' => [],
+                        'checked_tickets' => $checkedTickets
+                    ]
+                ]);
+            }
+
             $gateStaffShift = GateStaffShift::where('staff_id', $staff->id)
                 ->whereIn('status', [GateStaffShift::STATUS_WAITING, GateStaffShift::STATUS_CHECKIN])
                 ->orderBy('date')

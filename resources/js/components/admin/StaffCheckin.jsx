@@ -267,7 +267,8 @@ const StaffCheckin = () => {
         try {
             const response = await axios.post('/api/admin/use-ticket', {
                 code: code,
-                staff_id: checkedInStaff.staff.id
+                staff_id: checkedInStaff.staff.id,
+                is_master: checkedInStaff.staff.is_master
             });
 
             if (response.data.success === true) {
@@ -277,8 +278,8 @@ const StaffCheckin = () => {
                     code: code,
                     name: newTicketData.name,
                     status: newTicketData.status,
-                    checkin_at: newTicketData.checkin_time,
-                    checkout_at: newTicketData.checkout_time
+                    checkin_at: newTicketData.checkin_time ?? '',
+                    checkout_at: newTicketData.checkout_time ?? ''
                 };
 
                 const existingTicketIndex = checkedTickets.findIndex(
