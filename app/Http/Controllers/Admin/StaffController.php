@@ -103,7 +103,8 @@ class StaffController extends Controller
                 'vehical_size' => 'required|integer|min:0',
                 'vehical_type' => 'required|integer|min:0',
                 'phone' => 'required|size:10|unique:staff',
-                'default_gate_id' => 'nullable'
+                'default_gate_id' => 'nullable',
+                'is_master' => 'nullable|boolean'
             ]);
 
             if ($request->hasFile('avatar')) {
@@ -163,7 +164,8 @@ class StaffController extends Controller
                 'vehical_size' => 'required|integer|min:0',
                 'vehical_type' => 'required|integer|min:0',
                 'avatar' => 'nullable|image|max:2048',
-                'default_gate_id' => 'required'
+                'default_gate_id' => 'required',
+                'is_master' => 'nullable'
             ];
 
             if ($request->filled('password')) {
@@ -176,6 +178,7 @@ class StaffController extends Controller
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar_url'] = '/storage/' . $path;
             }
+            $validated['is_master'] = $request->is_master ? 1 : 0;
 
             ActionLog::create([
                 'action' => ActionLog::ACTION_UPDATE,
@@ -188,7 +191,7 @@ class StaffController extends Controller
             $staff = $this->staffService->createOrUpdate($validated, $staff);
             return response()->json($staff);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Có lỗi xảy ra khi cập nhật nhân viên'], 500);
+            return response()->json(['message' => 'Có lỗi xảy ra khi cập nhật nhân viên','error' => $e->getMessage()], 500);
         }
     }
 

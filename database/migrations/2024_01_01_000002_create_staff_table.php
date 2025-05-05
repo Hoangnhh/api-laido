@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('status', 45)->default('ACTIVE');
             $table->integer('vehical_size')->default(6);
             $table->integer('vehical_type')->default(1);
+            $table->integer('is_master')->default(0);
             $table->string('fcm_token', 200)->nullable();
             $table->foreignId('default_gate_id')->constrained('gate');
             $table->timestamps();

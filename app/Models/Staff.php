@@ -35,6 +35,7 @@ class Staff extends Model
         'status',
         'vehical_size',
         'vehical_type',
+        'is_master',
         'phone',
         'fcm_token',
         'default_gate_id'
@@ -43,7 +44,8 @@ class Staff extends Model
     protected $casts = [
         'birthdate' => 'date',
         'vehical_size' => 'integer',
-        'vehical_type' => 'integer'
+        'vehical_type' => 'integer',
+        'is_master' => 'integer'
     ];
 
     public function group(): BelongsTo

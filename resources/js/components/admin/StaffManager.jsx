@@ -951,6 +951,17 @@ const StaffManager = () => {
                                                 </MenuItem>
                                             ))}
                                         </TextField>
+
+                                        <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                                            <input
+                                                type="checkbox"
+                                                id="is_master"
+                                                checked={formData.is_master || false}
+                                                onChange={(e) => setFormData({ ...formData, is_master: e.target.checked })}
+                                                style={{ marginRight: '8px' }}
+                                            />
+                                            <label htmlFor="is_master">Thẻ master</label>
+                                        </Box>
                                     </Box>
                                 </Box>
 
