@@ -16,6 +16,8 @@ class SystemConfigController extends Controller
         SystemConfigKey::ENABLE_CHECKIN_ALL_GATE->value,
         SystemConfigKey::CHECKIN_TICKET_RANGE_MINUTE->value,
         SystemConfigKey::ENABLE_CHECKOUT_WITH_OTHER->value,
+        SystemConfigKey::ENABLE_LOCK_STAFF_CHECKIN->value,
+
     ];
     public function index()
     {
