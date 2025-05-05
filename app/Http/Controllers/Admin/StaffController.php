@@ -111,6 +111,7 @@ class StaffController extends Controller
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar_url'] = '/storage/' . $path;
             }
+            $validated['is_master'] = $request->is_master ? 1 : 0;
 
             $staff = $this->staffService->createOrUpdate($validated);
 
