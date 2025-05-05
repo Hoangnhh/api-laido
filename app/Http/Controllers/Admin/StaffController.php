@@ -104,7 +104,7 @@ class StaffController extends Controller
                 'vehical_type' => 'required|integer|min:0',
                 'phone' => 'required|size:10|unique:staff',
                 'default_gate_id' => 'nullable',
-                'is_master' => 'nullable|boolean'
+                'is_master' => 'nullable'
             ]);
 
             if ($request->hasFile('avatar')) {
