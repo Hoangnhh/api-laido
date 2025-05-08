@@ -305,6 +305,11 @@ class TicketController extends Controller
                     'is_checkin_with_other' => 0
                 ]);
 
+                // Cập nhật trạng thái vé thành đã sử dụng
+                $syncTicket->update([
+                    'status' => Ticket::STATUS_USED
+                ]);
+
                 DB::commit();
                 
                 $checkedTicket['checkin_time'] = Carbon::parse($checkedTicket->checkin_at)->format('H:i:s');
