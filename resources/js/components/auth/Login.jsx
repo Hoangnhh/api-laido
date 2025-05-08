@@ -32,6 +32,7 @@ const Login = () => {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [licenseInfo, setLicenseInfo] = useState(null);
 
     useEffect(() => {
         // Tạo animation cho background
@@ -45,7 +46,20 @@ const Login = () => {
             circle.style.animationDelay = `${randomDelay}s`;
             circle.style.animationDuration = `${randomDuration}s`;
         });
+
+        // Kiểm tra license khi component mount
+        checkLicense();
     }, []);
+
+    const checkLicense = async () => {
+        try {
+            const response = await fetch('/api/admin/check-license');
+            const data = await response.json();
+            setLicenseInfo(data);
+        } catch (error) {
+            console.error('Error checking license:', error);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({
@@ -288,6 +302,44 @@ const Login = () => {
                         </Box>
                     </Paper>
                 </Box>
+
+                {licenseInfo && (
+                    <Box
+                        sx={{
+                            position: 'fixed',
+                            bottom: 20,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            bgcolor: 'rgba(0, 0, 0, 0.7)',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: 2,
+                            backdropFilter: 'blur(5px)',
+                            zIndex: 1000
+                        }}
+                    >
+                        
+                    { licenseInfo.days_remaining <= 30 ? (
+                        <Typography variant="body2">
+                            {licenseInfo.valid ? (
+                                <>
+                                        <>
+                                            License sử dụng phần mềm còn hiệu lực: {licenseInfo.days_remaining} ngày
+                                            <span style={{ color: '#ff9800', marginLeft: 8 }}>
+                                                (Sắp hết hạn)
+                                            </span>
+                                        </>
+                                </>
+                            ) : (
+                                <span style={{ color: '#f44336' }}>
+                                    {licenseInfo.message}
+                                </span>
+                            )}
+                        </Typography>
+                        ) : null
+                    }
+                    </Box>
+                )}
             </Container>
         </>
     );

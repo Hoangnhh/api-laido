@@ -138,6 +138,9 @@ Route::prefix('admin')->group(function () {
             }
             return response()->json($user);
         });
+
+        Route::get('/license/status', [AuthController::class, 'checkLicenseStatus'])
+            ->name('admin.license.status');
     });
 
     // Route login cho admin
@@ -147,6 +150,8 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::prefix('api/admin')->group(function () {
+    Route::get('/check-license', [AuthController::class, 'checkLicenseStatus'])
+            ->name('admin.check-license');
     Route::apiResource('users', UserController::class);
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermission']);
     Route::apiResource('staffs', StaffController::class);
