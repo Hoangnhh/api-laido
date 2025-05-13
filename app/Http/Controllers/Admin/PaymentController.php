@@ -488,6 +488,7 @@ class PaymentController extends Controller
 
             // Lấy danh sách nhân viên có commission chưa thanh toán
             $staffWithUnpaidCommission = Staff::query()
+                ->where('status', Staff::STATUS_ACTIVE)
                 ->select([
                     'staff.id',
                     'staff.code',
