@@ -290,7 +290,9 @@ class TicketController extends Controller
                 // Tạo checked ticket mới
                 $checkedTicket = CheckedTicket::create([
                     'code' => $code,
-                    'name' => $syncTicket->name,
+                    'name' => $syncTicket->service_name,
+                    'issue_date' => $syncTicket->issued_date,
+                    'expired_date' => $syncTicket->expired_date,
                     'status' => CheckedTicket::STATUS_CHECKOUT,
                     'date' => Carbon::now(),
                     'checkin_at' => Carbon::now(),
