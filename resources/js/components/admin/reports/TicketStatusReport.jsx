@@ -7,16 +7,39 @@ import '../../../../css/Report.css';
 import * as XLSX from 'xlsx';
 
 const TicketStatusReport = () => {
-    // Lấy tháng/năm hiện tại dạng YYYY-MM
+    // Lấy tháng/năm hiện tại
     const today = new Date();
-    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const currentYear = today.getFullYear();
+    const currentMonthNum = today.getMonth() + 1;
 
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    // Danh sách tháng tiếng Việt
+    const months = [
+        { value: 1, label: 'Tháng 1' },
+        { value: 2, label: 'Tháng 2' },
+        { value: 3, label: 'Tháng 3' },
+        { value: 4, label: 'Tháng 4' },
+        { value: 5, label: 'Tháng 5' },
+        { value: 6, label: 'Tháng 6' },
+        { value: 7, label: 'Tháng 7' },
+        { value: 8, label: 'Tháng 8' },
+        { value: 9, label: 'Tháng 9' },
+        { value: 10, label: 'Tháng 10' },
+        { value: 11, label: 'Tháng 11' },
+        { value: 12, label: 'Tháng 12' }
+    ];
 
-    // Hàm tính from_date và to_date từ tháng được chọn
-    const getDatesFromMonth = (monthYear) => {
-        if (!monthYear) return { from_date: '', to_date: '' };
-        const [year, month] = monthYear.split('-');
+    // Tạo danh sách năm (từ năm hiện tại trở về trước 5 năm)
+    const years = [];
+    for (let i = 0; i <= 5; i++) {
+        years.push(currentYear - i);
+    }
+
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonthNum, setSelectedMonthNum] = useState(currentMonthNum);
+
+    // Hàm tính from_date và to_date từ tháng/năm được chọn
+    const getDatesFromMonth = (year, month) => {
+        if (!year || !month) return { from_date: '', to_date: '' };
         const fromDate = new Date(year, month - 1, 1);
         const toDate = new Date(year, month, 0); // Ngày cuối cùng của tháng
 
@@ -26,9 +49,13 @@ const TicketStatusReport = () => {
         };
     };
 
+    // Hàm format tháng/năm thành YYYY-MM
+    const getMonthYearString = (year, month) => {
+        return `${year}-${String(month).padStart(2, '0')}`;
+    };
+
     const [filters, setFilters] = useState(() => {
-        const dates = getDatesFromMonth(currentMonth);
-        return dates;
+        return getDatesFromMonth(currentYear, currentMonthNum);
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -89,15 +116,29 @@ const TicketStatusReport = () => {
         }
     };
 
-    const handleMonthChange = (monthYear) => {
-        setSelectedMonth(monthYear);
-        const dates = getDatesFromMonth(monthYear);
+    const handleYearChange = (year) => {
+        const newYear = parseInt(year);
+        setSelectedYear(newYear);
+        const dates = getDatesFromMonth(newYear, selectedMonthNum);
+        setFilters(dates);
+    };
+
+    const handleMonthChange = (month) => {
+        const newMonth = parseInt(month);
+        setSelectedMonthNum(newMonth);
+        const dates = getDatesFromMonth(selectedYear, newMonth);
         setFilters(dates);
     };
 
     const handleSearch = () => {
-        if (!selectedMonth) {
-            alert('Vui lòng chọn tháng để tìm kiếm.');
+        if (!selectedYear || !selectedMonthNum) {
+            alert('Vui lòng chọn tháng và năm để tìm kiếm.');
+            return;
+        }
+
+        // Kiểm tra không được chọn tháng tương lai
+        if (selectedYear > currentYear || (selectedYear === currentYear && selectedMonthNum > currentMonthNum)) {
+            alert('Không thể chọn tháng trong tương lai.');
             return;
         }
 
@@ -107,8 +148,14 @@ const TicketStatusReport = () => {
     };
 
     const handleViewStatistics = () => {
-        if (!selectedMonth) {
-            alert('Vui lòng chọn tháng để xem thống kê.');
+        if (!selectedYear || !selectedMonthNum) {
+            alert('Vui lòng chọn tháng và năm để xem thống kê.');
+            return;
+        }
+
+        // Kiểm tra không được chọn tháng tương lai
+        if (selectedYear > currentYear || (selectedYear === currentYear && selectedMonthNum > currentMonthNum)) {
+            alert('Không thể chọn tháng trong tương lai.');
             return;
         }
 
@@ -161,7 +208,7 @@ const TicketStatusReport = () => {
         ];
         ws['!cols'] = colWidths;
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo trạng thái vé');
+        XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo trạng thái vé theo ngày in');
         XLSX.writeFile(wb, `bao_cao_trang_thai_ve_${filters.from_date}_${filters.to_date}.xlsx`);
     };
 
@@ -263,51 +310,117 @@ const TicketStatusReport = () => {
                 <div className="rp-header">
                     <Card className="rp-filter-section mb-3">
                         <Card.Header>
-                            <h4>Báo cáo trạng thái vé</h4>
+                            <h4>Báo cáo trạng thái vé theo ngày in</h4>
                         </Card.Header>
                         <Card.Body>
                             <Form>
                                 <Row>
-                                    <Col md={4}>
+                                    <Col md={3}>
                                         <Form.Group>
-                                            <Form.Label>Chọn tháng</Form.Label>
-                                            <Form.Control
-                                                type="month"
-                                                value={selectedMonth}
+                                            <Form.Label className="fw-bold">
+                                                <i className="bi bi-calendar3 me-2"></i>Chọn tháng
+                                            </Form.Label>
+                                            <Form.Select
+                                                value={selectedMonthNum}
                                                 onChange={(e) => handleMonthChange(e.target.value)}
-                                                max={currentMonth}
-                                            />
-                                            {selectedMonth && (
-                                                <Form.Text className="text-muted">
-                                                    Từ ngày: {filters.from_date} - Đến ngày: {filters.to_date}
-                                                </Form.Text>
-                                            )}
+                                                className="form-select-lg"
+                                                style={{
+                                                    fontSize: '1rem',
+                                                    padding: '0.5rem 1rem',
+                                                    border: '2px solid #dee2e6',
+                                                    borderRadius: '0.375rem',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onFocus={(e) => e.target.style.borderColor = '#0d6efd'}
+                                                onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
+                                            >
+                                                {months.map((month) => (
+                                                    <option
+                                                        key={month.value}
+                                                        value={month.value}
+                                                        disabled={
+                                                            selectedYear === currentYear &&
+                                                            month.value > currentMonthNum
+                                                        }
+                                                    >
+                                                        {month.label}
+                                                    </option>
+                                                ))}
+                                            </Form.Select>
                                         </Form.Group>
                                     </Col>
-                                    <Col md={8} className="d-flex align-items-end">
-                                        <Button
-                                            variant="primary"
-                                            className="me-2"
-                                            onClick={handleSearch}
-                                            disabled={loading}
-                                        >
-                                            {loading ? 'Đang tải...' : 'Tìm kiếm'}
-                                        </Button>
-                                        <Button
-                                            variant="info"
-                                            className="me-2"
-                                            onClick={handleViewStatistics}
-                                            disabled={loadingStatistics}
-                                        >
-                                            {loadingStatistics ? 'Đang tải...' : 'Xem thống kê'}
-                                        </Button>
-                                        <Button
-                                            variant="success"
-                                            onClick={handleExportExcel}
-                                            disabled={data.length === 0 || loading || viewMode === 'statistics'}
-                                        >
-                                            Xuất Excel
-                                        </Button>
+                                    <Col md={3}>
+                                        <Form.Group>
+                                            <Form.Label className="fw-bold">
+                                                <i className="bi bi-calendar-year me-2"></i>Chọn năm
+                                            </Form.Label>
+                                            <Form.Select
+                                                value={selectedYear}
+                                                onChange={(e) => handleYearChange(e.target.value)}
+                                                className="form-select-lg"
+                                                style={{
+                                                    fontSize: '1rem',
+                                                    padding: '0.5rem 1rem',
+                                                    border: '2px solid #dee2e6',
+                                                    borderRadius: '0.375rem',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onFocus={(e) => e.target.style.borderColor = '#0d6efd'}
+                                                onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
+                                            >
+                                                {years.map((year) => (
+                                                    <option key={year} value={year}>
+                                                        Năm {year}
+                                                    </option>
+                                                ))}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6} className="d-flex align-items-center">
+                                        <div className="d-flex align-items-center justify-content-end w-100">
+                                            <Button
+                                                variant="primary"
+                                                className="me-2 px-4"
+                                                onClick={handleSearch}
+                                                disabled={loading}
+                                                style={{
+                                                    minWidth: '120px',
+                                                    fontWeight: '500',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                }}
+                                            >
+                                                <i className="bi bi-search me-2"></i>
+                                                {loading ? 'Đang tải...' : 'Tìm kiếm'}
+                                            </Button>
+                                            <Button
+                                                variant="info"
+                                                className="me-2 px-4"
+                                                onClick={handleViewStatistics}
+                                                disabled={loadingStatistics}
+                                                style={{
+                                                    minWidth: '140px',
+                                                    fontWeight: '500',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                }}
+                                            >
+                                                <i className="bi bi-bar-chart me-2"></i>
+                                                {loadingStatistics ? 'Đang tải...' : 'Xem thống kê'}
+                                            </Button>
+                                            <Button
+                                                variant="success"
+                                                className="px-4"
+                                                onClick={handleExportExcel}
+                                                disabled={data.length === 0 || loading || viewMode === 'statistics'}
+                                                style={{
+                                                    minWidth: '130px',
+                                                    fontWeight: '500',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                }}
+                                            >
+                                                <i className="bi bi-file-earmark-excel me-2"></i>
+                                                Xuất Excel
+                                            </Button>
+                                        </div>
                                     </Col>
                                 </Row>
                             </Form>
