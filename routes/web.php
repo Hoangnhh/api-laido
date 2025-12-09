@@ -29,6 +29,8 @@ Route::prefix('admin')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
     Route::middleware(['auth'])->group(function () {
+        // Đổi mật khẩu
+        Route::post('/change-password', [AuthController::class, 'changePassword'])->name('admin.change-password');
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
@@ -124,6 +126,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/ticket-status-report', function () {
             return view('admin.ticket-status-report');
         })->name('admin.ticket-status-report');
+
+        Route::get('/change-password', function () {
+            return view('admin.change-password');
+        })->name('admin.change-password.view');
 
 
         // Thêm route toggle status cho staff

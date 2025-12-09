@@ -17,7 +17,8 @@ import {
     faStar,
     faDoorOpen,
     faDoorClosed,
-    faLocationDot
+    faLocationDot,
+    faKey
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -358,7 +359,19 @@ const Sidebar = () => {
                         {!collapsed && (
                             <div className="sb-logo-content">
                                 <span className="sb-logo-text">Admin Panel</span>
-                                {user && <span className="sb-user-name">{user.name}</span>}
+                                {user && (
+                                    <>
+                                        <span className="sb-user-name">{user.name}</span>
+                                        <a
+                                            href="/admin/change-password"
+                                            className="sb-change-password-link"
+                                            onClick={handleMobileMenuClick}
+                                        >
+                                            <FontAwesomeIcon icon={faKey} className="me-2" />
+                                            Đổi mật khẩu
+                                        </a>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
