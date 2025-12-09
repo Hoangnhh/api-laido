@@ -423,8 +423,11 @@ class ReportController extends Controller
     public function getTicketStatusReport(Request $request)
     {
         try {
-            $fromDate = $request->input('from_date');
-            $toDate = $request->input('to_date');
+            // Nhận tham số với camelCase
+            $fromDate = $request->input('fromDate') ?: $request->input('from_date');
+            $toDate = $request->input('toDate') ?: $request->input('to_date');
+            $pageNumber = $request->input('pageNumber', 1);
+            $pageSize = $request->input('pageSize', 50);
 
             if (!$fromDate || !$toDate) {
                 return response()->json([
@@ -464,6 +467,7 @@ class ReportController extends Controller
             $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
 
             // Gọi API n8n với header Authorization Bearer và timeout 120 giây
+            // Gửi pageNumber và pageSize để hỗ trợ phân trang
             $response = Http::timeout(120)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $jwtToken,
@@ -472,39 +476,44 @@ class ReportController extends Controller
                 ])
                 ->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
                     'fromDate' => $fromDate . ' 00:00:00',
-                    'toDate' => $toDate . ' 23:59:59'
+                    'toDate' => $toDate . ' 23:59:59',
+                    'pageNumber' => (int)$pageNumber,
+                    'pageSize' => (int)$pageSize
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                // Format dữ liệu để hiển thị (tối ưu, loại bỏ dữ liệu thừa)
+                // Kiểm tra nếu response là mảng trực tiếp (format mới với phân trang)
+                if (is_array($data) && count($data) > 0) {
+                    // Response đã có format đúng với totalCount trong mỗi item
+                    // Trả về mảng trực tiếp như yêu cầu
+                    return response()->json($data);
+                }
+
+                // Fallback: Format dữ liệu cũ nếu API trả về format khác
                 $formattedData = collect($data)->map(function ($item) {
                     return [
-                        'id' => $item['ID'] ?? null,
-                        'account_code' => $item['AccountCode'] ?? null,
-                        'issued_date' => $item['IssuedDate'] ? Carbon::parse($item['IssuedDate'])->format('d/m/Y') : null,
-                        'expiration_date' => $item['ExpirationDate'] ? Carbon::parse($item['ExpirationDate'])->format('d/m/Y') : null,
-                        'total_money' => $item['TotalMoney'] ?? 0,
-                        'status' => $item['Status'] ?? null,
-                        'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
-                        'created_by' => $item['CreatedBy'] ?? null,
-                        'created_date' => $item['CreatedDate'] ? Carbon::parse($item['CreatedDate'])->format('d/m/Y H:i:s') : null,
-                        'sequence' => $item['Sequence'] ?? null,
-                        'service_name' => $item['ServiceName'] ?? null,
-                        'invoice_status' => $item['InvoiceStatus'] ?? null,
-                        'invoice_number' => $item['InvoiceNumber'] ?? null,
-                        'invoice_code' => $item['InvoiceCode'] ?? null,
-                        'invoice_sign_date' => $item['InvoiceSignDate'] ? Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s') : null,
-                        'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null
+                        'ID' => $item['ID'] ?? null,
+                        'AccountCode' => $item['AccountCode'] ?? null,
+                        'IssuedDate' => $item['IssuedDate'] ?? null,
+                        'ExpirationDate' => $item['ExpirationDate'] ?? null,
+                        'TotalMoney' => $item['TotalMoney'] ?? 0,
+                        'Status' => $item['Status'] ?? null,
+                        'CreatedBy' => $item['CreatedBy'] ?? null,
+                        'CreatedDate' => $item['CreatedDate'] ?? null,
+                        'Sequence' => $item['Sequence'] ?? null,
+                        'ServiceName' => $item['ServiceName'] ?? null,
+                        'InvoiceStatus' => $item['InvoiceStatus'] ?? null,
+                        'InvoiceNumber' => $item['InvoiceNumber'] ?? null,
+                        'InvoiceCode' => $item['InvoiceCode'] ?? null,
+                        'InvoiceSignDate' => $item['InvoiceSignDate'] ?? null,
+                        'InvoiceCreatedDate' => $item['InvoiceCreatedDate'] ?? null,
+                        'totalCount' => $item['totalCount'] ?? 0
                     ];
                 });
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Lấy dữ liệu thành công',
-                    'data' => $formattedData
-                ]);
+                return response()->json($formattedData);
             } else {
                 return response()->json([
                     'success' => false,

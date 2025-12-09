@@ -125,8 +125,8 @@ const TicketStatusReport = () => {
         try {
             const response = await axios.get('/api/admin/get-ticket-status-report', {
                 params: {
-                    from_date: fromDate,
-                    to_date: toDate,
+                    fromDate: fromDate,
+                    toDate: toDate,
                     pageNumber: page,
                     pageSize: pageSize
                 }
@@ -256,8 +256,8 @@ const TicketStatusReport = () => {
             // Gọi API với pageSize lớn để lấy tất cả dữ liệu cho Excel
             const response = await axios.get('/api/admin/get-ticket-status-report', {
                 params: {
-                    from_date: filters.from_date,
-                    to_date: filters.to_date,
+                    fromDate: filters.from_date,
+                    toDate: filters.to_date,
                     pageNumber: 1,
                     pageSize: totalCount || 10000 // Lấy tất cả hoặc số lớn
                 }
