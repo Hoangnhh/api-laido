@@ -469,19 +469,18 @@ class ReportController extends Controller
                     return [
                         'id' => $item['ID'] ?? null,
                         'account_code' => $item['AccountCode'] ?? null,
-                        'booking_detail_id' => $item['BookingDetailID'] ?? null,
                         'issued_date' => $item['IssuedDate'] ? Carbon::parse($item['IssuedDate'])->format('d/m/Y') : null,
                         'expiration_date' => $item['ExpirationDate'] ? Carbon::parse($item['ExpirationDate'])->format('d/m/Y') : null,
                         'total_money' => $item['TotalMoney'] ?? 0,
                         'status' => $item['Status'] ?? null,
                         'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
-                        'booking_id' => $item['BookingID'] ?? null,
                         'created_by' => $item['CreatedBy'] ?? null,
                         'created_date' => $item['CreatedDate'] ? Carbon::parse($item['CreatedDate'])->format('d/m/Y H:i:s') : null,
                         'sequence' => $item['Sequence'] ?? null,
-                        'service_rate_id' => $item['ServiceRateID'] ?? null,
+                        'service_name' => $item['ServiceName'] ?? null,
                         'invoice_status' => $item['InvoiceStatus'] ?? null,
                         'invoice_number' => $item['InvoiceNumber'] ?? null,
+                        'invoice_code' => $item['InvoiceCode'] ?? null,
                         'invoice_sign_date' => $item['InvoiceSignDate'] ? Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s') : null,
                         'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null,
                         // Giữ nguyên dữ liệu gốc
@@ -529,5 +528,79 @@ class ReportController extends Controller
         ];
 
         return $methods[$method] ?? $method;
+    }
+
+    public function getTicketStatusStatistics(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            // Lấy JWT secret từ env (hỗ trợ cả 2 tên biến)
+            $jwtSecret = env('N8N_JWT_SECRET') ?: env('N8N_JWT_TOKEN');
+
+            if (!$jwtSecret) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'JWT Secret chưa được cấu hình. Vui lòng thêm N8N_JWT_SECRET hoặc N8N_JWT_TOKEN vào file .env và chạy: php artisan config:clear'
+                ], 500);
+            }
+
+            // Tạo JWT token với payload rỗng (như trong Postman)
+            $payload = [
+                'iat' => time(),
+                'exp' => time() + 3600 // Token hết hạn sau 1 giờ
+            ];
+
+            $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
+
+            // Gọi API n8n thống kê với header Authorization Bearer
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $jwtToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/5de638e5-38c9-4cdd-9816-307629a4c612', [
+                'fromDate' => $fromDate . ' 00:00:00',
+                'toDate' => $toDate . ' 23:59:59'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                // Format dữ liệu để hiển thị
+                $formattedData = collect($data)->map(function ($item) {
+                    return [
+                        'service_name' => $item['ServiceName'] ?? null,
+                        'total_tickets' => $item['TotalTickets'] ?? 0,
+                        'invoice_created' => $item['InvoiceCreated'] ?? 0,
+                        'invoice_not_created' => $item['InvoiceNotCreated'] ?? 0
+                    ];
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy dữ liệu thống kê thành công',
+                    'data' => $formattedData
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lỗi khi gọi API: ' . $response->body()
+                ], $response->status());
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

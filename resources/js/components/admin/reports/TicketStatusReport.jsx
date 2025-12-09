@@ -18,7 +18,9 @@ const TicketStatusReport = () => {
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const pageSizeOptions = [10, 20, 50, 100];
     const [data, setData] = useState([]);
+    const [statistics, setStatistics] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingStatistics, setLoadingStatistics] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
@@ -45,9 +47,34 @@ const TicketStatusReport = () => {
         }
     };
 
+    const fetchStatistics = async () => {
+        setLoadingStatistics(true);
+        try {
+            const response = await axios.get('/api/admin/get-ticket-status-statistics', {
+                params: {
+                    from_date: filters.from_date,
+                    to_date: filters.to_date
+                }
+            });
+
+            if (response.data.success) {
+                setStatistics(response.data.data || []);
+            } else {
+                console.error('Error fetching statistics:', response.data.message);
+                setStatistics([]);
+            }
+        } catch (error) {
+            console.error('Error fetching statistics:', error);
+            setStatistics([]);
+        } finally {
+            setLoadingStatistics(false);
+        }
+    };
+
     const handleSearch = () => {
         setCurrentPage(1);
         fetchData();
+        fetchStatistics();
     };
 
     const handleExportExcel = () => {
@@ -58,11 +85,12 @@ const TicketStatusReport = () => {
             'Ngày hết hạn': item.expiration_date,
             'Tổng tiền': item.total_money,
             'Trạng thái': item.status_text,
-            'Mã đặt chỗ': item.booking_id,
+            'Tên dịch vụ': item.service_name || '',
             'Người tạo': item.created_by,
             'Ngày tạo': item.created_date,
             'Thứ tự': item.sequence,
             'Trạng thái hóa đơn': item.invoice_status,
+            'Mã hóa đơn': item.invoice_code || '',
             'Số hóa đơn': item.invoice_number || '',
             'Ngày ký hóa đơn': item.invoice_sign_date || '',
             'Ngày tạo hóa đơn': item.invoice_created_date || ''
@@ -78,11 +106,12 @@ const TicketStatusReport = () => {
             { wch: 15 },  // Ngày hết hạn
             { wch: 15 },  // Tổng tiền
             { wch: 15 },  // Trạng thái
-            { wch: 30 },  // Mã đặt chỗ
+            { wch: 30 },  // Tên dịch vụ
             { wch: 15 },  // Người tạo
             { wch: 18 },  // Ngày tạo
             { wch: 10 },  // Thứ tự
             { wch: 20 },  // Trạng thái hóa đơn
+            { wch: 15 },  // Mã hóa đơn
             { wch: 15 },  // Số hóa đơn
             { wch: 18 },  // Ngày ký hóa đơn
             { wch: 18 }   // Ngày tạo hóa đơn
@@ -241,6 +270,73 @@ const TicketStatusReport = () => {
                     </Card>
                 </div>
 
+                {/* Phần thống kê */}
+                {statistics.length > 0 && (
+                    <Card className="rp-statistics-section mb-3">
+                        <Card.Header>
+                            <h5>Thống kê theo dịch vụ</h5>
+                        </Card.Header>
+                        <Card.Body>
+                            {loadingStatistics ? (
+                                <div className="text-center py-3">
+                                    <p>Đang tải thống kê...</p>
+                                </div>
+                            ) : (
+                                <div className="table-responsive">
+                                    <Table striped bordered hover className="rp-table">
+                                        <thead>
+                                            <tr>
+                                                <th className="text-center">STT</th>
+                                                <th>Tên dịch vụ</th>
+                                                <th className="text-end">Tổng số vé</th>
+                                                <th className="text-end">Đã tạo hóa đơn</th>
+                                                <th className="text-end">Chưa tạo hóa đơn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td className="text-center">{index + 1}</td>
+                                                    <td>{item.service_name || '-'}</td>
+                                                    <td className="text-end">{item.total_tickets.toLocaleString('vi-VN')}</td>
+                                                    <td className="text-end">
+                                                        <span className="text-success">
+                                                            {item.invoice_created.toLocaleString('vi-VN')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="text-end">
+                                                        <span className="text-warning">
+                                                            {item.invoice_not_created.toLocaleString('vi-VN')}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr className="fw-bold">
+                                                <td colSpan="2" className="text-end">Tổng cộng:</td>
+                                                <td className="text-end">
+                                                    {statistics.reduce((sum, item) => sum + (item.total_tickets || 0), 0).toLocaleString('vi-VN')}
+                                                </td>
+                                                <td className="text-end">
+                                                    <span className="text-success">
+                                                        {statistics.reduce((sum, item) => sum + (item.invoice_created || 0), 0).toLocaleString('vi-VN')}
+                                                    </span>
+                                                </td>
+                                                <td className="text-end">
+                                                    <span className="text-warning">
+                                                        {statistics.reduce((sum, item) => sum + (item.invoice_not_created || 0), 0).toLocaleString('vi-VN')}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </Table>
+                                </div>
+                            )}
+                        </Card.Body>
+                    </Card>
+                )}
+
                 <Card className="rp-data-grid flex-grow-1 overflow-hidden">
                     <Card.Body className="d-flex flex-column h-100">
                         {loading ? (
@@ -265,11 +361,12 @@ const TicketStatusReport = () => {
                                                         <th>Ngày hết hạn</th>
                                                         <th className="text-end">Tổng tiền</th>
                                                         <th>Trạng thái</th>
-                                                        <th>Mã đặt chỗ</th>
+                                                        <th>Tên dịch vụ</th>
                                                         <th>Người tạo</th>
                                                         <th>Ngày tạo</th>
                                                         <th className="text-center">Thứ tự</th>
                                                         <th>Trạng thái hóa đơn</th>
+                                                        <th>Mã hóa đơn</th>
                                                         <th>Số hóa đơn</th>
                                                         <th>Ngày ký hóa đơn</th>
                                                         <th>Ngày tạo hóa đơn</th>
@@ -295,11 +392,12 @@ const TicketStatusReport = () => {
                                                                     {item.status_text}
                                                                 </span>
                                                             </td>
-                                                            <td>{item.booking_id}</td>
+                                                            <td>{item.service_name || '-'}</td>
                                                             <td>{item.created_by}</td>
                                                             <td className="text-center">{item.created_date}</td>
                                                             <td className="text-center">{item.sequence}</td>
                                                             <td>{item.invoice_status}</td>
+                                                            <td>{item.invoice_code || '-'}</td>
                                                             <td>{item.invoice_number || '-'}</td>
                                                             <td className="text-center">{item.invoice_sign_date || '-'}</td>
                                                             <td className="text-center">{item.invoice_created_date || '-'}</td>

@@ -199,6 +199,7 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-payment-all-data', [PaymentController::class, 'getPaymentAllData']);
     Route::post('/create-payment-all', [PaymentController::class, 'createPaymentAll']);
     Route::get('/get-ticket-status-report', [ReportController::class, 'getTicketStatusReport']);
+    Route::get('/get-ticket-status-statistics', [ReportController::class, 'getTicketStatusStatistics']);
 });
 
 // Route không cần xác thực
