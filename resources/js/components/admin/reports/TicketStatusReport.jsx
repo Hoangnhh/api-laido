@@ -127,7 +127,7 @@ const TicketStatusReport = () => {
             'Trạng thái': item.status_text,
             'Tên dịch vụ': item.service_name || '',
             'Người tạo': item.created_by,
-            'Ngày tạo': item.created_date,
+            'Ngày in': item.created_date,
             'Thứ tự': item.sequence,
             'Trạng thái hóa đơn': item.invoice_status,
             'Mã hóa đơn': item.invoice_code || '',
@@ -148,7 +148,7 @@ const TicketStatusReport = () => {
             { wch: 15 },  // Trạng thái
             { wch: 30 },  // Tên dịch vụ
             { wch: 15 },  // Người tạo
-            { wch: 18 },  // Ngày tạo
+            { wch: 18 },  // Ngày in
             { wch: 10 },  // Thứ tự
             { wch: 20 },  // Trạng thái hóa đơn
             { wch: 15 },  // Mã hóa đơn
@@ -480,7 +480,7 @@ const TicketStatusReport = () => {
                                                         <th>Trạng thái</th>
                                                         <th>Tên dịch vụ</th>
                                                         <th>Người tạo</th>
-                                                        <th>Ngày tạo</th>
+                                                        <th>Ngày in</th>
                                                         <th className="text-center">Thứ tự</th>
                                                         <th>Trạng thái hóa đơn</th>
                                                         <th>Mã hóa đơn</th>
