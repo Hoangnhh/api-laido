@@ -37,6 +37,14 @@ const TicketStatusReport = () => {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonthNum, setSelectedMonthNum] = useState(currentMonthNum);
 
+    // Hàm format date thành YYYY-MM-DD (tránh lỗi timezone)
+    const formatDateToString = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // Hàm tính from_date và to_date từ tháng/năm được chọn
     const getDatesFromMonth = (year, month) => {
         if (!year || !month) return { from_date: '', to_date: '' };
@@ -44,8 +52,8 @@ const TicketStatusReport = () => {
         const toDate = new Date(year, month, 0); // Ngày cuối cùng của tháng
 
         return {
-            from_date: fromDate.toISOString().split('T')[0],
-            to_date: toDate.toISOString().split('T')[0]
+            from_date: formatDateToString(fromDate),
+            to_date: formatDateToString(toDate)
         };
     };
 
