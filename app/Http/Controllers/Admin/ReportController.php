@@ -11,7 +11,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Firebase\JWT\JWT;
 
 class ReportController extends Controller
@@ -465,85 +464,41 @@ class ReportController extends Controller
             $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
 
             // Gọi API n8n với header Authorization Bearer
-            // Tăng timeout cho dữ liệu lớn (300 giây = 5 phút)
-            $response = Http::timeout(300)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $jwtToken,
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
-                ])->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
-                    'fromDate' => $fromDate . ' 00:00:00',
-                    'toDate' => $toDate . ' 23:59:59'
-                ]);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $jwtToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
+                'fromDate' => $fromDate . ' 00:00:00',
+                'toDate' => $toDate . ' 23:59:59'
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                // Kiểm tra nếu dữ liệu quá lớn
-                $dataCount = is_array($data) ? count($data) : 0;
-                Log::info('Processing ticket status report', [
-                    'from_date' => $fromDate,
-                    'to_date' => $toDate,
-                    'data_count' => $dataCount
-                ]);
-
-                // Format dữ liệu để hiển thị với error handling cho từng item
+                // Format dữ liệu để hiển thị
                 $formattedData = collect($data)->map(function ($item) {
-                    try {
-                        return [
-                            'id' => $item['ID'] ?? null,
-                            'account_code' => $item['AccountCode'] ?? null,
-                            'issued_date' => isset($item['IssuedDate']) && $item['IssuedDate'] ?
-                                (Carbon::parse($item['IssuedDate'])->format('d/m/Y')) : null,
-                            'expiration_date' => isset($item['ExpirationDate']) && $item['ExpirationDate'] ?
-                                (Carbon::parse($item['ExpirationDate'])->format('d/m/Y')) : null,
-                            'total_money' => $item['TotalMoney'] ?? 0,
-                            'status' => $item['Status'] ?? null,
-                            'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
-                            'created_by' => $item['CreatedBy'] ?? null,
-                            'created_date' => isset($item['CreatedDate']) && $item['CreatedDate'] ?
-                                (Carbon::parse($item['CreatedDate'])->format('d/m/Y H:i:s')) : null,
-                            'sequence' => $item['Sequence'] ?? null,
-                            'service_name' => $item['ServiceName'] ?? null,
-                            'invoice_status' => $item['InvoiceStatus'] ?? null,
-                            'invoice_number' => $item['InvoiceNumber'] ?? null,
-                            'invoice_code' => $item['InvoiceCode'] ?? null,
-                            'invoice_sign_date' => isset($item['InvoiceSignDate']) && $item['InvoiceSignDate'] ?
-                                (Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s')) : null,
-                            'invoice_created_date' => isset($item['InvoiceCreatedDate']) && $item['InvoiceCreatedDate'] ?
-                                (Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s')) : null,
-                            // Giữ nguyên dữ liệu gốc
-                            'raw' => $item
-                        ];
-                    } catch (\Exception $e) {
-                        // Log lỗi cho item cụ thể nhưng vẫn tiếp tục xử lý các item khác
-                        Log::warning('Error formatting ticket item', [
-                            'item_id' => $item['ID'] ?? 'unknown',
-                            'error' => $e->getMessage()
-                        ]);
-
-                        // Trả về dữ liệu cơ bản nếu parse lỗi
-                        return [
-                            'id' => $item['ID'] ?? null,
-                            'account_code' => $item['AccountCode'] ?? null,
-                            'issued_date' => null,
-                            'expiration_date' => null,
-                            'total_money' => $item['TotalMoney'] ?? 0,
-                            'status' => $item['Status'] ?? null,
-                            'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
-                            'created_by' => $item['CreatedBy'] ?? null,
-                            'created_date' => null,
-                            'sequence' => $item['Sequence'] ?? null,
-                            'service_name' => $item['ServiceName'] ?? null,
-                            'invoice_status' => $item['InvoiceStatus'] ?? null,
-                            'invoice_number' => $item['InvoiceNumber'] ?? null,
-                            'invoice_code' => $item['InvoiceCode'] ?? null,
-                            'invoice_sign_date' => null,
-                            'invoice_created_date' => null,
-                            'raw' => $item
-                        ];
-                    }
-                })->filter(); // Loại bỏ các item null nếu có
+                    return [
+                        'id' => $item['ID'] ?? null,
+                        'account_code' => $item['AccountCode'] ?? null,
+                        'issued_date' => $item['IssuedDate'] ? Carbon::parse($item['IssuedDate'])->format('d/m/Y') : null,
+                        'expiration_date' => $item['ExpirationDate'] ? Carbon::parse($item['ExpirationDate'])->format('d/m/Y') : null,
+                        'total_money' => $item['TotalMoney'] ?? 0,
+                        'status' => $item['Status'] ?? null,
+                        'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
+                        'created_by' => $item['CreatedBy'] ?? null,
+                        'created_date' => $item['CreatedDate'] ? Carbon::parse($item['CreatedDate'])->format('d/m/Y H:i:s') : null,
+                        'sequence' => $item['Sequence'] ?? null,
+                        'service_name' => $item['ServiceName'] ?? null,
+                        'invoice_status' => $item['InvoiceStatus'] ?? null,
+                        'invoice_number' => $item['InvoiceNumber'] ?? null,
+                        'invoice_code' => $item['InvoiceCode'] ?? null,
+                        'invoice_sign_date' => $item['InvoiceSignDate'] ? Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s') : null,
+                        'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null,
+                        // Giữ nguyên dữ liệu gốc
+                        'raw' => $item
+                    ];
+                });
 
                 return response()->json([
                     'success' => true,
@@ -551,13 +506,6 @@ class ReportController extends Controller
                     'data' => $formattedData
                 ]);
             } else {
-                Log::error('N8N API Error in getTicketStatusReport', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'from_date' => $fromDate,
-                    'to_date' => $toDate
-                ]);
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Lỗi khi gọi API: ' . $response->body()
@@ -565,15 +513,6 @@ class ReportController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Exception in getTicketStatusReport', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'from_date' => $fromDate ?? null,
-                'to_date' => $toDate ?? null
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
@@ -647,16 +586,14 @@ class ReportController extends Controller
             $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
 
             // Gọi API n8n thống kê với header Authorization Bearer
-            // Tăng timeout cho dữ liệu lớn (300 giây = 5 phút)
-            $response = Http::timeout(300)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $jwtToken,
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
-                ])->post('https://n8n-prod.thinksoft.com.vn/webhook/5de638e5-38c9-4cdd-9816-307629a4c612', [
-                    'fromDate' => $fromDate . ' 00:00:00',
-                    'toDate' => $toDate . ' 23:59:59'
-                ]);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $jwtToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/5de638e5-38c9-4cdd-9816-307629a4c612', [
+                'fromDate' => $fromDate . ' 00:00:00',
+                'toDate' => $toDate . ' 23:59:59'
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
