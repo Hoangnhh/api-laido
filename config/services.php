@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'n8n' => [
+        'jwt_secret' => env('N8N_JWT_SECRET'),
+    ],
+
 ];

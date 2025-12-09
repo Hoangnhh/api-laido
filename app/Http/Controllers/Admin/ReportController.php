@@ -10,6 +10,8 @@ use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Firebase\JWT\JWT;
 
 class ReportController extends Controller
 {
@@ -72,7 +74,7 @@ class ReportController extends Controller
             $staffGroupId = $request->input('staff_group_id');
             $status = $request->input('status');
             $staffId = $request->input('staff_id');
-            
+
             $fromDate = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
             $toDate = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
 
@@ -119,7 +121,7 @@ class ReportController extends Controller
                 DB::raw("DATE_FORMAT(checked_ticket.checkout_at, '%d/%m/%Y %H:%i') as checkout_at_formatted"),
                 DB::raw("DATE_FORMAT(checked_ticket.issue_date, '%d/%m/%Y') as issue_date_formatted"),
                 DB::raw("DATE_FORMAT(checked_ticket.expired_date, '%d/%m/%Y') as expired_date_formatted"),
-                DB::raw("CASE 
+                DB::raw("CASE
                     WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKIN . "' THEN 'Chưa hoàn thành'
                     WHEN checked_ticket.status = '" . CheckedTicket::STATUS_CHECKOUT . "' THEN 'Đã hoàn thành'
                     ELSE 'Không xác định'
@@ -208,13 +210,13 @@ class ReportController extends Controller
                         ->get()
                         ->map(function ($payment) {
                             $payment->payment_method = $this->formatPaymentMethod($payment->payment_method);
-                            
+
                             $payment->tickets = [];
                             $payment->total_commission = 0;
-                            
+
                             // Xóa id khỏi response
                             unset($payment->id);
-                            
+
                             return $payment;
                         });
 
@@ -310,7 +312,7 @@ class ReportController extends Controller
         try {
             $staffCode = $request->input('staff_code');
             $limit = $request->input('limit', 10);
-            
+
             if (!$staffCode) {
                 return response()->json([
                     'success' => false,
@@ -321,7 +323,7 @@ class ReportController extends Controller
             // Lấy thông tin staff và các ca làm việc
             $result = DB::select("
                 WITH staff_shifts AS (
-                    SELECT 
+                    SELECT
                         s.code as staff_code,
                         s.name as staff_name,
                         s.username,
@@ -332,24 +334,24 @@ class ReportController extends Controller
                         g.name as gate_name,
                         gss.checkin_at,
                         gss.checkout_at,
-                        CASE 
+                        CASE
                             WHEN gss.status = 'WAITING' THEN 'Đang chờ'
                             WHEN gss.status = 'CHECKIN' THEN 'Đang làm việc'
                             WHEN gss.status = 'CHECKOUT' THEN 'Đã checkout'
                             ELSE gss.status
                         END as status,
                         (
-                            SELECT COUNT(*) 
-                            FROM checked_ticket 
-                            WHERE gate_staff_shift_id = gss.id 
+                            SELECT COUNT(*)
+                            FROM checked_ticket
+                            WHERE gate_staff_shift_id = gss.id
                             AND checkin_by = s.username
                         ) as checkin_count,
                         (
-                            SELECT COUNT(*) 
-                            FROM checked_ticket 
-                            WHERE gate_staff_shift_id = gss.id 
+                            SELECT COUNT(*)
+                            FROM checked_ticket
+                            WHERE gate_staff_shift_id = gss.id
                             AND checkout_by = s.username
-                        ) as checkout_count 
+                        ) as checkout_count
                     FROM staff s
                     LEFT JOIN staff_group sg ON s.group_id = sg.id
                     LEFT JOIN gate_staff_shift gss ON s.id = gss.staff_id
@@ -416,6 +418,107 @@ class ReportController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getTicketStatusReport(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            // Lấy JWT secret từ env (hỗ trợ cả 2 tên biến)
+            $jwtSecret = env('N8N_JWT_SECRET') ?: env('N8N_JWT_TOKEN');
+
+            if (!$jwtSecret) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'JWT Secret chưa được cấu hình. Vui lòng thêm N8N_JWT_SECRET hoặc N8N_JWT_TOKEN vào file .env và chạy: php artisan config:clear'
+                ], 500);
+            }
+
+            // Tạo JWT token với payload rỗng (như trong Postman)
+            $payload = [
+                'iat' => time(),
+                'exp' => time() + 3600 // Token hết hạn sau 1 giờ
+            ];
+
+            $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
+
+            // Gọi API n8n với header Authorization Bearer
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $jwtToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
+                'fromDate' => $fromDate . ' 00:00:00',
+                'toDate' => $toDate . ' 23:59:59'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                // Format dữ liệu để hiển thị
+                $formattedData = collect($data)->map(function ($item) {
+                    return [
+                        'id' => $item['ID'] ?? null,
+                        'account_code' => $item['AccountCode'] ?? null,
+                        'booking_detail_id' => $item['BookingDetailID'] ?? null,
+                        'issued_date' => $item['IssuedDate'] ? Carbon::parse($item['IssuedDate'])->format('d/m/Y') : null,
+                        'expiration_date' => $item['ExpirationDate'] ? Carbon::parse($item['ExpirationDate'])->format('d/m/Y') : null,
+                        'total_money' => $item['TotalMoney'] ?? 0,
+                        'status' => $item['Status'] ?? null,
+                        'status_text' => $this->formatTicketStatus($item['Status'] ?? null),
+                        'booking_id' => $item['BookingID'] ?? null,
+                        'created_by' => $item['CreatedBy'] ?? null,
+                        'created_date' => $item['CreatedDate'] ? Carbon::parse($item['CreatedDate'])->format('d/m/Y H:i:s') : null,
+                        'sequence' => $item['Sequence'] ?? null,
+                        'service_rate_id' => $item['ServiceRateID'] ?? null,
+                        'invoice_status' => $item['InvoiceStatus'] ?? null,
+                        'invoice_number' => $item['InvoiceNumber'] ?? null,
+                        'invoice_sign_date' => $item['InvoiceSignDate'] ? Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s') : null,
+                        'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null,
+                        // Giữ nguyên dữ liệu gốc
+                        'raw' => $item
+                    ];
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy dữ liệu thành công',
+                    'data' => $formattedData
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lỗi khi gọi API: ' . $response->body()
+                ], $response->status());
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function formatTicketStatus($status)
+    {
+        $statusMap = [
+            'INACTIVE' => 'Chưa kích hoạt',
+            'CLOSE' => 'Đã đóng',
+            'ACTIVE' => 'Đang hoạt động',
+            'OPEN' => 'Đang mở'
+        ];
+
+        return $statusMap[$status] ?? $status;
     }
 
     private function formatPaymentMethod($method)

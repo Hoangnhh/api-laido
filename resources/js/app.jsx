@@ -22,12 +22,13 @@ import CheckoutScreen from './components/admin/CheckoutScreen';
 import AddExtraShift from './components/admin/AddExtraShift';
 import StaffPayment from './components/admin/StaffPayment';
 import Review from './components/admin/Review';
-import RevenueDetailReport from './components/admin/reports/RevenueDetailReport';  
+import RevenueDetailReport from './components/admin/reports/RevenueDetailReport';
 import TicketPrintHistoryReport from './components/admin/reports/TicketPrintHistoryReport';
 import RevenueReport from './components/admin/reports/RevenueReport';
 import TicketByHoursReport from './components/admin/reports/TicketByHoursReport';
 import StaffCheckin from './components/admin/StaffCheckin';
 import TicketByNameReport from './components/admin/reports/TicketByNameReport';
+import TicketStatusReport from './components/admin/reports/TicketStatusReport';
 import PaymentAll from './components/admin/PaymentAll';
 
 const theme = createTheme({
@@ -54,7 +55,7 @@ axios.interceptors.response.use(
 
 const App = () => {
     const currentPath = window.location.pathname;
-    
+
     // Render component dựa vào path
     const renderComponent = () => {
         switch (currentPath) {
@@ -108,6 +109,8 @@ const App = () => {
                 return <StaffCheckin />;
             case '/admin/ticket-by-name-report':
                 return <TicketByNameReport />;
+            case '/admin/ticket-status-report':
+                return <TicketStatusReport />;
             case '/admin/payment-all':
                 return <PaymentAll />;
             default:

@@ -140,6 +140,11 @@ const Sidebar = () => {
                     text: 'Vé sử dụng theo tên', 
                     icon: faCircle,
                     path: '/admin/ticket-by-name-report'
+                },
+                { 
+                    text: 'Trạng thái vé', 
+                    icon: faCircle,
+                    path: '/admin/ticket-status-report'
                 }
 
             ]
