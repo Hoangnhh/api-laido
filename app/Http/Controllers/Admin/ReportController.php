@@ -463,20 +463,22 @@ class ReportController extends Controller
 
             $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
 
-            // Gọi API n8n với header Authorization Bearer
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $jwtToken,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
-                'fromDate' => $fromDate . ' 00:00:00',
-                'toDate' => $toDate . ' 23:59:59'
-            ]);
+            // Gọi API n8n với header Authorization Bearer và timeout 120 giây
+            $response = Http::timeout(120)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $jwtToken,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->post('https://n8n-prod.thinksoft.com.vn/webhook/59f43171-b5e6-4612-a196-9e13db2eae36', [
+                    'fromDate' => $fromDate . ' 00:00:00',
+                    'toDate' => $toDate . ' 23:59:59'
+                ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                // Format dữ liệu để hiển thị
+                // Format dữ liệu để hiển thị (tối ưu, loại bỏ dữ liệu thừa)
                 $formattedData = collect($data)->map(function ($item) {
                     return [
                         'id' => $item['ID'] ?? null,
@@ -494,9 +496,7 @@ class ReportController extends Controller
                         'invoice_number' => $item['InvoiceNumber'] ?? null,
                         'invoice_code' => $item['InvoiceCode'] ?? null,
                         'invoice_sign_date' => $item['InvoiceSignDate'] ? Carbon::parse($item['InvoiceSignDate'])->format('d/m/Y H:i:s') : null,
-                        'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null,
-                        // Giữ nguyên dữ liệu gốc
-                        'raw' => $item
+                        'invoice_created_date' => $item['InvoiceCreatedDate'] ? Carbon::parse($item['InvoiceCreatedDate'])->format('d/m/Y H:i:s') : null
                     ];
                 });
 
@@ -585,15 +585,17 @@ class ReportController extends Controller
 
             $jwtToken = JWT::encode($payload, $jwtSecret, 'HS256');
 
-            // Gọi API n8n thống kê với header Authorization Bearer
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $jwtToken,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->post('https://n8n-prod.thinksoft.com.vn/webhook/5de638e5-38c9-4cdd-9816-307629a4c612', [
-                'fromDate' => $fromDate . ' 00:00:00',
-                'toDate' => $toDate . ' 23:59:59'
-            ]);
+            // Gọi API n8n thống kê với header Authorization Bearer và timeout 120 giây
+            $response = Http::timeout(120)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $jwtToken,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->post('https://n8n-prod.thinksoft.com.vn/webhook/5de638e5-38c9-4cdd-9816-307629a4c612', [
+                    'fromDate' => $fromDate . ' 00:00:00',
+                    'toDate' => $toDate . ' 23:59:59'
+                ]);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -620,7 +622,21 @@ class ReportController extends Controller
                 ], $response->status());
             }
 
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể kết nối đến server. Vui lòng thử lại sau.'
+            ], 503);
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi gọi API: ' . $e->getMessage()
+            ], 500);
         } catch (\Exception $e) {
+            \Log::error('Error in getTicketStatusStatistics: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
