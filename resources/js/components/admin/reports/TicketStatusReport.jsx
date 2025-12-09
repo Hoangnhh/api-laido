@@ -7,11 +7,28 @@ import '../../../../css/Report.css';
 import * as XLSX from 'xlsx';
 
 const TicketStatusReport = () => {
-    const today = new Date().toISOString().split('T')[0];
+    // Lấy tháng/năm hiện tại dạng YYYY-MM
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-    const [filters, setFilters] = useState({
-        from_date: today,
-        to_date: today
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    // Hàm tính from_date và to_date từ tháng được chọn
+    const getDatesFromMonth = (monthYear) => {
+        if (!monthYear) return { from_date: '', to_date: '' };
+        const [year, month] = monthYear.split('-');
+        const fromDate = new Date(year, month - 1, 1);
+        const toDate = new Date(year, month, 0); // Ngày cuối cùng của tháng
+
+        return {
+            from_date: fromDate.toISOString().split('T')[0],
+            to_date: toDate.toISOString().split('T')[0]
+        };
+    };
+
+    const [filters, setFilters] = useState(() => {
+        const dates = getDatesFromMonth(currentMonth);
+        return dates;
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -72,19 +89,15 @@ const TicketStatusReport = () => {
         }
     };
 
+    const handleMonthChange = (monthYear) => {
+        setSelectedMonth(monthYear);
+        const dates = getDatesFromMonth(monthYear);
+        setFilters(dates);
+    };
+
     const handleSearch = () => {
-        // Kiểm tra khoảng thời gian không quá 1 tháng
-        const fromDate = new Date(filters.from_date);
-        const toDate = new Date(filters.to_date);
-        const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
-
-        if (daysDiff > 31) {
-            alert('Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày). Vui lòng chọn lại khoảng thời gian.');
-            return;
-        }
-
-        if (daysDiff < 0) {
-            alert('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+        if (!selectedMonth) {
+            alert('Vui lòng chọn tháng để tìm kiếm.');
             return;
         }
 
@@ -94,18 +107,8 @@ const TicketStatusReport = () => {
     };
 
     const handleViewStatistics = () => {
-        // Kiểm tra khoảng thời gian không quá 1 tháng
-        const fromDate = new Date(filters.from_date);
-        const toDate = new Date(filters.to_date);
-        const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
-
-        if (daysDiff > 31) {
-            alert('Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày). Vui lòng chọn lại khoảng thời gian.');
-            return;
-        }
-
-        if (daysDiff < 0) {
-            alert('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+        if (!selectedMonth) {
+            alert('Vui lòng chọn tháng để xem thống kê.');
             return;
         }
 
@@ -267,79 +270,21 @@ const TicketStatusReport = () => {
                                 <Row>
                                     <Col md={4}>
                                         <Form.Group>
-                                            <Form.Label>Từ ngày</Form.Label>
+                                            <Form.Label>Chọn tháng</Form.Label>
                                             <Form.Control
-                                                type="date"
-                                                value={filters.from_date}
-                                                onChange={(e) => {
-                                                    const newFromDate = e.target.value;
-                                                    const fromDate = new Date(newFromDate);
-                                                    const toDate = new Date(filters.to_date);
-                                                    const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
-
-                                                    if (daysDiff > 31) {
-                                                        // Tự động điều chỉnh đến ngày về 31 ngày từ ngày bắt đầu mới
-                                                        const maxDate = new Date(fromDate);
-                                                        maxDate.setDate(maxDate.getDate() + 31);
-                                                        setFilters({
-                                                            from_date: newFromDate,
-                                                            to_date: maxDate.toISOString().split('T')[0]
-                                                        });
-                                                        alert('Khoảng thời gian không được vượt quá 1 tháng (31 ngày). Đã tự động điều chỉnh đến ngày.');
-                                                    } else if (daysDiff < 0) {
-                                                        // Nếu từ ngày lớn hơn đến ngày, tự động điều chỉnh đến ngày
-                                                        const maxDate = new Date(fromDate);
-                                                        maxDate.setDate(maxDate.getDate() + 31);
-                                                        setFilters({
-                                                            from_date: newFromDate,
-                                                            to_date: maxDate.toISOString().split('T')[0]
-                                                        });
-                                                    } else {
-                                                        setFilters({...filters, from_date: newFromDate});
-                                                    }
-                                                }}
-                                                max={filters.to_date}
+                                                type="month"
+                                                value={selectedMonth}
+                                                onChange={(e) => handleMonthChange(e.target.value)}
+                                                max={currentMonth}
                                             />
+                                            {selectedMonth && (
+                                                <Form.Text className="text-muted">
+                                                    Từ ngày: {filters.from_date} - Đến ngày: {filters.to_date}
+                                                </Form.Text>
+                                            )}
                                         </Form.Group>
                                     </Col>
-                                    <Col md={4}>
-                                        <Form.Group>
-                                            <Form.Label>Đến ngày</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                value={filters.to_date}
-                                                onChange={(e) => {
-                                                    const newToDate = e.target.value;
-                                                    const fromDate = new Date(filters.from_date);
-                                                    const toDate = new Date(newToDate);
-                                                    const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
-
-                                                    if (daysDiff > 31) {
-                                                        // Tự động điều chỉnh về 31 ngày từ ngày bắt đầu
-                                                        const maxDate = new Date(fromDate);
-                                                        maxDate.setDate(maxDate.getDate() + 31);
-                                                        setFilters({
-                                                            ...filters,
-                                                            to_date: maxDate.toISOString().split('T')[0]
-                                                        });
-                                                        alert('Khoảng thời gian không được vượt quá 1 tháng (31 ngày). Đã tự động điều chỉnh đến ngày.');
-                                                    } else {
-                                                        setFilters({...filters, to_date: newToDate});
-                                                    }
-                                                }}
-                                                min={filters.from_date}
-                                                max={(() => {
-                                                    if (filters.from_date) {
-                                                        const maxDate = new Date(filters.from_date);
-                                                        maxDate.setDate(maxDate.getDate() + 31);
-                                                        return maxDate.toISOString().split('T')[0];
-                                                    }
-                                                    return '';
-                                                })()}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={4} className="d-flex align-items-end">
+                                    <Col md={8} className="d-flex align-items-end">
                                         <Button
                                             variant="primary"
                                             className="me-2"
