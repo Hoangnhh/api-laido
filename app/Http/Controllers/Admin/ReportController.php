@@ -433,6 +433,18 @@ class ReportController extends Controller
                 ], 422);
             }
 
+            // Kiểm tra khoảng thời gian không quá 1 tháng
+            $from = Carbon::parse($fromDate);
+            $to = Carbon::parse($toDate);
+            $daysDiff = $from->diffInDays($to);
+
+            if ($daysDiff > 31) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày)'
+                ], 422);
+            }
+
             // Lấy JWT secret từ env (hỗ trợ cả 2 tên biến)
             $jwtSecret = env('N8N_JWT_SECRET') ?: env('N8N_JWT_TOKEN');
 
@@ -540,6 +552,18 @@ class ReportController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            // Kiểm tra khoảng thời gian không quá 1 tháng
+            $from = Carbon::parse($fromDate);
+            $to = Carbon::parse($toDate);
+            $daysDiff = $from->diffInDays($to);
+
+            if ($daysDiff > 31) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày)'
                 ], 422);
             }
 

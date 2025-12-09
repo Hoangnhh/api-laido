@@ -21,6 +21,7 @@ const TicketStatusReport = () => {
     const [statistics, setStatistics] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingStatistics, setLoadingStatistics] = useState(false);
+    const [viewMode, setViewMode] = useState('detail'); // 'detail' or 'statistics'
 
     const fetchData = async () => {
         setLoading(true);
@@ -72,15 +73,54 @@ const TicketStatusReport = () => {
     };
 
     const handleSearch = () => {
+        // Kiểm tra khoảng thời gian không quá 1 tháng
+        const fromDate = new Date(filters.from_date);
+        const toDate = new Date(filters.to_date);
+        const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
+
+        if (daysDiff > 31) {
+            alert('Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày). Vui lòng chọn lại khoảng thời gian.');
+            return;
+        }
+
+        if (daysDiff < 0) {
+            alert('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+            return;
+        }
+
         setCurrentPage(1);
+        setViewMode('detail'); // Mặc định hiển thị chi tiết
         fetchData();
+    };
+
+    const handleViewStatistics = () => {
+        // Kiểm tra khoảng thời gian không quá 1 tháng
+        const fromDate = new Date(filters.from_date);
+        const toDate = new Date(filters.to_date);
+        const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
+
+        if (daysDiff > 31) {
+            alert('Khoảng thời gian truy vấn không được vượt quá 1 tháng (31 ngày). Vui lòng chọn lại khoảng thời gian.');
+            return;
+        }
+
+        if (daysDiff < 0) {
+            alert('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+            return;
+        }
+
+        setViewMode('statistics');
         fetchStatistics();
+    };
+
+    const handleViewDetail = () => {
+        setViewMode('detail');
     };
 
     const handleExportExcel = () => {
         const excelData = data.map((item, index) => ({
             'STT': index + 1,
-            'Mã tài khoản': item.account_code,
+            'Mã vé': item.account_code,
             'Ngày phát hành': item.issued_date,
             'Ngày hết hạn': item.expiration_date,
             'Tổng tiền': item.total_money,
@@ -101,7 +141,7 @@ const TicketStatusReport = () => {
 
         const colWidths = [
             { wch: 5 },   // STT
-            { wch: 15 },  // Mã tài khoản
+            { wch: 15 },  // Mã vé
             { wch: 15 },  // Ngày phát hành
             { wch: 15 },  // Ngày hết hạn
             { wch: 15 },  // Tổng tiền
@@ -231,7 +271,33 @@ const TicketStatusReport = () => {
                                             <Form.Control
                                                 type="date"
                                                 value={filters.from_date}
-                                                onChange={(e) => setFilters({...filters, from_date: e.target.value})}
+                                                onChange={(e) => {
+                                                    const newFromDate = e.target.value;
+                                                    const fromDate = new Date(newFromDate);
+                                                    const toDate = new Date(filters.to_date);
+                                                    const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
+
+                                                    if (daysDiff > 31) {
+                                                        // Tự động điều chỉnh đến ngày về 31 ngày từ ngày bắt đầu mới
+                                                        const maxDate = new Date(fromDate);
+                                                        maxDate.setDate(maxDate.getDate() + 31);
+                                                        setFilters({
+                                                            from_date: newFromDate,
+                                                            to_date: maxDate.toISOString().split('T')[0]
+                                                        });
+                                                        alert('Khoảng thời gian không được vượt quá 1 tháng (31 ngày). Đã tự động điều chỉnh đến ngày.');
+                                                    } else if (daysDiff < 0) {
+                                                        // Nếu từ ngày lớn hơn đến ngày, tự động điều chỉnh đến ngày
+                                                        const maxDate = new Date(fromDate);
+                                                        maxDate.setDate(maxDate.getDate() + 31);
+                                                        setFilters({
+                                                            from_date: newFromDate,
+                                                            to_date: maxDate.toISOString().split('T')[0]
+                                                        });
+                                                    } else {
+                                                        setFilters({...filters, from_date: newFromDate});
+                                                    }
+                                                }}
                                                 max={filters.to_date}
                                             />
                                         </Form.Group>
@@ -242,8 +308,34 @@ const TicketStatusReport = () => {
                                             <Form.Control
                                                 type="date"
                                                 value={filters.to_date}
-                                                onChange={(e) => setFilters({...filters, to_date: e.target.value})}
+                                                onChange={(e) => {
+                                                    const newToDate = e.target.value;
+                                                    const fromDate = new Date(filters.from_date);
+                                                    const toDate = new Date(newToDate);
+                                                    const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24));
+
+                                                    if (daysDiff > 31) {
+                                                        // Tự động điều chỉnh về 31 ngày từ ngày bắt đầu
+                                                        const maxDate = new Date(fromDate);
+                                                        maxDate.setDate(maxDate.getDate() + 31);
+                                                        setFilters({
+                                                            ...filters,
+                                                            to_date: maxDate.toISOString().split('T')[0]
+                                                        });
+                                                        alert('Khoảng thời gian không được vượt quá 1 tháng (31 ngày). Đã tự động điều chỉnh đến ngày.');
+                                                    } else {
+                                                        setFilters({...filters, to_date: newToDate});
+                                                    }
+                                                }}
                                                 min={filters.from_date}
+                                                max={(() => {
+                                                    if (filters.from_date) {
+                                                        const maxDate = new Date(filters.from_date);
+                                                        maxDate.setDate(maxDate.getDate() + 31);
+                                                        return maxDate.toISOString().split('T')[0];
+                                                    }
+                                                    return '';
+                                                })()}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -257,9 +349,17 @@ const TicketStatusReport = () => {
                                             {loading ? 'Đang tải...' : 'Tìm kiếm'}
                                         </Button>
                                         <Button
+                                            variant="info"
+                                            className="me-2"
+                                            onClick={handleViewStatistics}
+                                            disabled={loadingStatistics}
+                                        >
+                                            {loadingStatistics ? 'Đang tải...' : 'Xem thống kê'}
+                                        </Button>
+                                        <Button
                                             variant="success"
                                             onClick={handleExportExcel}
-                                            disabled={data.length === 0 || loading}
+                                            disabled={data.length === 0 || loading || viewMode === 'statistics'}
                                         >
                                             Xuất Excel
                                         </Button>
@@ -270,93 +370,110 @@ const TicketStatusReport = () => {
                     </Card>
                 </div>
 
-                {/* Phần thống kê */}
-                {statistics.length > 0 && (
+                {/* Phần thống kê - chỉ hiển thị khi viewMode = 'statistics' */}
+                {viewMode === 'statistics' && (
                     <Card className="rp-statistics-section mb-3">
-                        <Card.Header>
+                        <Card.Header className="d-flex justify-content-between align-items-center">
                             <h5>Thống kê theo dịch vụ</h5>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleViewDetail}
+                            >
+                                Xem chi tiết
+                            </Button>
                         </Card.Header>
                         <Card.Body>
                             {loadingStatistics ? (
-                                <div className="text-center py-3">
+                                <div className="text-center py-5">
                                     <p>Đang tải thống kê...</p>
                                 </div>
                             ) : (
-                                <div className="table-responsive">
-                                    <Table striped bordered hover className="rp-table">
-                                        <thead>
-                                            <tr>
-                                                <th className="text-center">STT</th>
-                                                <th>Tên dịch vụ</th>
-                                                <th className="text-end">Tổng số vé</th>
-                                                <th className="text-end">Đã tạo hóa đơn</th>
-                                                <th className="text-end">Chưa tạo hóa đơn</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {statistics.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td className="text-center">{index + 1}</td>
-                                                    <td>{item.service_name || '-'}</td>
-                                                    <td className="text-end">{item.total_tickets.toLocaleString('vi-VN')}</td>
-                                                    <td className="text-end">
-                                                        <span className="text-success">
-                                                            {item.invoice_created.toLocaleString('vi-VN')}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-end">
-                                                        <span className="text-warning">
-                                                            {item.invoice_not_created.toLocaleString('vi-VN')}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr className="fw-bold">
-                                                <td colSpan="2" className="text-end">Tổng cộng:</td>
-                                                <td className="text-end">
-                                                    {statistics.reduce((sum, item) => sum + (item.total_tickets || 0), 0).toLocaleString('vi-VN')}
-                                                </td>
-                                                <td className="text-end">
-                                                    <span className="text-success">
-                                                        {statistics.reduce((sum, item) => sum + (item.invoice_created || 0), 0).toLocaleString('vi-VN')}
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <span className="text-warning">
-                                                        {statistics.reduce((sum, item) => sum + (item.invoice_not_created || 0), 0).toLocaleString('vi-VN')}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </Table>
-                                </div>
+                                <>
+                                    {statistics.length === 0 ? (
+                                        <div className="text-center py-5">
+                                            <p>Không có dữ liệu thống kê để hiển thị.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <Table striped bordered hover className="rp-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="text-center">STT</th>
+                                                        <th>Tên dịch vụ</th>
+                                                        <th className="text-end">Tổng số vé</th>
+                                                        <th className="text-end">Đã tạo hóa đơn</th>
+                                                        <th className="text-end">Chưa tạo hóa đơn</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {statistics.map((item, index) => (
+                                                        <tr key={index}>
+                                                            <td className="text-center">{index + 1}</td>
+                                                            <td>{item.service_name || '-'}</td>
+                                                            <td className="text-end">{item.total_tickets.toLocaleString('vi-VN')}</td>
+                                                            <td className="text-end">
+                                                                <span className="text-success">
+                                                                    {item.invoice_created.toLocaleString('vi-VN')}
+                                                                </span>
+                                                            </td>
+                                                            <td className="text-end">
+                                                                <span className="text-warning">
+                                                                    {item.invoice_not_created.toLocaleString('vi-VN')}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr className="fw-bold">
+                                                        <td colSpan="2" className="text-end">Tổng cộng:</td>
+                                                        <td className="text-end">
+                                                            {statistics.reduce((sum, item) => sum + (item.total_tickets || 0), 0).toLocaleString('vi-VN')}
+                                                        </td>
+                                                        <td className="text-end">
+                                                            <span className="text-success">
+                                                                {statistics.reduce((sum, item) => sum + (item.invoice_created || 0), 0).toLocaleString('vi-VN')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="text-end">
+                                                            <span className="text-warning">
+                                                                {statistics.reduce((sum, item) => sum + (item.invoice_not_created || 0), 0).toLocaleString('vi-VN')}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </Table>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </Card.Body>
                     </Card>
                 )}
 
-                <Card className="rp-data-grid flex-grow-1 overflow-hidden">
-                    <Card.Body className="d-flex flex-column h-100">
-                        {loading ? (
-                            <div className="text-center py-5">
-                                <p>Đang tải dữ liệu...</p>
-                            </div>
-                        ) : (
-                            <>
-                                {data.length === 0 ? (
-                                    <div className="text-center py-5">
-                                        <p>Không có dữ liệu để hiển thị.</p>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="table-responsive flex-grow-1 overflow-auto">
-                                            <Table striped bordered hover className="rp-table">
+                {/* Phần chi tiết - chỉ hiển thị khi viewMode = 'detail' */}
+                {viewMode === 'detail' && (
+                    <Card className="rp-data-grid flex-grow-1 overflow-hidden">
+                        <Card.Body className="d-flex flex-column h-100">
+                            {loading ? (
+                                <div className="text-center py-5">
+                                    <p>Đang tải dữ liệu...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {data.length === 0 ? (
+                                        <div className="text-center py-5">
+                                            <p>Không có dữ liệu để hiển thị.</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="table-responsive flex-grow-1 overflow-auto">
+                                                <Table striped bordered hover className="rp-table">
                                                 <thead>
                                                     <tr>
                                                         <th className="text-center">STT</th>
-                                                        <th>Mã tài khoản</th>
+                                                        <th>Mã vé</th>
                                                         <th>Ngày phát hành</th>
                                                         <th>Ngày hết hạn</th>
                                                         <th className="text-end">Tổng tiền</th>
@@ -436,6 +553,7 @@ const TicketStatusReport = () => {
                         )}
                     </Card.Body>
                 </Card>
+                )}
             </div>
         </AdminLayout>
     );
