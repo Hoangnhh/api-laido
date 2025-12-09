@@ -70,31 +70,102 @@ const TicketStatusReport = () => {
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const pageSizeOptions = [10, 20, 50, 100];
     const [data, setData] = useState([]);
+    const [totalCount, setTotalCount] = useState(0);
     const [statistics, setStatistics] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingStatistics, setLoadingStatistics] = useState(false);
     const [viewMode, setViewMode] = useState('detail'); // 'detail' or 'statistics'
 
-    const fetchData = async () => {
+    // Hàm map dữ liệu từ response (PascalCase) sang format hiện tại (snake_case)
+    const mapResponseData = (items) => {
+        if (!items || items.length === 0) return [];
+
+        return items.map(item => {
+            // Map status sang status_text
+            const statusMap = {
+                'CLOSE': 'Đã sử dụng',
+                'ACTIVE': 'Đang sử dụng',
+                'INACTIVE': 'Chưa sử dụng'
+            };
+
+            return {
+                id: item.ID,
+                account_code: item.AccountCode,
+                issued_date: item.IssuedDate ? new Date(item.IssuedDate).toISOString().split('T')[0] : '',
+                expiration_date: item.ExpirationDate ? new Date(item.ExpirationDate).toISOString().split('T')[0] : '',
+                total_money: item.TotalMoney || 0,
+                status: item.Status,
+                status_text: statusMap[item.Status] || item.Status,
+                created_by: item.CreatedBy,
+                created_date: item.CreatedDate ? new Date(item.CreatedDate).toISOString().split('T')[0] : '',
+                sequence: item.Sequence,
+                service_name: item.ServiceName || '',
+                invoice_status: item.InvoiceStatus || '',
+                invoice_code: item.InvoiceCode || '',
+                invoice_number: item.InvoiceNumber || '',
+                invoice_sign_date: item.InvoiceSignDate ? new Date(item.InvoiceSignDate).toISOString().split('T')[0] : '',
+                invoice_created_date: item.InvoiceCreatedDate ? new Date(item.InvoiceCreatedDate).toISOString().split('T')[0] : ''
+            };
+        });
+    };
+
+    const fetchData = async (page = currentPage, pageSize = itemsPerPage, dates = null) => {
+        // Sử dụng dates được truyền vào hoặc lấy từ filters
+        const fromDate = dates?.from_date || filters.from_date;
+        const toDate = dates?.to_date || filters.to_date;
+
+        // Kiểm tra fromDate và toDate trước khi gọi API
+        if (!fromDate || !toDate) {
+            alert('Vui lòng chọn tháng và năm để tìm kiếm.');
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await axios.get('/api/admin/get-ticket-status-report', {
                 params: {
-                    from_date: filters.from_date,
-                    to_date: filters.to_date
+                    from_date: fromDate,
+                    to_date: toDate,
+                    pageNumber: page,
+                    pageSize: pageSize
                 }
             });
 
-            if (response.data.success) {
-                setData(response.data.data || []);
-            } else {
+            // Kiểm tra response có success: false
+            if (response.data && response.data.success === false) {
                 alert(response.data.message || 'Có lỗi xảy ra khi lấy dữ liệu');
                 setData([]);
+                setTotalCount(0);
+                setLoading(false);
+                return;
+            }
+
+            // Response là mảng trực tiếp
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                const mappedData = mapResponseData(response.data);
+                setData(mappedData);
+                // Lấy totalCount từ item đầu tiên
+                setTotalCount(response.data[0].totalCount || 0);
+            } else if (Array.isArray(response.data)) {
+                setData([]);
+                setTotalCount(0);
+            } else if (response.data && response.data.success && response.data.data) {
+                // Fallback cho format cũ nếu API vẫn trả về format cũ
+                const mappedData = mapResponseData(response.data.data || []);
+                setData(mappedData);
+                setTotalCount(mappedData.length);
+            } else {
+                alert(response.data?.message || 'Có lỗi xảy ra khi lấy dữ liệu');
+                setData([]);
+                setTotalCount(0);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert(error.response?.data?.message || 'Có lỗi xảy ra khi lấy dữ liệu');
+            const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi lấy dữ liệu';
+            alert(errorMessage);
             setData([]);
+            setTotalCount(0);
         } finally {
             setLoading(false);
         }
@@ -150,9 +221,14 @@ const TicketStatusReport = () => {
             return;
         }
 
+        // Tính toán lại dates và cập nhật filters
+        const dates = getDatesFromMonth(selectedYear, selectedMonthNum);
+        setFilters(dates);
         setCurrentPage(1);
         setViewMode('detail'); // Mặc định hiển thị chi tiết
-        fetchData();
+
+        // Gọi fetchData với dates mới
+        fetchData(1, itemsPerPage, dates);
     };
 
     const handleViewStatistics = () => {
@@ -175,63 +251,99 @@ const TicketStatusReport = () => {
         setViewMode('detail');
     };
 
-    const handleExportExcel = () => {
-        const excelData = data.map((item, index) => ({
-            'STT': index + 1,
-            'Mã vé': item.account_code,
-            'Ngày phát hành': item.issued_date,
-            'Ngày hết hạn': item.expiration_date,
-            'Tổng tiền': item.total_money,
-            'Trạng thái': item.status_text,
-            'Tên dịch vụ': item.service_name || '',
-            'Người tạo': item.created_by,
-            'Ngày in': item.created_date,
-            'Thứ tự': item.sequence,
-            'Trạng thái hóa đơn': item.invoice_status,
-            'Mã hóa đơn': item.invoice_code || '',
-            'Số hóa đơn': item.invoice_number || '',
-            'Ngày ký hóa đơn': item.invoice_sign_date || '',
-            'Ngày tạo hóa đơn': item.invoice_created_date || ''
-        }));
+    const handleExportExcel = async () => {
+        try {
+            // Gọi API với pageSize lớn để lấy tất cả dữ liệu cho Excel
+            const response = await axios.get('/api/admin/get-ticket-status-report', {
+                params: {
+                    from_date: filters.from_date,
+                    to_date: filters.to_date,
+                    pageNumber: 1,
+                    pageSize: totalCount || 10000 // Lấy tất cả hoặc số lớn
+                }
+            });
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(excelData);
+            let allData = [];
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                allData = mapResponseData(response.data);
+            } else if (response.data.success && response.data.data) {
+                allData = mapResponseData(response.data.data);
+            }
 
-        const colWidths = [
-            { wch: 5 },   // STT
-            { wch: 15 },  // Mã vé
-            { wch: 15 },  // Ngày phát hành
-            { wch: 15 },  // Ngày hết hạn
-            { wch: 15 },  // Tổng tiền
-            { wch: 15 },  // Trạng thái
-            { wch: 30 },  // Tên dịch vụ
-            { wch: 15 },  // Người tạo
-            { wch: 18 },  // Ngày in
-            { wch: 10 },  // Thứ tự
-            { wch: 20 },  // Trạng thái hóa đơn
-            { wch: 15 },  // Mã hóa đơn
-            { wch: 15 },  // Số hóa đơn
-            { wch: 18 },  // Ngày ký hóa đơn
-            { wch: 18 }   // Ngày tạo hóa đơn
-        ];
-        ws['!cols'] = colWidths;
+            if (allData.length === 0) {
+                alert('Không có dữ liệu để xuất Excel.');
+                return;
+            }
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo trạng thái vé theo ngày in');
-        XLSX.writeFile(wb, `bao_cao_trang_thai_ve_${filters.from_date}_${filters.to_date}.xlsx`);
+            const excelData = allData.map((item, index) => ({
+                'STT': index + 1,
+                'Mã vé': item.account_code,
+                'Ngày phát hành': item.issued_date,
+                'Ngày hết hạn': item.expiration_date,
+                'Tổng tiền': item.total_money,
+                'Trạng thái': item.status_text,
+                'Tên dịch vụ': item.service_name || '',
+                'Người tạo': item.created_by,
+                'Ngày in': item.created_date,
+                'Thứ tự': item.sequence,
+                'Trạng thái hóa đơn': item.invoice_status,
+                'Mã hóa đơn': item.invoice_code || '',
+                'Số hóa đơn': item.invoice_number || '',
+                'Ngày ký hóa đơn': item.invoice_sign_date || '',
+                'Ngày tạo hóa đơn': item.invoice_created_date || ''
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            const colWidths = [
+                { wch: 5 },   // STT
+                { wch: 15 },  // Mã vé
+                { wch: 15 },  // Ngày phát hành
+                { wch: 15 },  // Ngày hết hạn
+                { wch: 15 },  // Tổng tiền
+                { wch: 15 },  // Trạng thái
+                { wch: 30 },  // Tên dịch vụ
+                { wch: 15 },  // Người tạo
+                { wch: 18 },  // Ngày in
+                { wch: 10 },  // Thứ tự
+                { wch: 20 },  // Trạng thái hóa đơn
+                { wch: 15 },  // Mã hóa đơn
+                { wch: 15 },  // Số hóa đơn
+                { wch: 18 },  // Ngày ký hóa đơn
+                { wch: 18 }   // Ngày tạo hóa đơn
+            ];
+            ws['!cols'] = colWidths;
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo trạng thái vé theo ngày in');
+            XLSX.writeFile(wb, `bao_cao_trang_thai_ve_${filters.from_date}_${filters.to_date}.xlsx`);
+        } catch (error) {
+            console.error('Error exporting Excel:', error);
+            alert('Có lỗi xảy ra khi xuất Excel: ' + (error.response?.data?.message || error.message));
+        }
     };
 
-    // Tính toán dữ liệu cho trang hiện tại
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const currentData = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    // Tính toán số trang dựa trên totalCount
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    // Dữ liệu hiện tại là dữ liệu đã được phân trang từ server
+    const currentData = data;
 
     const handlePageSizeChange = (e) => {
         const newSize = parseInt(e.target.value);
         setItemsPerPage(newSize);
         setCurrentPage(1);
+        // Gọi lại fetchData với page size mới
+        if (filters.from_date && filters.to_date) {
+            fetchData(1, newSize);
+        }
     };
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
+        // Gọi lại fetchData với trang mới
+        if (filters.from_date && filters.to_date) {
+            fetchData(pageNumber, itemsPerPage);
+        }
     };
 
     const renderPaginationItems = () => {
@@ -418,7 +530,7 @@ const TicketStatusReport = () => {
                                                 variant="success"
                                                 className="px-4"
                                                 onClick={handleExportExcel}
-                                                disabled={data.length === 0 || loading || viewMode === 'statistics'}
+                                                disabled={totalCount === 0 || loading || viewMode === 'statistics'}
                                                 style={{
                                                     minWidth: '130px',
                                                     fontWeight: '500',
@@ -608,7 +720,7 @@ const TicketStatusReport = () => {
                                                     </Form.Select>
                                                 </Form.Group>
                                                 <div>
-                                                    Hiển thị {(currentPage - 1) * itemsPerPage + 1} đến {Math.min(currentPage * itemsPerPage, data.length)} trong tổng số {data.length} bản ghi
+                                                    Hiển thị {(currentPage - 1) * itemsPerPage + 1} đến {Math.min(currentPage * itemsPerPage, totalCount)} trong tổng số {totalCount.toLocaleString('vi-VN')} bản ghi
                                                 </div>
                                             </div>
                                             <Pagination className="rp-pagination">{renderPaginationItems()}</Pagination>
