@@ -124,103 +124,73 @@ class ZaloService
     /**
      * Verify phone token với Zalo API để lấy số điện thoại thật
      *
-     * Luồng:
-     * 1. Exchange phone token (code) → User Access Token
-     * 2. Use User Access Token → Get phone number
+     * Theo tài liệu: https://miniapp.zaloplatforms.com/documents/api/getPhoneNumber/
      *
-     * @param string $code - Authorization code từ getPhoneNumber() của Zalo
+     * @param string $code - Phone token từ getPhoneNumber()
+     * @param string|null $accessToken - Mini App access token từ getAccessToken() (frontend)
      * @return string|null - Số điện thoại thật hoặc null nếu lỗi
      * @throws Exception
      */
-    public function verifyPhoneToken(string $code): ?string
+    public function verifyPhoneToken(string $code, ?string $accessToken = null): ?string
     {
         try {
-            Log::info('Verifying Zalo phone token', ['code_length' => strlen($code)]);
+            Log::info('Verifying Zalo Mini App phone token', [
+                'code_length' => strlen($code),
+                'has_access_token' => !empty($accessToken),
+            ]);
 
-            // Step 1: Exchange authorization code → User Access Token
-            $tokenResponse = Http::asForm()->post('https://oauth.zaloapp.com/v4/access_token', [
-                'app_id' => $this->appId,
-                'app_secret' => $this->secretKey,
+            if (empty($accessToken)) {
+                throw new Exception('access_token từ frontend là bắt buộc để verify phone token');
+            }
+
+            // Theo tài liệu chính thức: GET https://graph.zalo.me/v2.0/me/info
+            // Params: access_token, code, secret_key
+            $response = Http::get('https://graph.zalo.me/v2.0/me/info', [
+                'access_token' => $accessToken,
                 'code' => $code,
-                'grant_type' => 'authorization_code',
+                'secret_key' => $this->secretKey,
             ]);
 
-            Log::info('Exchange code for access token response', [
-                'status' => $tokenResponse->status(),
-                'body' => $tokenResponse->body(),
-                'json' => $tokenResponse->json(),
+            Log::info('Zalo Graph API response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'json' => $response->json(),
             ]);
 
-            if (!$tokenResponse->successful()) {
-                Log::error('Failed to exchange code for access token', [
-                    'status' => $tokenResponse->status(),
-                    'body' => $tokenResponse->body(),
+            if (!$response->successful()) {
+                Log::error('Failed to get phone from Zalo', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
                 ]);
-                throw new Exception('Không thể exchange authorization code thành access token');
+                throw new Exception('Không thể lấy số điện thoại từ Zalo API. Token có thể đã hết hạn (2 phút) hoặc đã được sử dụng.');
             }
 
-            $tokenData = $tokenResponse->json();
+            $data = $response->json();
 
-            if (!isset($tokenData['access_token'])) {
-                Log::error('Access token not found in exchange response', [
-                    'response' => $tokenData
+            // Response format theo tài liệu:
+            // { "data": { "number": "849123456789" }, "error": 0, "message": "Success" }
+
+            if (isset($data['error']) && $data['error'] !== 0) {
+                Log::error('Zalo API returned error', [
+                    'error' => $data['error'],
+                    'message' => $data['message'] ?? 'Unknown error'
                 ]);
-                throw new Exception('Access token không có trong response');
+                throw new Exception($data['message'] ?? 'Lỗi từ Zalo API');
             }
 
-            $userAccessToken = $tokenData['access_token'];
-
-            Log::info('Got user access token', [
-                'token_length' => strlen($userAccessToken),
-                'expires_in' => $tokenData['expires_in'] ?? 'unknown',
-            ]);
-
-            // Step 2: Use access token to get phone number
-            $phoneResponse = Http::withHeaders([
-                'access_token' => $userAccessToken,
-            ])->get('https://graph.zalo.me/v2.0/me/info', [
-                'fields' => 'id,name,picture,phone',
-            ]);
-
-            Log::info('Get phone number response', [
-                'status' => $phoneResponse->status(),
-                'body' => $phoneResponse->body(),
-                'json' => $phoneResponse->json(),
-            ]);
-
-            if (!$phoneResponse->successful()) {
-                Log::error('Failed to get phone number', [
-                    'status' => $phoneResponse->status(),
-                    'body' => $phoneResponse->body(),
-                ]);
-                throw new Exception('Không thể lấy số điện thoại từ Zalo');
-            }
-
-            $userData = $phoneResponse->json();
-
-            // Kiểm tra phone number trong response
-            $phone = null;
-            if (isset($userData['phone'])) {
-                $phone = $userData['phone'];
-            } elseif (isset($userData['data']['phone'])) {
-                $phone = $userData['data']['phone'];
-            } elseif (isset($userData['number'])) {
-                $phone = $userData['number'];
-            } elseif (isset($userData['data']['number'])) {
-                $phone = $userData['data']['number'];
-            }
-
-            if (!$phone) {
-                Log::error('Phone number not found in user data', [
-                    'user_data' => $userData
-                ]);
+            if (!isset($data['data']['number'])) {
+                Log::error('Phone number not found in response', ['response' => $data]);
                 throw new Exception('Số điện thoại không có trong response từ Zalo');
             }
 
+            $phone = $data['data']['number'];
+
             Log::info('Successfully got phone number from Zalo', [
-                'phone' => substr($phone, 0, 3) . '****' . substr($phone, -3)
+                'phone' => substr($phone, 0, 3) . '****' . substr($phone, -3),
+                'format' => 'International (84...)'
             ]);
 
+            // Normalize: 849123456789 → 0123456789
             return $this->normalizePhoneNumber($phone);
 
         } catch (Exception $e) {

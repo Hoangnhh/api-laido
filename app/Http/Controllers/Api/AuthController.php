@@ -79,7 +79,8 @@ class AuthController extends Controller
                 'ip' => $request->ip(),
             ]);
             $request->validate([
-                'phone' => 'required|string',
+                'phone' => 'required|string', // Phone token (code)
+                'access_token' => 'nullable|string', // Mini App access token từ getAccessToken()
                 'zalo_id' => 'nullable|string',
                 'name' => 'nullable|string',
                 'avatar' => 'nullable|string',
@@ -99,7 +100,9 @@ class AuthController extends Controller
 
                 try {
                     // Verify token để lấy số điện thoại thật
-                    $realPhone = $zaloService->verifyPhoneToken($phoneInput);
+                    // Cần access_token từ frontend
+                    $miniAppAccessToken = $request->access_token;
+                    $realPhone = $zaloService->verifyPhoneToken($phoneInput, $miniAppAccessToken);
 
                     if (!$realPhone) {
                         return $this->errorResponse('Không thể xác thực số điện thoại từ Zalo', 400);
