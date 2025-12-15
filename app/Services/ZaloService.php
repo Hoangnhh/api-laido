@@ -22,6 +22,15 @@ class ZaloService
     {
         $this->appId = config('services.zalo.app_id');
         $this->secretKey = config('services.zalo.secret_key');
+
+        Log::info('ZaloService initialized', [
+            'has_app_id' => !empty($this->appId),
+            'has_secret_key' => !empty($this->secretKey),
+        ]);
+
+        if (empty($this->appId) || empty($this->secretKey)) {
+            Log::warning('Zalo config missing! Please set ZALO_APP_ID and ZALO_SECRET_KEY in .env');
+        }
     }
 
     /**

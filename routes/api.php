@@ -23,6 +23,20 @@ Route::group(['middleware' => ['api']], function () {
         Route::group(['prefix' => 'auth'], function () {
             Route::post('login', [AuthController::class, 'login']);
             Route::post('zalo-login', [AuthController::class, 'zaloLogin']);
+
+            // Test route để kiểm tra API hoạt động
+            Route::get('test', function () {
+                \Log::info('Test route called');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'API is working!',
+                    'cache_driver' => config('cache.default'),
+                    'zalo_config' => [
+                        'app_id' => config('services.zalo.app_id') ? 'Đã cấu hình' : 'Chưa cấu hình',
+                        'secret_key' => config('services.zalo.secret_key') ? 'Đã cấu hình' : 'Chưa cấu hình',
+                    ]
+                ]);
+            });
         });
 
         // Protected routes

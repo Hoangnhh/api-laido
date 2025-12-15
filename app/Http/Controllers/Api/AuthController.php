@@ -73,6 +73,11 @@ class AuthController extends Controller
      */
     public function zaloLogin(Request $request, ZaloService $zaloService)
     {
+        Log::info('=== Zalo Login API Called ===', [
+            'request_data' => $request->all(),
+            'ip' => $request->ip(),
+        ]);
+
         try {
             $request->validate([
                 'phone' => 'required|string',
