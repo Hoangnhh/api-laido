@@ -54,10 +54,21 @@ class ZaloService
         Log::info('Fetching new Zalo access token from API');
 
         try {
+            Log::info('Calling Zalo OAuth API', [
+                'app_id' => $this->appId ? 'SET' : 'NOT SET',
+                'app_secret' => $this->secretKey ? 'SET' : 'NOT SET',
+            ]);
+
             $response = Http::asForm()->post('https://oauth.zaloapp.com/v4/oa/access_token', [
                 'app_id' => $this->appId,
                 'app_secret' => $this->secretKey,
                 'grant_type' => 'client_credentials',
+            ]);
+
+            Log::info('Zalo OAuth API response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'json' => $response->json(),
             ]);
 
             if (!$response->successful()) {
@@ -71,7 +82,10 @@ class ZaloService
             $data = $response->json();
 
             if (!isset($data['access_token'])) {
-                Log::error('Access token not found in response', ['data' => $data]);
+                Log::error('Access token not found in response', [
+                    'response_data' => $data,
+                    'response_body' => $response->body(),
+                ]);
                 throw new Exception('Access Token không có trong response từ Zalo');
             }
 
