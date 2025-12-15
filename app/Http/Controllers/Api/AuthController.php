@@ -79,14 +79,16 @@ class AuthController extends Controller
                 'ip' => $request->ip(),
             ]);
             $request->validate([
-                'phone' => 'required|string', // Phone token (code)
+                'phone' => 'required_without:phone_token|string', // Tương thích ngược
+                'phone_token' => 'required_without:phone|string', // Phone token (code) - tên mới
                 'access_token' => 'nullable|string', // Mini App access token từ getAccessToken()
                 'zalo_id' => 'nullable|string',
                 'name' => 'nullable|string',
                 'avatar' => 'nullable|string',
             ]);
 
-            $phoneInput = $request->phone;
+            // Support cả hai tên: phone_token (mới) và phone (cũ)
+            $phoneInput = $request->phone_token ?? $request->phone;
             $realPhone = $phoneInput;
 
             Log::info('Zalo login attempt', [
