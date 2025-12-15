@@ -15,28 +15,13 @@ use App\Http\Controllers\Api\ReviewController;
 
 // Thêm middleware api và cors cho tất cả routes
 Route::group(['middleware' => ['api']], function () {
-
+    
     // API version 1
     Route::prefix('v1')->group(function () {
-
+        
         // Public routes
         Route::group(['prefix' => 'auth'], function () {
             Route::post('login', [AuthController::class, 'login']);
-            Route::post('zalo-login', [AuthController::class, 'zaloLogin']);
-
-            // Test route để kiểm tra API hoạt động
-            Route::get('test', function () {
-                \Log::info('Test route called');
-                return response()->json([
-                    'success' => true,
-                    'message' => 'API is working!',
-                    'cache_driver' => config('cache.default'),
-                    'zalo_config' => [
-                        'app_id' => config('services.zalo.app_id') ? 'Đã cấu hình' : 'Chưa cấu hình',
-                        'secret_key' => config('services.zalo.secret_key') ? 'Đã cấu hình' : 'Chưa cấu hình',
-                    ]
-                ]);
-            });
         });
 
         // Protected routes
@@ -63,7 +48,7 @@ Route::group(['middleware' => ['api']], function () {
                 Route::post('token', [StaffController::class, 'updateFcmToken']);
             });
         });
-
+        
         // Routes cho Review API
         Route::prefix('reviews')->group(function () {
             Route::post('/save', [ReviewController::class, 'store']);
@@ -76,4 +61,4 @@ Route::group(['middleware' => ['api']], function () {
             'message' => 'Route không tồn tại'
         ], 404);
     });
-});
+}); 

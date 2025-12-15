@@ -39,11 +39,4 @@ return [
         'jwt_secret' => env('N8N_JWT_SECRET'),
     ],
 
-    'zalo' => [
-        'app_id' => env('ZALO_APP_ID'),
-        'secret_key' => env('ZALO_SECRET_KEY'),
-        // Access token sẽ được lấy tự động từ API và cache 23 giờ
-        // Không cần cấu hình access_token tĩnh
-    ],
-
 ];
