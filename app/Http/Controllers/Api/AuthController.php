@@ -71,22 +71,13 @@ class AuthController extends Controller
      * - Nếu số điện thoại tồn tại và staff đang active thì đăng nhập thành công
      * - Nếu số điện thoại chưa tồn tại thì từ chối đăng nhập
      */
-    public function zaloLogin(Request $request)
+    public function zaloLogin(Request $request, ZaloService $zaloService)
     {
-        // Tạm thời disable ZaloService để debug
         try {
             \Log::info('=== Zalo Login API Called ===', [
                 'request_data' => $request->all(),
                 'ip' => $request->ip(),
             ]);
-
-            // Test return trước
-            return $this->successResponse([
-                'test' => 'API is working',
-                'received_data' => $request->all(),
-            ], 'Test successful');
-
-            /* TEMPORARY DISABLED FOR DEBUGGING
             $request->validate([
                 'phone' => 'required|string',
                 'zalo_id' => 'nullable|string',
@@ -186,7 +177,6 @@ class AuthController extends Controller
                     'group' => $staff->group
                 ]
             ], 'Đăng nhập thành công');
-            END DISABLED CODE */
 
         } catch (Exception $e) {
             Log::error('Zalo login error', [
