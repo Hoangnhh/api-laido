@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: api-laido
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/public/build
+      - /var/www/storage
+      - /var/www/bootstrap/cache
+      - ./docker/nginx/nginx.conf:/etc/nginx/http.d/default.conf
+      - ./docker/nginx/certs:/etc/letsencrypt
+      - ./docker/nginx/www:/var/www/certbot
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    depends_on:
+      - db
+      - redis
+    networks:
+      - laido-network
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./docker/nginx/certs:/etc/letsencrypt
+      - ./docker/nginx/www:/var/www/certbot
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: admin-laido
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: hxMGyhGcE8oRRJn
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - laido-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - laido-network
+
+networks:
+  laido-network:
+    driver: bridge
+
+volumes:
+  db-data:

@@ -12,18 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->integer('id')->autoIncrement()->primary();
-            $table->uuid('ref_id')->unique();
-            $table->string('ticket_code', 50);
-            $table->dateTime('issue_date');
+            $table->id();
+            $table->uuid('ref_id');
+            $table->string('code', 50);
+            $table->string('service_name', 200);
+            $table->dateTime('issued_date');
             $table->dateTime('expired_date');
             $table->integer('price');
             $table->string('status', 20);
             $table->integer('print_count');
             $table->string('created_by', 50);
             $table->dateTime('created_date');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate();
+            $table->timestamps();
         });
     }
 

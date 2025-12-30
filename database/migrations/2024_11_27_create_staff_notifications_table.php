@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('staff_notifications', function (Blueprint $table) {
+        Schema::create('staff_notification', function (Blueprint $table) {
             $table->id();
             $table->integer('staff_id')->notNull();
             $table->string('title');
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('staff_notifications');
+        Schema::dropIfExists('staff_notification');
     }
 }; 
