@@ -5,14 +5,10 @@ services:
       dockerfile: Dockerfile
     image: api-laido
     ports:
-      - "80:80"
+      - "8080:80"
       - "443:443"
     volumes:
       - .:/var/www
-      - /var/www/vendor
-      - /var/www/public/build
-      - /var/www/storage
-      - /var/www/bootstrap/cache
       - ./docker/nginx/nginx.conf:/etc/nginx/http.d/default.conf
       - ./docker/nginx/certs:/etc/letsencrypt
       - ./docker/nginx/www:/var/www/certbot

@@ -253,16 +253,25 @@ case "$db_choice" in
         else
             echo -e "${BLUE}Sanitizing and importing $sql_path...${NC}"
             
-            # Remove schema prefix and wrap with foreign key check disables
+            # Remove schema prefix from SQL dump
             sed 's/`admin-laido`\.//g' "$sql_path" > database/temp_sanitized.sql
-            { echo "SET FOREIGN_KEY_CHECKS=0;"; cat database/temp_sanitized.sql; echo "SET FOREIGN_KEY_CHECKS=1;"; } > database/temp_import.sql
-            mv database/temp_import.sql database/temp_sanitized.sql
+            
+            # Wrap with foreign key check disables (using printf for proper newlines)
+            {
+                printf "SET FOREIGN_KEY_CHECKS=0;\n"
+                cat database/temp_sanitized.sql
+                printf "\nSET FOREIGN_KEY_CHECKS=1;\n"
+            } > database/temp_import.sql
             
             sg docker -c "docker-compose exec -T app php artisan db:wipe --force" 2>/dev/null || true
-            sg docker -c "docker-compose exec -T db mysql -u admin -phxMGyhGcE8oRRJn admin-laido < database/temp_sanitized.sql"
-            rm -f database/temp_sanitized.sql
             
-            print_success "Database restored successfully!"
+            if sg docker -c "docker-compose exec -T db mysql -u admin -phxMGyhGcE8oRRJn admin-laido < database/temp_import.sql"; then
+                print_success "Database restored successfully!"
+            else
+                print_error "Database import failed! Check the SQL dump file."
+            fi
+            
+            rm -f database/temp_sanitized.sql database/temp_import.sql
         fi
         ;;
     2)

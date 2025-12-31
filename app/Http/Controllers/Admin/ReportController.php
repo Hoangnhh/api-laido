@@ -230,8 +230,15 @@ class ReportController extends Controller
     {
         try {
             // Lấy tham số từ request
-            $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d')) . ' 00:00:00';
-            $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d')) . ' 23:59:59';
+            // Nếu có parameter 'date' thì dùng cho cả from_date và to_date
+            if ($request->has('date')) {
+                $date = $request->input('date');
+                $fromDate = $date . ' 00:00:00';
+                $toDate = $date . ' 23:59:59';
+            } else {
+                $fromDate = $request->input('from_date', Carbon::today()->format('Y-m-d')) . ' 00:00:00';
+                $toDate = $request->input('to_date', Carbon::today()->format('Y-m-d')) . ' 23:59:59';
+            }
 
             // Chuyển đổi thành đối tượng Carbon để xử lý ngày
             $fromDate = Carbon::parse($fromDate)->startOfDay();
