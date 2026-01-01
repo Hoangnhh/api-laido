@@ -20,8 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (config('app.env') === 'production') { // <-- Chỉ áp dụng cho production
-            URL::forceScheme('https'); // <-- Thêm dòng này
+        if (config('app.env') === 'production' || str_contains(config('app.url'), 'https')) {
+            URL::forceScheme('https');
         }
     }
 }
