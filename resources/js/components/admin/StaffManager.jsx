@@ -52,7 +52,7 @@ const BANK_OPTIONS = [
 // Thêm constant cho tên hiển thị của các trường
 const FIELD_LABELS = {
     code: 'Mã nhân viên',
-    name: 'Tên nhân viên', 
+    name: 'Tên nhân viên',
     group_id: 'Nhóm nhân viên',
     card_id: 'CMND/CCCD',
     bank_name: 'Tên ngân hàng',
@@ -120,12 +120,12 @@ const StaffManager = () => {
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return '';
-            
+
             // Format dd/mm/yyyy
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
-            
+
             return `${day}/${month}/${year}`;
         } catch (error) {
             return '';
@@ -247,17 +247,17 @@ const StaffManager = () => {
         }
         setOpenDialog(true);
     };
-    
+
     // Xử lý submit form
     const handleSubmit = async () => {
         if (isSubmitting) return; // Ngăn submit nhiều lần
-        
+
         try {
             setIsSubmitting(true); // Bắt đầu submit
-            
+
             // Kiểm tra các trường bắt buộc
             const requiredFields = [
-                'code', 'name', 'group_id', 'card_id', 
+                'code', 'name', 'group_id', 'card_id',
                 'bank_name', 'bank_account', 'card_date',
                 'birthdate', 'address', 'phone'
             ];
@@ -265,7 +265,7 @@ const StaffManager = () => {
             if (!selectedStaff) {
                 requiredFields.push('password');
             }
-            console.log("formData",formData);
+            console.log("formData", formData);
 
             // Kiểm tra password confirmation
             if (formData.password && formData.password !== formData.password_confirmation) {
@@ -297,7 +297,7 @@ const StaffManager = () => {
 
             // Tiếp tục xử lý submit như cũ
             const formDataToSend = new FormData();
-            
+
             Object.keys(formData).forEach(key => {
                 if (key === 'avatar' && formData[key]) {
                     formDataToSend.append('avatar', formData[key]);
@@ -325,7 +325,7 @@ const StaffManager = () => {
                 });
                 showAlert('Thêm nhân viên thành công');
             }
-            
+
             setOpenDialog(false);
             setShouldFetch(true); // Thay vì gọi fetchStaffs trực tiếp
         } catch (error) {
@@ -435,15 +435,15 @@ const StaffManager = () => {
     const handleDelete = async (staffId) => {
         const staff = staffs.find(s => s.id === staffId);
         const isActive = staff?.status === 'ACTIVE';
-        const confirmMessage = isActive 
-            ? 'Bạn có chắc chắn muốn vô hiệu hóa nhân viên này?' 
+        const confirmMessage = isActive
+            ? 'Bạn có chắc chắn muốn vô hiệu hóa nhân viên này?'
             : 'Bạn có chắc chắn muốn kích hoạt lại nhân viên này?';
 
         if (window.confirm(confirmMessage)) {
             try {
                 await axios.put(`/admin/staffs/${staffId}/toggle-status`);
                 showAlert(
-                    isActive 
+                    isActive
                         ? 'Vô hiệu hóa nhân viên thành công'
                         : 'Kích hoạt nhân viên thành công'
                 );
@@ -512,8 +512,10 @@ const StaffManager = () => {
                 // Đặt độ rộng cột
                 const colWidths = [
                     { wch: 5 },  // STT
-                    { wch: 12 }, // Mã nhân viên
+                    { wch: 8 },  // ID
+                    { wch: 15 }, // Mã nhân viên
                     { wch: 25 }, // Tên nhân viên
+                    { wch: 20 }, // Tên đăng nhập
                     { wch: 20 }, // Nhóm
                     { wch: 15 }, // Số điện thoại
                     { wch: 15 }, // CMND/CCCD
@@ -522,9 +524,13 @@ const StaffManager = () => {
                     { wch: 30 }, // Địa chỉ
                     { wch: 10 }, // Tải trọng
                     { wch: 15 }, // Loại phương tiện
+                    { wch: 15 }, // Loại nhân viên
+                    { wch: 12 }, // Trưởng nhóm
+                    { wch: 20 }, // Cổng mặc định
                     { wch: 15 }, // Ngân hàng
                     { wch: 20 }, // Số tài khoản
-                    { wch: 15 }  // Trạng thái
+                    { wch: 15 }, // Trạng thái
+                    { wch: 20 }  // Ngày tạo
                 ];
                 ws['!cols'] = colWidths;
 
@@ -546,7 +552,7 @@ const StaffManager = () => {
                     <h2 className="staff-manager-title">
                         Quản lý nhân viên
                     </h2>
-                    
+
                     <Box className="staff-manager-controls">
                         {/* Status Filter */}
                         <TextField
@@ -638,7 +644,7 @@ const StaffManager = () => {
                             startIcon={<FontAwesomeIcon icon={faFileExcel} />}
                             onClick={handleExportExcel}
                             className="staff-manager-export-btn"
-                            sx={{ 
+                            sx={{
                                 bgcolor: '#217346',
                                 '&:hover': {
                                     bgcolor: '#1a5a38'
@@ -696,17 +702,17 @@ const StaffManager = () => {
                                 </TableRow>
                             ) : (
                                 staffs.map((staff) => (
-                                    <TableRow 
+                                    <TableRow
                                         key={staff.id}
                                         sx={{ '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.04)' } }}
                                     >
                                         <TableCell>
-                                            <Box 
+                                            <Box
                                                 className="staff-manager-avatar-wrapper"
                                                 component="label"
                                             >
                                                 <Avatar
-                                                    src={staff.avatar_url} 
+                                                    src={staff.avatar_url}
                                                     alt={staff.name}
                                                     sx={{ width: 40, height: 40 }}
                                                 />
@@ -722,14 +728,14 @@ const StaffManager = () => {
                                         <TableCell>{staff.name}</TableCell>
                                         <TableCell>
                                             {staff.group ? (
-                                                <Chip 
+                                                <Chip
                                                     label={staff.group.name}
                                                     color="primary"
                                                     variant="outlined"
                                                     size="small"
                                                 />
                                             ) : (
-                                                <Chip 
+                                                <Chip
                                                     label="Chưa phân nhóm"
                                                     color="default"
                                                     variant="outlined"
@@ -739,14 +745,14 @@ const StaffManager = () => {
                                         </TableCell>
                                         <TableCell>
                                             {staff.default_gate_id ? (
-                                                <Chip 
+                                                <Chip
                                                     label={gates.find(g => g.id === staff.default_gate_id)?.name || `Cổng ${staff.default_gate_id}`}
                                                     color="info"
                                                     variant="outlined"
                                                     size="small"
                                                 />
                                             ) : (
-                                                <Chip 
+                                                <Chip
                                                     label="Không rõ"
                                                     color="default"
                                                     variant="outlined"
@@ -811,15 +817,15 @@ const StaffManager = () => {
                         rowsPerPage={rowsPerPage}
                         onRowsPerPageChange={handleRowsPerPageChange}
                         labelRowsPerPage="Số dòng mỗi trang:"
-                        labelDisplayedRows={({ from, to, count }) => 
+                        labelDisplayedRows={({ from, to, count }) =>
                             `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
                         }
                     />
                 </TableContainer>
 
                 {/* Dialog */}
-                <Dialog 
-                    open={openDialog} 
+                <Dialog
+                    open={openDialog}
                     onClose={() => setOpenDialog(false)}
                     maxWidth={false}
                     className="staff-manager-dialog"
@@ -827,12 +833,12 @@ const StaffManager = () => {
                     <DialogTitle className="staff-manager-dialog-title">
                         {selectedStaff ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
                     </DialogTitle>
-                    
+
                     <DialogContent>
                         <Box className="staff-manager-form">
                             {/* Left side - Avatar */}
                             <Box className="staff-manager-avatar-container">
-                                <Box 
+                                <Box
                                     className="staff-manager-avatar-wrapper"
                                     component="label"
                                 >
@@ -864,7 +870,7 @@ const StaffManager = () => {
                                             value={formData.code}
                                             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                                         />
-                                        
+
                                         <TextField
                                             required
                                             label="Tên nhân viên"
@@ -996,15 +1002,15 @@ const StaffManager = () => {
                                                 onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
                                                 required={!selectedStaff || formData.password}
                                                 error={formData.password !== formData.password_confirmation}
-                                                helperText={formData.password !== formData.password_confirmation ? 
-                                                    "Mật khẩu không khớp" : 
+                                                helperText={formData.password !== formData.password_confirmation ?
+                                                    "Mật khẩu không khớp" :
                                                     selectedStaff ? "ể trống nếu không muốn đổi mật khẩu" : "Bắt buộc nhập lại mật khẩu"
                                                 }
                                             />
 
                                             <Box sx={{ display: 'flex', gap: 2 }}>
                                                 <TextField
-                                                    label="Tải trọng phương tiện (Người)" 
+                                                    label="Tải trọng phương tiện (Người)"
                                                     type="number"
                                                     value={formData.vehical_size}
                                                     onChange={(e) => setFormData({ ...formData, vehical_size: parseInt(e.target.value) || 0 })}
@@ -1067,10 +1073,10 @@ const StaffManager = () => {
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 3 }}>
-                        <Button 
+                        <Button
                             onClick={() => setOpenDialog(false)}
                             disabled={isSubmitting}
-                            sx={{ 
+                            sx={{
                                 color: '#2c3e50',
                                 '&:hover': {
                                     bgcolor: 'rgba(44, 62, 80, 0.1)',
@@ -1079,12 +1085,12 @@ const StaffManager = () => {
                         >
                             Hủy
                         </Button>
-                        <Button 
-                            variant="contained" 
+                        <Button
+                            variant="contained"
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            sx={{ 
-                                bgcolor: '#2c3e50', 
+                            sx={{
+                                bgcolor: '#2c3e50',
                                 color: 'white',
                                 '&:hover': {
                                     bgcolor: '#1a252f'
