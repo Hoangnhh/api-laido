@@ -24,15 +24,17 @@ Route::prefix('admin')->group(function () {
         }
         return view('admin.login');
     })->name('admin.login');
-    
+
     Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
-    
+
     Route::middleware(['auth'])->group(function () {
+        // Đổi mật khẩu
+        Route::post('/change-password', [AuthController::class, 'changePassword'])->name('admin.change-password');
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
-        
+
         Route::get('/users', function () {
             return view('admin.user-manager');
         })->name('admin.user-manager');
@@ -104,7 +106,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/revenue-detail-report', function () {
             return view('admin.revenue-detail-report');
         })->name('admin.revenue-detail-report');
-        
+
         Route::get('/ticket-print-history-report', function () {
             return view('admin.ticket-print-history-report');
         })->name('admin.ticket-print-history-report');
@@ -120,6 +122,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/ticket-by-name-report', function () {
             return view('admin.ticket-by-name-report');
         })->name('admin.ticket-by-name-report');
+
+        Route::get('/ticket-status-report', function () {
+            return view('admin.ticket-status-report');
+        })->name('admin.ticket-status-report');
+
+        Route::get('/change-password', function () {
+            return view('admin.change-password');
+        })->name('admin.change-password.view');
+
 
         // Thêm route toggle status cho staff
         Route::put('/staffs/{staff}/toggle-status', [StaffController::class, 'toggleStatus'])
@@ -193,6 +204,8 @@ Route::prefix('api/admin')->group(function () {
     Route::get('/get-ticket-by-name', [ReportController::class, 'getTicketByName']);
     Route::get('/get-payment-all-data', [PaymentController::class, 'getPaymentAllData']);
     Route::post('/create-payment-all', [PaymentController::class, 'createPaymentAll']);
+    Route::get('/get-ticket-status-report', [ReportController::class, 'getTicketStatusReport']);
+    Route::get('/get-ticket-status-statistics', [ReportController::class, 'getTicketStatusStatistics']);
 });
 
 // Route không cần xác thực

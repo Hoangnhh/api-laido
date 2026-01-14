@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('extra_shifts', function (Blueprint $table) {
+        Schema::create('extra_shift', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->date('date');
-            $table->unsignedBigInteger('staff_id')->default(0);
+            $table->foreignId('staff_id')->constrained('staff');
             $table->integer('recheckin_times')->default(0);
             $table->text('recheckin_at')->nullable();
             $table->string('status')->default('ACTIVE');
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('extra_shifts');
+        Schema::dropIfExists('extra_shift');
     }
 }; 

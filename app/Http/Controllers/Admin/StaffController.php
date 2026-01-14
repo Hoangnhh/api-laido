@@ -303,7 +303,7 @@ class StaffController extends Controller
             $vehicalType = $request->input('vehical_type');
             $defaultGateId = $request->input('default_gate_id');
             
-            $query = Staff::with('group');
+            $query = Staff::with(['group', 'gate']);
 
             // Áp dụng các điều kiện lọc
             if ($groupId) {
@@ -337,8 +337,10 @@ class StaffController extends Controller
             $staffs = $query->get()->map(function($staff, $index) {
                 return [
                     'STT' => $index + 1,
+                    'ID' => $staff->id,
                     'Mã nhân viên' => $staff->code,
                     'Tên nhân viên' => $staff->name,
+                    'Tên đăng nhập' => $staff->username,
                     'Nhóm' => $staff->group ? $staff->group->name : '',
                     'Số điện thoại' => $staff->phone,
                     'CMND/CCCD' => $staff->card_id,
@@ -347,9 +349,13 @@ class StaffController extends Controller
                     'Địa chỉ' => $staff->address,
                     'Tải trọng' => $staff->vehical_size,
                     'Loại phương tiện' => $staff->vehical_type == 1 ? 'Đò' : 'Xuồng',
+                    'Loại nhân viên' => $staff->type,
+                    'Trưởng nhóm' => $staff->is_master ? 'Có' : 'Không',
+                    'Cổng mặc định' => $staff->gate ? $staff->gate->name : '',
                     'Ngân hàng' => $staff->bank_name,
                     'Số tài khoản' => $staff->bank_account,
-                    'Trạng thái' => $staff->status == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'
+                    'Trạng thái' => $staff->status == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động',
+                    'Ngày tạo' => $staff->created_at ? $staff->created_at->format('d/m/Y H:i:s') : ''
                 ];
             })->toArray();
 

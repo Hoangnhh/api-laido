@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('gate_shifts', function (Blueprint $table) {
+        Schema::create('gate_shift', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gate_id')->constrained('gates');
+            $table->foreignId('gate_id')->constrained('gate');
             $table->integer('current_index')->default(1);
             $table->string('status', 45)->default('ACTIVE');
             $table->timestamps();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('gate_shifts');
+        Schema::dropIfExists('gate_shift');
     }
 }; 

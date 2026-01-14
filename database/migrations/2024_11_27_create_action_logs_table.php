@@ -12,10 +12,10 @@ return new class extends Migration
             $table->id();
             $table->string('action', 45);
             $table->string('table', 45)->nullable();
-            $table->text('before_data')->nullable();
-            $table->text('after_data')->nullable();
+            $table->json('before_data')->nullable();
+            $table->json('after_data')->nullable();
             $table->string('create_by', 45);
-            $table->timestamp('create_at')->useCurrent();
+            $table->dateTime('create_at')->useCurrent();
         });
     }
 

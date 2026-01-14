@@ -8,8 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('checked_tickets', function (Blueprint $table) {
+        Schema::create('checked_ticket', function (Blueprint $table) {
             $table->id();
+            $table->dateTime('issue_date')->nullable();
+            $table->dateTime('expired_date')->nullable();
             $table->string('code', 45);
             $table->string('name', 45)->nullable();
             $table->string('status', 45)->default('CHECKIN');
@@ -22,18 +24,18 @@ return new class extends Migration
             $table->foreignId('payment_id')->nullable();
             $table->boolean('paid')->default(false);
             $table->string('price', 20)->default('0');
-            $table->integer('commisson')->default(0);
+            $table->integer('commission')->default(0);
             $table->boolean('is_checkout_with_other')->default(false);
             $table->boolean('is_checkin_with_other')->default(false);
-            $table->foreignId('gate_shift_staff_id')->nullable();
+            $table->foreignId('gate_staff_shift_id')->nullable();
             $table->foreignId('staff_id')->constrained('staff');
-            $table->foreignId('extra_shift_id')->nullable()->constrained('extra_shifts');
+            $table->foreignId('extra_shift_id')->nullable()->constrained('extra_shift');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('checked_tickets');
+        Schema::dropIfExists('checked_ticket');
     }
 }; 

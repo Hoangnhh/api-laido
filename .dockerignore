@@ -1,0 +1,29 @@
+# Docker Ignore
+.git
+.gitignore
+.dockerignore
+.idea
+.vscode
+*.md
+!README.md
+
+# Dependencies
+node_modules
+vendor
+
+# Laravel artifacts
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+
+# SSL certificates (owned by root, causes build issues)
+docker/nginx/certs/
+docker/nginx/www/
+
+# Temporary files
+*.log
+*.tmp
+.env.local
+.env.*.local

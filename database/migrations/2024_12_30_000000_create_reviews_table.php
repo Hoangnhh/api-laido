@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('customer_phone', 45);
             $table->string('email', 45)->nullable();
             $table->tinyInteger('stars')->default(1);
-            $table->text('other_review')->nullable();
+            $table->json('other_review')->nullable();
             $table->text('note')->nullable();
             $table->tinyInteger('is_view')->default(0);
-            $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('created_at')->useCurrent();
         });
     }
 

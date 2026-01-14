@@ -1,0 +1,29 @@
+# Multi-app and Reverse Proxy Configuration
+# HTTP - redirect all traffic to HTTPS, but allow Certbot challenge
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{APP_DOMAIN}};
+
+    root /var/www/public;
+    index index.php;
+    charset utf-8;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    {{HTTP_LOCATION_BLOCK}}
+
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+
+{{SSL_SERVER_BLOCK}}
