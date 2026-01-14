@@ -21,6 +21,7 @@ class Staff extends Model
     protected $fillable = [
         'type',
         'group_id',
+        'zalo_id',
         'code',
         'name',
         'username',

@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('type', 45)->default('DRIVER');
             $table->foreignId('group_id')->constrained('staff_group');
+            $table->string('zalo_id', 45)->nullable();
             $table->string('code', 45);
             $table->string('name', 200);
             $table->string('phone', 45)->nullable();

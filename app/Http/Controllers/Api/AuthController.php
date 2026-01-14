@@ -59,4 +59,85 @@ class AuthController extends Controller
             ]
         ], 'Đăng nhập thành công');
     }
+
+    public function zaloCheck(Request $request)
+    {
+        $request->validate([
+            'zalo_id' => 'required|string'
+        ]);
+
+        $staff = Staff::where('zalo_id', $request->zalo_id)
+            ->where('status', Staff::STATUS_ACTIVE)
+            ->first();
+
+        if (!$staff) {
+            return $this->successResponse([
+                'is_exist' => false
+            ]);
+        }
+
+        $payload = [
+            'user_id' => $staff->id,
+            'code' => $staff->code,
+            'phone' => $staff->phone,
+            'username' => $staff->username,
+            'name' => $staff->name,
+            'type' => $staff->type,
+            'group_id' => $staff->group_id,
+            'iat' => time(),
+            'exp' => time() + (60 * 60 * 24 * 30) // 30 ngày
+        ];
+
+        $token = JWT::encode($payload, config('app.key'), 'HS256');
+
+        return $this->successResponse([
+            'access_token' => $token,
+            'user' => [
+                'id' => $staff->id,
+                'username' => $staff->username,
+                'code' => $staff->code,
+                'phone' => $staff->phone,
+                'name' => $staff->name,
+                'type' => $staff->type,
+                'group' => $staff->group
+            ]
+        ], 'Đăng nhập thành công');
+    }
+
+    public function zaloLogin(Request $request)
+    {
+        $request->validate([
+            'access_token' => 'required|string',
+            'phone_request_token' => 'required|string',
+            'zalo_id' => 'required|string'
+        ]);
+
+        $zaloAccessToken = 'e6lMuhDJ2pOO9DZHRb1D';
+        // $payload = [
+        //     'user_id' => $staff->id,
+        //     'code' => $staff->code,
+        //     'phone' => $staff->phone,
+        //     'username' => $staff->username,
+        //     'name' => $staff->name,
+        //     'type' => $staff->type,
+        //     'group_id' => $staff->group_id,
+        //     'iat' => time(),
+        //     'exp' => time() + (60 * 60 * 24 * 30) // 30 ngày
+        // ];
+
+        // $token = JWT::encode($payload, config('app.key'), 'HS256');
+
+        // return $this->successResponse([
+        //     'access_token' => $token,
+        //     'user' => [
+        //         'id' => $staff->id,
+        //         'username' => $staff->username,
+        //         'code' => $staff->code,
+        //         'phone' => $staff->phone,
+        //         'name' => $staff->name,
+        //         'type' => $staff->type,
+        //         'group' => $staff->group
+        //     ]
+        // ], 'Đăng nhập thành công');
+    }
 } 
