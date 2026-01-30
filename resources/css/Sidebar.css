@@ -168,6 +168,26 @@
     flex-direction: column;
     height: calc(100vh - 80px);
     position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar styling */
+.sb-sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sb-sidebar-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sb-sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sb-sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .sb-menu-item {
@@ -336,6 +356,7 @@
     margin-top: auto;
     padding: 20px 0;
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
+    flex-shrink: 0;
 }
 
 .sb-logout-item {
@@ -453,8 +474,10 @@
 
     /* Điều chỉnh lại chiều cao của sidebar menu */
     .sb-sidebar-menu {
-        height: 100%;
+        height: calc(100vh - 60px);
         padding-top: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     /* Các style hiện tại */

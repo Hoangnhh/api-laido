@@ -1,0 +1,143 @@
+
+> build
+> vite build
+
+vite v5.4.10 building for production...
+Browserslist: browsers data (caniuse-lite) is 15 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+transforming...
+node_modules/@mui/material/styles/useThemeProps.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/useThemeProps.js" was ignored.
+node_modules/@mui/material/styles/ThemeProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/ThemeProvider.js" was ignored.
+node_modules/@mui/material/styles/styled.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/styled.js" was ignored.
+node_modules/@mui/material/styles/useTheme.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/useTheme.js" was ignored.
+node_modules/@mui/material/styles/ThemeProviderWithVars.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/ThemeProviderWithVars.js" was ignored.
+node_modules/@mui/material/styles/defaultTheme.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/defaultTheme.js" was ignored.
+node_modules/@mui/material/styles/ThemeProviderNoVars.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/styles/ThemeProviderNoVars.js" was ignored.
+node_modules/@mui/system/esm/Stack/Stack.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/system/esm/Stack/Stack.js" was ignored.
+node_modules/@mui/system/esm/Grid/Grid.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/system/esm/Grid/Grid.js" was ignored.
+node_modules/@mui/material/utils/index.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@mui/material/utils/index.js" was ignored.
+node_modules/react-bootstrap/esm/Accordion.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Accordion.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionContext.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionContext.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionButton.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionButton.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionCollapse.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionCollapse.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionBody.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionHeader.js" was ignored.
+node_modules/react-bootstrap/esm/AccordionItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AccordionItem.js" was ignored.
+node_modules/react-bootstrap/esm/Alert.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Alert.js" was ignored.
+node_modules/react-bootstrap/esm/AlertHeading.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AlertHeading.js" was ignored.
+node_modules/react-bootstrap/esm/AlertLink.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/AlertLink.js" was ignored.
+node_modules/react-bootstrap/esm/Badge.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Badge.js" was ignored.
+node_modules/react-bootstrap/esm/Breadcrumb.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Breadcrumb.js" was ignored.
+node_modules/react-bootstrap/esm/BreadcrumbItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/BreadcrumbItem.js" was ignored.
+node_modules/react-bootstrap/esm/Button.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Button.js" was ignored.
+node_modules/react-bootstrap/esm/ButtonGroup.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ButtonGroup.js" was ignored.
+node_modules/react-bootstrap/esm/ButtonToolbar.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ButtonToolbar.js" was ignored.
+node_modules/react-bootstrap/esm/CardBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardBody.js" was ignored.
+node_modules/react-bootstrap/esm/Card.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Card.js" was ignored.
+node_modules/react-bootstrap/esm/CardFooter.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardFooter.js" was ignored.
+node_modules/react-bootstrap/esm/CardGroup.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardGroup.js" was ignored.
+node_modules/react-bootstrap/esm/CardImg.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardImg.js" was ignored.
+node_modules/react-bootstrap/esm/CardHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardHeader.js" was ignored.
+node_modules/react-bootstrap/esm/CardImgOverlay.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardImgOverlay.js" was ignored.
+node_modules/react-bootstrap/esm/CardLink.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardLink.js" was ignored.
+node_modules/react-bootstrap/esm/CardSubtitle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardSubtitle.js" was ignored.
+node_modules/react-bootstrap/esm/CardText.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardText.js" was ignored.
+node_modules/react-bootstrap/esm/CardTitle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CardTitle.js" was ignored.
+node_modules/react-bootstrap/esm/Carousel.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Carousel.js" was ignored.
+node_modules/react-bootstrap/esm/CarouselCaption.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CarouselCaption.js" was ignored.
+node_modules/react-bootstrap/esm/CarouselItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/CarouselItem.js" was ignored.
+node_modules/react-bootstrap/esm/Col.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Col.js" was ignored.
+node_modules/react-bootstrap/esm/Container.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Container.js" was ignored.
+node_modules/react-bootstrap/esm/Dropdown.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Dropdown.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownHeader.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownDivider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownDivider.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownItem.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownItemText.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownItemText.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownToggle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownToggle.js" was ignored.
+node_modules/react-bootstrap/esm/Figure.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Figure.js" was ignored.
+node_modules/react-bootstrap/esm/FigureCaption.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FigureCaption.js" was ignored.
+node_modules/react-bootstrap/esm/DropdownMenu.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/DropdownMenu.js" was ignored.
+node_modules/react-bootstrap/esm/FormCheck.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormCheck.js" was ignored.
+node_modules/react-bootstrap/esm/FormFloating.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormFloating.js" was ignored.
+node_modules/react-bootstrap/esm/FloatingLabel.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FloatingLabel.js" was ignored.
+node_modules/react-bootstrap/esm/FormSelect.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormSelect.js" was ignored.
+node_modules/react-bootstrap/esm/FormText.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormText.js" was ignored.
+node_modules/react-bootstrap/esm/Image.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Image.js" was ignored.
+node_modules/react-bootstrap/esm/FormControl.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormControl.js" was ignored.
+node_modules/react-bootstrap/esm/FormLabel.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/FormLabel.js" was ignored.
+node_modules/react-bootstrap/esm/InputGroup.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/InputGroup.js" was ignored.
+node_modules/react-bootstrap/esm/Modal.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Modal.js" was ignored.
+node_modules/react-bootstrap/esm/ModalBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ModalBody.js" was ignored.
+node_modules/react-bootstrap/esm/ModalDialog.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ModalDialog.js" was ignored.
+node_modules/react-bootstrap/esm/ModalFooter.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ModalFooter.js" was ignored.
+node_modules/react-bootstrap/esm/ModalHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ModalHeader.js" was ignored.
+node_modules/react-bootstrap/esm/ModalTitle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ModalTitle.js" was ignored.
+node_modules/react-bootstrap/esm/ListGroup.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ListGroup.js" was ignored.
+node_modules/react-bootstrap/esm/ListGroupItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ListGroupItem.js" was ignored.
+node_modules/react-bootstrap/esm/Nav.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Nav.js" was ignored.
+node_modules/react-bootstrap/esm/Navbar.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Navbar.js" was ignored.
+node_modules/react-bootstrap/esm/NavbarBrand.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavbarBrand.js" was ignored.
+node_modules/react-bootstrap/esm/NavbarOffcanvas.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavbarOffcanvas.js" was ignored.
+node_modules/react-bootstrap/esm/NavbarCollapse.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavbarCollapse.js" was ignored.
+node_modules/react-bootstrap/esm/NavbarText.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavbarText.js" was ignored.
+node_modules/react-bootstrap/esm/NavbarToggle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavbarToggle.js" was ignored.
+node_modules/react-bootstrap/esm/NavDropdown.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavDropdown.js" was ignored.
+node_modules/react-bootstrap/esm/NavItem.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavItem.js" was ignored.
+node_modules/react-bootstrap/esm/NavLink.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/NavLink.js" was ignored.
+node_modules/react-bootstrap/esm/Offcanvas.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Offcanvas.js" was ignored.
+node_modules/react-bootstrap/esm/OffcanvasBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/OffcanvasBody.js" was ignored.
+node_modules/react-bootstrap/esm/OffcanvasHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/OffcanvasHeader.js" was ignored.
+node_modules/react-bootstrap/esm/OffcanvasTitle.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/OffcanvasTitle.js" was ignored.
+node_modules/react-bootstrap/esm/OffcanvasToggling.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/OffcanvasToggling.js" was ignored.
+node_modules/react-bootstrap/esm/Overlay.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Overlay.js" was ignored.
+node_modules/react-bootstrap/esm/Pagination.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Pagination.js" was ignored.
+node_modules/react-bootstrap/esm/Popover.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Popover.js" was ignored.
+node_modules/react-bootstrap/esm/PopoverBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/PopoverBody.js" was ignored.
+node_modules/react-bootstrap/esm/PopoverHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/PopoverHeader.js" was ignored.
+node_modules/react-bootstrap/esm/ProgressBar.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ProgressBar.js" was ignored.
+node_modules/react-bootstrap/esm/Ratio.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Ratio.js" was ignored.
+node_modules/react-bootstrap/esm/Row.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Row.js" was ignored.
+node_modules/react-bootstrap/esm/Spinner.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Spinner.js" was ignored.
+node_modules/react-bootstrap/esm/Stack.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Stack.js" was ignored.
+node_modules/react-bootstrap/esm/OverlayTrigger.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/OverlayTrigger.js" was ignored.
+node_modules/react-bootstrap/esm/TabContent.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/TabContent.js" was ignored.
+node_modules/react-bootstrap/esm/Table.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Table.js" was ignored.
+node_modules/react-bootstrap/esm/TabPane.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/TabPane.js" was ignored.
+node_modules/react-bootstrap/esm/ThemeProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ThemeProvider.js" was ignored.
+node_modules/react-bootstrap/esm/ToastBody.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ToastBody.js" was ignored.
+node_modules/react-bootstrap/esm/Toast.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Toast.js" was ignored.
+node_modules/react-bootstrap/esm/ToastContainer.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ToastContainer.js" was ignored.
+node_modules/react-bootstrap/esm/ToastHeader.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ToastHeader.js" was ignored.
+node_modules/react-bootstrap/esm/ToggleButton.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/ToggleButton.js" was ignored.
+node_modules/react-bootstrap/esm/Tooltip.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/react-bootstrap/esm/Tooltip.js" was ignored.
+✓ 435 modules transformed.
+x Build failed in 5.21s
+error during build:
+[vite:esbuild] Transform failed with 1 error:
+/app/resources/js/components/admin/Layout/Sidebar.jsx:466:0: ERROR: Unexpected "}"
+file: /app/resources/js/components/admin/Layout/Sidebar.jsx:466:0
+
+Unexpected "}"
+464|      </>
+465|  );
+466|  };
+   |  ^
+467|  
+468|  export default Sidebar; 
+
+    at failureErrorWithLog (/app/node_modules/esbuild/lib/main.js:1472:15)
+    at /app/node_modules/esbuild/lib/main.js:755:50
+    at responseCallbacks.<computed> (/app/node_modules/esbuild/lib/main.js:622:9)
+    at handleIncomingPacket (/app/node_modules/esbuild/lib/main.js:677:12)
+    at Socket.readFromStdout (/app/node_modules/esbuild/lib/main.js:600:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.7.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+npm notice To update run: npm install -g npm@11.7.0
+npm notice

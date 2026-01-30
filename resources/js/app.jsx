@@ -29,8 +29,11 @@ import TicketByHoursReport from './components/admin/reports/TicketByHoursReport'
 import StaffCheckin from './components/admin/StaffCheckin';
 import TicketByNameReport from './components/admin/reports/TicketByNameReport';
 import TicketStatusReport from './components/admin/reports/TicketStatusReport';
+import BoatOperatorPaymentReport from './components/admin/reports/BoatOperatorPaymentReport';
+import BoatOperatorPaymentReportV2 from './components/admin/reports/BoatOperatorPaymentReportV2';
 import PaymentAll from './components/admin/PaymentAll';
 import ChangePassword from './components/admin/ChangePassword';
+import PostManager from './components/admin/PostManager';
 
 const theme = createTheme({
     palette: {
@@ -112,10 +115,16 @@ const App = () => {
                 return <TicketByNameReport />;
             case '/admin/ticket-status-report':
                 return <TicketStatusReport />;
+            case '/admin/boat-operator-payment-report':
+                return <BoatOperatorPaymentReport />;
+            case '/admin/boat-operator-payment-report-v2':
+                return <BoatOperatorPaymentReportV2 />;
             case '/admin/payment-all':
                 return <PaymentAll />;
             case '/admin/change-password':
                 return <ChangePassword />;
+            case '/admin/posts':
+                return <PostManager />;
             default:
                 return <Dashboard />;  // hoặc có thể return null hoặc component 404
         }
@@ -133,7 +142,7 @@ const App = () => {
 if (document.getElementById('app')) {
     ReactDOM.createRoot(document.getElementById('app')).render(
         // <React.StrictMode>
-            <App />
+        <App />
         // </React.StrictMode>
     );
 }

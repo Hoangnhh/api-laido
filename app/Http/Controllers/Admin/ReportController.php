@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Firebase\JWT\JWT;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class ReportController extends Controller
 {
@@ -653,6 +658,672 @@ class ReportController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get JSON báo cáo thanh toán vé lái đò cho FE hiển thị
+     * Tách riêng vé chỉ chiều vào và vé đủ 2 chiều
+     */
+    public function getBoatOperatorPaymentReport(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $staffSearch = $request->input('staff_search');
+            $ticketType = $request->input('ticket_type');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            $fromDateParsed = Carbon::parse($fromDate)->format('Y-m-d');
+            $toDateParsed = Carbon::parse($toDate)->format('Y-m-d');
+
+            // Build filters dynamically
+            $filters = [];
+            $params = [$fromDateParsed, $toDateParsed];
+
+            if ($staffSearch) {
+                $filters[] = "(s.code LIKE ? OR s.name LIKE ?)";
+                $params[] = "%{$staffSearch}%";
+                $params[] = "%{$staffSearch}%";
+            }
+
+            if ($ticketType) {
+                $filters[] = "ct.name = ?";
+                $params[] = $ticketType;
+            }
+
+            $whereClause = count($filters) > 0 ? "AND " . implode(" AND ", $filters) : "";
+
+            $sql = "
+                SELECT
+                    s.id as staff_id,
+                    s.code as staff_code,
+                    s.name as staff_name,
+                    ct.name as ticket_type,
+                    ct.commission as price,
+                    CASE
+                        WHEN ct.checkin_by = s.username AND ct.checkout_by = s.username THEN '2 Chiều'
+                        WHEN ct.checkin_by = s.username AND (ct.checkout_by IS NULL OR ct.checkout_by != s.username) THEN 'Chiều vào'
+                    END as direction,
+                    COUNT(DISTINCT ct.code) as quantity,
+                    SUM(ct.commission) as total_amount
+                FROM checked_ticket ct
+                INNER JOIN staff s ON ct.staff_id = s.id
+                WHERE ct.date >= ?
+                  AND ct.date <= ?
+                  AND ct.checkin_by = s.username
+                  {$whereClause}
+                GROUP BY
+                    s.id, s.code, s.name, ct.name, ct.commission,
+                    CASE
+                        WHEN ct.checkin_by = s.username AND ct.checkout_by = s.username THEN '2 Chiều'
+                        WHEN ct.checkin_by = s.username AND (ct.checkout_by IS NULL OR ct.checkout_by != s.username) THEN 'Chiều vào'
+                    END
+                HAVING direction IS NOT NULL
+                ORDER BY s.code ASC, ct.name ASC, direction DESC
+            ";
+
+            $results = DB::select($sql, $params);
+
+            // Tính tổng
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            foreach ($results as $row) {
+                $totalQuantity += $row->quantity;
+                $totalAmount += $row->total_amount;
+            }
+
+            // Format items với STT
+            $items = [];
+            $stt = 1;
+            foreach ($results as $row) {
+                $items[] = [
+                    'stt' => $stt++,
+                    'staff_code' => $row->staff_code,
+                    'staff_name' => $row->staff_name,
+                    'ticket_type' => $row->ticket_type,
+                    'direction' => $row->direction,
+                    'price' => (int) $row->price,
+                    'quantity' => (int) $row->quantity,
+                    'total_amount' => (int) $row->total_amount
+                ];
+            }
+
+            // Tên filter nhân viên
+            $staffFilterName = 'Tất cả';
+            if ($staffSearch) {
+                $staffFilterName = "Tìm kiếm: {$staffSearch}";
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'report_title' => 'BẢNG KÊ THANH TOÁN VÉ LÁI ĐÒ',
+                    'service_name' => 'Dịch vụ đò Hương Tích',
+                    'date_range' => [
+                        'from_date' => Carbon::parse($fromDate)->format('d/m/Y'),
+                        'to_date' => Carbon::parse($toDate)->format('d/m/Y')
+                    ],
+                    'staff_filter' => $staffFilterName,
+                    'summary' => [
+                        'total_quantity' => $totalQuantity,
+                        'total_amount' => $totalAmount
+                    ],
+                    'items' => $items
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get danh sách loại vé từ checked_ticket
+     */
+    public function getTicketTypes(Request $request)
+    {
+        try {
+            $ticketTypes = DB::table('checked_ticket')
+                ->select('name')
+                ->distinct()
+                ->whereNotNull('name')
+                ->orderBy('name')
+                ->pluck('name');
+
+            return response()->json([
+                'success' => true,
+                'data' => $ticketTypes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export Excel báo cáo thanh toán vé lái đò
+     * Tách riêng vé chỉ chiều vào và vé đủ 2 chiều
+     */
+    public function exportBoatOperatorPaymentReport(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $staffSearch = $request->input('staff_search');
+            $ticketType = $request->input('ticket_type');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            $fromDateParsed = Carbon::parse($fromDate)->format('Y-m-d');
+            $toDateParsed = Carbon::parse($toDate)->format('Y-m-d');
+
+            // Build filters dynamically
+            $filters = [];
+            $params = [$fromDateParsed, $toDateParsed];
+
+            if ($staffSearch) {
+                $filters[] = "(s.code LIKE ? OR s.name LIKE ?)";
+                $params[] = "%{$staffSearch}%";
+                $params[] = "%{$staffSearch}%";
+            }
+
+            if ($ticketType) {
+                $filters[] = "ct.name = ?";
+                $params[] = $ticketType;
+            }
+
+            $whereClause = count($filters) > 0 ? "AND " . implode(" AND ", $filters) : "";
+
+            $sql = "
+                SELECT
+                    s.id as staff_id,
+                    s.code as staff_code,
+                    s.name as staff_name,
+                    ct.name as ticket_type,
+                    ct.commission as price,
+                    CASE
+                        WHEN ct.checkin_by = s.username AND ct.checkout_by = s.username THEN '2 Chiều'
+                        WHEN ct.checkin_by = s.username AND (ct.checkout_by IS NULL OR ct.checkout_by != s.username) THEN 'Chiều vào'
+                    END as direction,
+                    COUNT(DISTINCT ct.code) as quantity,
+                    SUM(ct.commission) as total_amount
+                FROM checked_ticket ct
+                INNER JOIN staff s ON ct.staff_id = s.id
+                WHERE ct.date >= ?
+                  AND ct.date <= ?
+                  AND ct.checkin_by = s.username
+                  {$whereClause}
+                GROUP BY
+                    s.id, s.code, s.name, ct.name, ct.commission,
+                    CASE
+                        WHEN ct.checkin_by = s.username AND ct.checkout_by = s.username THEN '2 Chiều'
+                        WHEN ct.checkin_by = s.username AND (ct.checkout_by IS NULL OR ct.checkout_by != s.username) THEN 'Chiều vào'
+                    END
+                HAVING direction IS NOT NULL
+                ORDER BY s.code ASC, ct.name ASC, direction DESC
+            ";
+
+            $results = DB::select($sql, $params);
+
+            // Tính tổng
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            foreach ($results as $row) {
+                $totalQuantity += $row->quantity;
+                $totalAmount += $row->total_amount;
+            }
+
+            // Tên filter nhân viên
+            $staffFilterName = 'Tất cả';
+            if ($staffSearch) {
+                $staffFilterName = "Tìm kiếm: {$staffSearch}";
+            }
+
+            // Tạo Excel
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Báo cáo vé lái đò');
+
+            // Header công ty
+            $sheet->setCellValue('A1', 'HTX DỊCH VỤ DU LỊCH CHÙA HƯƠNG');
+            $sheet->setCellValue('A2', 'Dịch vụ đò Hương Tích');
+            $sheet->mergeCells('A1:C1');
+            $sheet->mergeCells('A2:C2');
+
+            // Tiêu đề báo cáo
+            $sheet->setCellValue('D1', 'BẢNG KÊ THANH TOÁN VÉ LÁI ĐÒ');
+            $sheet->setCellValue('D2', 'Từ ngày: ' . Carbon::parse($fromDate)->format('d/m/Y') . ' đến ' . Carbon::parse($toDate)->format('d/m/Y'));
+            $sheet->setCellValue('D3', 'Nhân viên thanh toán: ' . $staffFilterName);
+            $sheet->mergeCells('D1:G1');
+            $sheet->mergeCells('D2:G2');
+            $sheet->mergeCells('D3:G3');
+
+            // Style header
+            $sheet->getStyle('A1:G1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('D1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Tiêu đề cột (row 5)
+            $headerRow = 5;
+            $headers = ['STT', 'Số đò', 'Tên lái đò', 'Loại vé', 'Mệnh giá', 'Số lượng', 'Thành tiền'];
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValue($columns[$index] . $headerRow, $header);
+            }
+
+            // Style header row
+            $sheet->getStyle('A' . $headerRow . ':G' . $headerRow)->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'CCCCCC']
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN
+                    ]
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ]
+            ]);
+
+            // Dòng tổng (row 6)
+            $summaryRow = 6;
+            $sheet->setCellValue('C' . $summaryRow, Carbon::parse($fromDate)->format('d/m/Y') . ' - ' . Carbon::parse($toDate)->format('d/m/Y'));
+            $sheet->setCellValue('F' . $summaryRow, $totalQuantity);
+            $sheet->setCellValue('G' . $summaryRow, $totalAmount);
+            $sheet->getStyle('A' . $summaryRow . ':G' . $summaryRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $summaryRow . ':G' . $summaryRow)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN
+                    ]
+                ]
+            ]);
+
+            // Data rows
+            $currentRow = 7;
+            $stt = 1;
+            foreach ($results as $row) {
+                $sheet->setCellValue('A' . $currentRow, $stt++);
+                $sheet->setCellValue('B' . $currentRow, $row->staff_code);
+                $sheet->setCellValue('C' . $currentRow, $row->staff_name);
+                $sheet->setCellValue('D' . $currentRow, $row->ticket_type . ' (' . $row->direction . ')');
+                $sheet->setCellValue('E' . $currentRow, (int)$row->price);
+                $sheet->setCellValue('F' . $currentRow, (int)$row->quantity);
+                $sheet->setCellValue('G' . $currentRow, (int)$row->total_amount);
+
+                // Border cho data row
+                $sheet->getStyle('A' . $currentRow . ':G' . $currentRow)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN
+                        ]
+                    ]
+                ]);
+
+                $currentRow++;
+            }
+
+            // Format số
+            $sheet->getStyle('E6:G' . ($currentRow - 1))->getNumberFormat()->setFormatCode('#,##0');
+
+            // Auto width columns
+            foreach ($columns as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Alignment
+            $sheet->getStyle('A6:B' . ($currentRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('E6:G' . ($currentRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+            // Output
+            $filename = 'bao-cao-ve-lai-do-' . date('Y-m-d-H-i-s') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Báo cáo thanh toán lái đò v2 - Group theo nhân viên và ngày
+     */
+    public function getBoatOperatorPaymentReportV2(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $staffSearch = $request->input('staff_search');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            $fromDateParsed = Carbon::parse($fromDate)->format('Y-m-d');
+            $toDateParsed = Carbon::parse($toDate)->format('Y-m-d');
+
+            // Giới hạn khoảng thời gian tối đa 1 năm để tránh quá tải
+            $daysDiff = Carbon::parse($fromDateParsed)->diffInDays(Carbon::parse($toDateParsed));
+            if ($daysDiff > 365) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khoảng thời gian tìm kiếm không được vượt quá 365 ngày'
+                ], 422);
+            }
+
+            // Build filters dynamically
+            $filters = [];
+            $params = [$fromDateParsed, $toDateParsed];
+
+            if ($staffSearch) {
+                $filters[] = "(s.code LIKE ? OR s.name LIKE ?)";
+                $params[] = "%{$staffSearch}%";
+                $params[] = "%{$staffSearch}%";
+            }
+
+            $whereClause = count($filters) > 0 ? "AND " . implode(" AND ", $filters) : "";
+
+            // Tăng giới hạn thời gian và bộ nhớ cho request lớn
+            set_time_limit(120);
+            ini_set('memory_limit', '512M');
+
+            // Query tối ưu: sử dụng subquery để filter trước khi join
+            $sql = "
+                SELECT
+                    s.id as staff_id,
+                    s.code as staff_code,
+                    s.name as staff_name,
+                    ct.date as ticket_date,
+                    ct.commission as price,
+                    COUNT(*) as quantity,
+                    SUM(ct.commission) as total_amount
+                FROM checked_ticket ct
+                INNER JOIN staff s ON ct.staff_id = s.id AND ct.checkin_by = s.username
+                WHERE ct.date >= ?
+                  AND ct.date <= ?
+                  {$whereClause}
+                GROUP BY
+                    s.id, s.code, s.name, ct.date, ct.commission
+                ORDER BY s.name ASC, ct.date ASC, ct.commission DESC
+            ";
+
+            $results = DB::select($sql, $params);
+
+            // Tổ chức dữ liệu theo cấu trúc nhân viên > ngày > vé
+            $staffData = [];
+            $totalQuantity = 0;
+            $totalAmount = 0;
+
+            foreach ($results as $row) {
+                $staffId = $row->staff_id;
+                $date = $row->ticket_date;
+
+                if (!isset($staffData[$staffId])) {
+                    $staffData[$staffId] = [
+                        'staff_id' => $staffId,
+                        'staff_code' => $row->staff_code,
+                        'staff_name' => $row->staff_name,
+                        'total_quantity' => 0,
+                        'total_amount' => 0,
+                        'dates' => []
+                    ];
+                }
+
+                if (!isset($staffData[$staffId]['dates'][$date])) {
+                    $staffData[$staffId]['dates'][$date] = [
+                        'date' => $date,
+                        'date_display' => Carbon::parse($date)->format('d/m/Y'),
+                        'tickets' => [],
+                        'day_total_quantity' => 0,
+                        'day_total_amount' => 0
+                    ];
+                }
+
+                // Thêm vé vào ngày
+                $staffData[$staffId]['dates'][$date]['tickets'][] = [
+                    'price' => (int) $row->price,
+                    'quantity' => (int) $row->quantity,
+                    'total_amount' => (int) $row->total_amount
+                ];
+
+                // Cộng dồn cho ngày
+                $staffData[$staffId]['dates'][$date]['day_total_quantity'] += $row->quantity;
+                $staffData[$staffId]['dates'][$date]['day_total_amount'] += $row->total_amount;
+
+                // Cộng dồn cho nhân viên
+                $staffData[$staffId]['total_quantity'] += $row->quantity;
+                $staffData[$staffId]['total_amount'] += $row->total_amount;
+
+                // Cộng dồn tổng
+                $totalQuantity += $row->quantity;
+                $totalAmount += $row->total_amount;
+            }
+
+            // Chuyển đổi dates từ associative array sang indexed array
+            foreach ($staffData as &$staff) {
+                $staff['dates'] = array_values($staff['dates']);
+            }
+
+            // Chuyển staffData từ associative array sang indexed array
+            $items = array_values($staffData);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'report_title' => 'BẢNG KÊ THANH TOÁN VÉ LÁI ĐÒ V2',
+                    'service_name' => 'Dịch vụ đò Hương Tích',
+                    'date_range' => [
+                        'from_date' => Carbon::parse($fromDate)->format('d/m/Y'),
+                        'to_date' => Carbon::parse($toDate)->format('d/m/Y')
+                    ],
+                    'staff_filter' => $staffSearch ? "Tìm kiếm: {$staffSearch}" : 'Tất cả',
+                    'summary' => [
+                        'total_quantity' => $totalQuantity,
+                        'total_amount' => $totalAmount,
+                        'total_staff' => count($items)
+                    ],
+                    'items' => $items
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export Excel báo cáo thanh toán lái đò v2
+     */
+    public function exportBoatOperatorPaymentReportV2(Request $request)
+    {
+        try {
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $staffSearch = $request->input('staff_search');
+
+            if (!$fromDate || !$toDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng nhập đầy đủ từ ngày và đến ngày'
+                ], 422);
+            }
+
+            $fromDateParsed = Carbon::parse($fromDate)->format('Y-m-d');
+            $toDateParsed = Carbon::parse($toDate)->format('Y-m-d');
+
+            // Giới hạn khoảng thời gian tối đa 1 năm
+            $daysDiff = Carbon::parse($fromDateParsed)->diffInDays(Carbon::parse($toDateParsed));
+            if ($daysDiff > 365) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khoảng thời gian xuất không được vượt quá 365 ngày'
+                ], 422);
+            }
+
+            // Build filters dynamically
+            $filters = [];
+            $params = [$fromDateParsed, $toDateParsed];
+
+            if ($staffSearch) {
+                $filters[] = "(s.code LIKE ? OR s.name LIKE ?)";
+                $params[] = "%{$staffSearch}%";
+                $params[] = "%{$staffSearch}%";
+            }
+
+            $whereClause = count($filters) > 0 ? "AND " . implode(" AND ", $filters) : "";
+
+            // Tăng giới hạn thời gian và bộ nhớ cho export
+            set_time_limit(300);
+            ini_set('memory_limit', '1G');
+
+            // Query tối ưu
+            $sql = "
+                SELECT
+                    s.id as staff_id,
+                    s.code as staff_code,
+                    s.name as staff_name,
+                    ct.date as ticket_date,
+                    ct.commission as price,
+                    COUNT(*) as quantity,
+                    SUM(ct.commission) as total_amount
+                FROM checked_ticket ct
+                INNER JOIN staff s ON ct.staff_id = s.id AND ct.checkin_by = s.username
+                WHERE ct.date >= ?
+                  AND ct.date <= ?
+                  {$whereClause}
+                GROUP BY
+                    s.id, s.code, s.name, ct.date, ct.commission
+                ORDER BY s.name ASC, ct.date ASC, ct.commission DESC
+            ";
+
+            $results = DB::select($sql, $params);
+
+            // Tạo Excel
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Tiêu đề
+            $sheet->setCellValue('A1', 'BẢNG KÊ THANH TOÁN VÉ LÁI ĐÒ V2');
+            $sheet->mergeCells('A1:F1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Khoảng thời gian
+            $dateRange = Carbon::parse($fromDate)->format('d/m/Y') . ' - ' . Carbon::parse($toDate)->format('d/m/Y');
+            $sheet->setCellValue('A2', 'Từ ngày: ' . $dateRange);
+            $sheet->mergeCells('A2:F2');
+
+            // Header
+            $headers = ['STT', 'Mã NV', 'Tên nhân viên', 'Ngày', 'Mệnh giá', 'Số lượng', 'Thành tiền'];
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '4', $header);
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $sheet->getStyle($col . '4')->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFE0E0E0');
+                $col++;
+            }
+
+            // Dữ liệu
+            $row = 5;
+            $stt = 1;
+            $currentStaffId = null;
+            $totalQuantity = 0;
+            $totalAmount = 0;
+
+            foreach ($results as $item) {
+                $sheet->setCellValue('A' . $row, $stt++);
+                $sheet->setCellValue('B' . $row, $item->staff_code);
+                $sheet->setCellValue('C' . $row, $item->staff_name);
+                $sheet->setCellValue('D' . $row, Carbon::parse($item->ticket_date)->format('d/m/Y'));
+                $sheet->setCellValue('E' . $row, $item->price);
+                $sheet->setCellValue('F' . $row, $item->quantity);
+                $sheet->setCellValue('G' . $row, $item->total_amount);
+
+                $totalQuantity += $item->quantity;
+                $totalAmount += $item->total_amount;
+                $row++;
+            }
+
+            // Dòng tổng
+            $sheet->setCellValue('A' . $row, '');
+            $sheet->setCellValue('B' . $row, '');
+            $sheet->setCellValue('C' . $row, 'TỔNG CỘNG');
+            $sheet->setCellValue('D' . $row, '');
+            $sheet->setCellValue('E' . $row, '');
+            $sheet->setCellValue('F' . $row, $totalQuantity);
+            $sheet->setCellValue('G' . $row, $totalAmount);
+            $sheet->getStyle('A' . $row . ':G' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $row . ':G' . $row)->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFFFF0B3');
+
+            // Format số
+            $sheet->getStyle('E5:G' . $row)->getNumberFormat()->setFormatCode('#,##0');
+
+            // Auto size columns
+            foreach (range('A', 'G') as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
+            }
+
+            // Border
+            $sheet->getStyle('A4:G' . $row)->getBorders()->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
+
+            // Output
+            $filename = 'bang_ke_thanh_toan_lai_do_v2_' . date('YmdHis') . '.xlsx';
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()

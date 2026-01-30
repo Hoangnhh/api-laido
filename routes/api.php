@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\TicketController;
 use App\Http\Middleware\VerifyJWTToken;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Admin\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,12 @@ Route::group(['middleware' => ['api']], function () {
         // Routes cho Review API
         Route::prefix('reviews')->group(function () {
             Route::post('/save', [ReviewController::class, 'store']);
+        });
+
+        // Routes cho Post API (Public)
+        Route::prefix('posts')->group(function () {
+            Route::get('/', [PostController::class, 'index']);
+            Route::get('/{id}', [PostController::class, 'show']);
         });
     });
 

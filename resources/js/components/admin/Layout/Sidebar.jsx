@@ -18,7 +18,8 @@ import {
     faDoorOpen,
     faDoorClosed,
     faLocationDot,
-    faKey
+    faKey,
+    faFileLines
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../../../../css/Sidebar.css';
@@ -29,15 +30,15 @@ const Sidebar = () => {
     const location = window.location.pathname;
     const [collapsed, setCollapsed] = useState(false);
     const [user, setUser] = useState(null);
-    
+
     const menuItems = [
-        { 
-            text: 'Trang chủ', 
+        {
+            text: 'Trang chủ',
             icon: faHome,
             path: '/admin/dashboard'
         },
-        { 
-            text: 'Phân ca', 
+        {
+            text: 'Phân ca',
             icon: faCalendarAlt,
             path: '/admin/shift-assignments'
         },
@@ -47,25 +48,25 @@ const Sidebar = () => {
             icon: faUsers,
             path: '#',
             children: [
-                { 
-                    text: 'Thanh toán theo lái đò', 
+                {
+                    text: 'Thanh toán theo lái đò',
                     icon: faMoneyBillWave,
                     path: '/admin/accounts-payable'
                 },
-                { 
-                    text: 'Thanh toán toàn bộ', 
+                {
+                    text: 'Thanh toán toàn bộ',
                     icon: faMoneyBillWave,
                     path: '/admin/payment-all'
                 }
             ]
         },
-        { 
-            text: 'Màn hình checkin', 
+        {
+            text: 'Màn hình checkin',
             icon: faDoorOpen,
             path: '/admin/queue-display'
         },
-        { 
-            text: 'Màn hình checkout', 
+        {
+            text: 'Màn hình checkout',
             icon: faDoorClosed,
             path: '/admin/checkout-screen'
         },
@@ -74,19 +75,19 @@ const Sidebar = () => {
             icon: faUsers,
             path: '#',
             children: [
-                { 
-                    text: 'Quản lý nhóm nhân viên', 
+                {
+                    text: 'Quản lý nhóm nhân viên',
                     icon: faCircle,
                     path: '/admin/staff-group'
                 },
-                { 
-                    text: 'Quản lý nhân viên', 
+                {
+                    text: 'Quản lý nhân viên',
                     icon: faCircle,
                     path: '/admin/staff'
                 },
             ]
         },
-        
+
         {
             text: 'Báo cáo',
             icon: faChartLine,
@@ -97,82 +98,97 @@ const Sidebar = () => {
                     icon: faCircle,
                     path: '/admin/payment-report'
                 },
-                { 
-                    text: 'Vé đã sử dụng', 
+                {
+                    text: 'Vé đã sử dụng',
                     icon: faCircle,
                     path: '/admin/used-tickets-list-report'
                 },
-                { 
-                    text: 'Lái đò đang chờ', 
+                {
+                    text: 'Lái đò đang chờ',
                     icon: faCircle,
                     path: '/admin/waiting-list-for-checkin-report'
                 },
-                { 
-                    text: 'Lái đò đang hoạt động', 
+                {
+                    text: 'Lái đò đang hoạt động',
                     icon: faCircle,
                     path: '/admin/checkin-list-report'
                 },
-                { 
-                    text: 'Lái đò đã kết ca', 
+                {
+                    text: 'Lái đò đã kết ca',
                     icon: faCircle,
                     path: '/admin/checkout-list-report'
                 },
-                { 
-                    text: 'Tổng hợp vé đã in', 
+                {
+                    text: 'Tổng hợp vé đã in',
                     icon: faCircle,
                     path: '/admin/revenue-report'
                 },
-                { 
-                    text: 'Vé đã in theo thu ngân', 
+                {
+                    text: 'Vé đã in theo thu ngân',
                     icon: faCircle,
                     path: '/admin/revenue-detail-report'
                 },
-                { 
-                    text: 'Lịch sử in lại vé', 
+                {
+                    text: 'Lịch sử in lại vé',
                     icon: faCircle,
                     path: '/admin/ticket-print-history-report'
                 },
-                { 
-                    text: 'Vé sử dụng theo giờ', 
+                {
+                    text: 'Vé sử dụng theo giờ',
                     icon: faCircle,
                     path: '/admin/ticket-by-hours-report'
                 },
-                { 
-                    text: 'Vé sử dụng theo tên', 
+                {
+                    text: 'Vé sử dụng theo tên',
                     icon: faCircle,
                     path: '/admin/ticket-by-name-report'
                 },
-                { 
-                    text: 'Trạng thái vé', 
+                {
+                    text: 'Trạng thái vé',
                     icon: faCircle,
                     path: '/admin/ticket-status-report'
+                },
+                {
+                    text: 'Bảng kê vé lái đò',
+                    icon: faCircle,
+                    path: '/admin/boat-operator-payment-report'
+                },
+                {
+                    text: 'Bảng kê vé lái đò V2',
+                    icon: faCircle,
+                    path: '/admin/boat-operator-payment-report-v2'
                 }
 
             ]
         },
-        { 
-            text: 'Đánh giá từ khách hàng', 
+        {
+            text: 'Đánh giá từ khách hàng',
             icon: faStar,
             path: '/admin/reviews'
         },
-                { 
-            text: 'Quản lý người dùng', 
+        {
+            text: 'Quản lý người dùng',
             icon: faUserCircle,
             path: '/admin/users'
         },
-        { 
-            text: 'Quản lý vị trí', 
+        {
+            text: 'Quản lý bài viết',
+            icon: faFileLines,
+            path: '/admin/posts'
+        },
+        {
+            text: 'Quản lý vị trí',
             icon: faLocationDot,
             path: '/admin/gate'
         },
-        { 
-            text: 'Cấu hình hệ thống', 
+        {
+            text: 'Cấu hình hệ thống',
             icon: faGear,
             path: '/admin/settings'
         },
-        
+
     ];
-    
+
     // Tìm menu cha dựa vào location hiện tại
     const findParentMenu = () => {
         for (const item of menuItems) {
@@ -188,7 +204,7 @@ const Sidebar = () => {
 
     // Khởi tạo state với menu cha được tìm thấy
     const [openSubmenu, setOpenSubmenu] = useState(findParentMenu());
-    
+
     // Thêm useEffect để cập nhật openSubmenu khi location thay đổi
     useEffect(() => {
         const parentMenu = findParentMenu();
@@ -225,7 +241,7 @@ const Sidebar = () => {
     const handleLogout = async (e) => {
         e.preventDefault();
         setIsLoggingOut(true);
-        
+
         try {
             const response = await axios.post('/admin/logout', {}, {
                 headers: {
@@ -254,7 +270,7 @@ const Sidebar = () => {
         const newCollapsed = !collapsed;
         setCollapsed(newCollapsed);
         localStorage.setItem('sidebarCollapsed', JSON.stringify(newCollapsed));
-        
+
         // Dispatch custom event để thông báo cho AdminLayout
         window.dispatchEvent(new CustomEvent('sidebarToggle', {
             detail: { collapsed: newCollapsed }
@@ -307,7 +323,14 @@ const Sidebar = () => {
     const hasPermission = (path) => {
         if (!user) return false;
         if (user.username === 'admin') return true;
-        return user.permission?.includes(path);
+        if (!user.permission) return false;
+
+        // Đảm bảo permission là array trước khi sử dụng
+        const permissions = Array.isArray(user.permission)
+            ? user.permission
+            : (typeof user.permission === 'string' ? JSON.parse(user.permission) : []);
+
+        return permissions.includes(path);
     };
 
     // Lọc và hiển thị menu items dựa trên quyền
@@ -315,19 +338,19 @@ const Sidebar = () => {
         if (user?.username === 'admin') return true;
         if (item.children) {
             // Lọc các submenu items có quyền truy cập
-            const allowedChildren = item.children.filter(child => 
+            const allowedChildren = item.children.filter(child =>
                 hasPermission(child.path)
             );
             // Chỉ hiện menu cha nếu có ít nhất 1 menu con được phép truy cập
             return allowedChildren.length > 0;
         }
-        
+
         return hasPermission(item.path);
     }).map(item => {
         if (item.children) {
             return {
                 ...item,
-                children: item.children.filter(child => 
+                children: item.children.filter(child =>
                     user?.username === 'admin' || hasPermission(child.path)
                 )
             };
@@ -338,7 +361,7 @@ const Sidebar = () => {
     return (
         <>
             {isLoggingOut && <Loading message="Đang đăng xuất..." />}
-            
+
             {/* Mobile Header */}
             <div className="sb-mobile-header">
                 <button className="sb-mobile-toggle" onClick={toggleMobileSidebar}>
@@ -375,7 +398,7 @@ const Sidebar = () => {
                             </div>
                         )}
                     </div>
-                    <button 
+                    <button
                         className="sb-toggle-button"
                         onClick={toggleSidebar}
                         title={collapsed ? "Mở rộng" : "Thu gọn"}
@@ -387,7 +410,7 @@ const Sidebar = () => {
                     {filteredMenuItems.map((item) => (
                         item.children ? (
                             <div key={item.text} className="sb-menu-item-group">
-                                <div 
+                                <div
                                     className={`sb-menu-item sb-parent ${openSubmenu === item.text ? 'sb-active' : ''}`}
                                     onClick={() => handleParentClick(item.text)}
                                 >
@@ -398,8 +421,8 @@ const Sidebar = () => {
                                         <span className="sb-menu-text">{item.text}</span>
                                     </div>
                                     <span className="sb-arrow-icon">
-                                        <FontAwesomeIcon 
-                                            icon={openSubmenu === item.text ? faChevronDown : faChevronRight} 
+                                        <FontAwesomeIcon
+                                            icon={openSubmenu === item.text ? faChevronDown : faChevronRight}
                                         />
                                     </span>
                                 </div>
@@ -434,8 +457,8 @@ const Sidebar = () => {
                     ))}
                     <div className="sb-sidebar-bottom">
                         <div className="sb-menu-divider"></div>
-                        <a 
-                            href="#" 
+                        <a
+                            href="#"
                             className="sb-menu-item sb-logout-item"
                             onClick={handleLogout}
                         >

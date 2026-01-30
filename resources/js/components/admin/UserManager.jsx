@@ -125,9 +125,25 @@ const menuItems = [
         text: 'Vé sử dụng theo giờ', 
         path: '/admin/ticket-by-hours-report'
     },
-    { 
-        text: 'Vé sử dụng theo tên', 
+    {
+        text: 'Vé sử dụng theo tên',
         path: '/admin/ticket-by-name-report'
+    },
+    {
+        text: 'Trạng thái vé',
+        path: '/admin/ticket-status-report'
+    },
+    {
+        text: 'Bảng kê vé lái đò',
+        path: '/admin/boat-operator-payment-report'
+    },
+    {
+        text: 'Bảng kê vé lái đò V2',
+        path: '/admin/boat-operator-payment-report-v2'
+    },
+    {
+        text: 'Quản lý bài viết',
+        path: '/admin/posts'
     },
 ];
 

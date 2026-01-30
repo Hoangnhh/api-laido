@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Middleware\VerifyAjaxRequest;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Api\TicketController;
 
 Route::prefix('admin')->group(function () {
@@ -103,6 +104,12 @@ Route::prefix('admin')->group(function () {
             return view('admin.reviews');
         })->name('admin.reviews');
 
+        Route::get('/posts', function () {
+            // Debug: check if route is reached
+            // dd('Reached the posts route');
+            return view('admin.posts');
+        })->name('admin.posts');
+
         Route::get('/revenue-detail-report', function () {
             return view('admin.revenue-detail-report');
         })->name('admin.revenue-detail-report');
@@ -126,6 +133,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/ticket-status-report', function () {
             return view('admin.ticket-status-report');
         })->name('admin.ticket-status-report');
+
+        Route::get('/boat-operator-payment-report', function () {
+            return view('admin.boat-operator-payment-report');
+        })->name('admin.boat-operator-payment-report');
+
+        Route::get('/boat-operator-payment-report-v2', function () {
+            return view('admin.boat-operator-payment-report-v2');
+        })->name('admin.boat-operator-payment-report-v2');
 
         Route::get('/change-password', function () {
             return view('admin.change-password');
@@ -206,6 +221,12 @@ Route::prefix('api/admin')->group(function () {
     Route::post('/create-payment-all', [PaymentController::class, 'createPaymentAll']);
     Route::get('/get-ticket-status-report', [ReportController::class, 'getTicketStatusReport']);
     Route::get('/get-ticket-status-statistics', [ReportController::class, 'getTicketStatusStatistics']);
+    Route::get('/export-boat-operator-payment-report', [ReportController::class, 'exportBoatOperatorPaymentReport']);
+    Route::get('/get-boat-operator-payment-report', [ReportController::class, 'getBoatOperatorPaymentReport']);
+    Route::get('/get-boat-operator-payment-report-v2', [ReportController::class, 'getBoatOperatorPaymentReportV2']);
+    Route::get('/export-boat-operator-payment-report-v2', [ReportController::class, 'exportBoatOperatorPaymentReportV2']);
+    Route::get('/get-ticket-types', [ReportController::class, 'getTicketTypes']);
+    Route::apiResource('posts', PostController::class);
 });
 
 // Route không cần xác thực

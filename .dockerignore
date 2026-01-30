@@ -18,9 +18,18 @@ storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*.php
 
+# Built frontend assets (will be built inside Docker)
+public/build
+
 # SSL certificates (owned by root, causes build issues)
 docker/nginx/certs/
 docker/nginx/www/
+
+# Backups and SQL files
+backups/
+*.sql
+*.sql.gz
+admin-laido
 
 # Temporary files
 *.log
