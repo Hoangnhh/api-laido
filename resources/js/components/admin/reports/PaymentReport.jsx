@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 
 const PaymentReport = () => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     const [filters, setFilters] = useState({
         from_date: today,
         to_date: today,
@@ -48,6 +48,15 @@ const PaymentReport = () => {
         fetchData();
     };
 
+    const removeAccents = (str) => {
+        if (!str) return '';
+        return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+    }
+
     const handleExportExcel = () => {
         // Chuẩn bị dữ liệu cho Excel
         const excelData = data.map((item, index) => ({
@@ -55,7 +64,7 @@ const PaymentReport = () => {
             'Dịch vụ': 'HYR',
             'Số TK nguồn': '2205555556868',
             'Số TK thụ hưởng': item.received_account || '',
-            'Tên TK thụ hưởng': item.staff_name,
+            'Tên TK thụ hưởng': removeAccents(item.staff_name),
             'Tên viết tắt ngân hàng thụ hưởng': '',
             'Tên ngân hàng thụ hưởng': '',
             'Tên chi nhánh ngân hàng thụ hưởng': '',
@@ -87,20 +96,20 @@ const PaymentReport = () => {
         // Định dạng từng cột
         for (let R = range.s.r + 1; R <= range.e.r; R++) {
             // STT - căn giữa
-            ws[XLSX.utils.encode_cell({r: R, c: 0})].s = {
+            ws[XLSX.utils.encode_cell({ r: R, c: 0 })].s = {
                 alignment: { horizontal: "center" }
             };
 
             // Số tiền - căn phải và định dạng số
-            const amountCell = XLSX.utils.encode_cell({r: R, c: 9});
+            const amountCell = XLSX.utils.encode_cell({ r: R, c: 9 });
             ws[amountCell].s = {
                 alignment: { horizontal: "right" },
                 numFmt: "#,##0"
             };
-            
+
             // Các cột khác - căn trái
-            for (let C of [1,2,3,4,5,6,7,8,10,11,12]) {
-                ws[XLSX.utils.encode_cell({r: R, c: C})].s = {
+            for (let C of [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12]) {
+                ws[XLSX.utils.encode_cell({ r: R, c: C })].s = {
                     alignment: { horizontal: "left" }
                 };
             }
@@ -142,8 +151,8 @@ const PaymentReport = () => {
         if (!selectedPayment) return null;
 
         return (
-            <Modal 
-                show={showTicketModal} 
+            <Modal
+                show={showTicketModal}
                 onHide={() => setShowTicketModal(false)}
                 size="lg"
             >
@@ -155,9 +164,9 @@ const PaymentReport = () => {
                         <strong>Nhân viên:</strong> {selectedPayment.staff_code} - {selectedPayment.staff_name}<br />
                         <strong>Ngày:</strong> {selectedPayment.payment_date}<br />
                         <strong>Hình thức:</strong> {selectedPayment.payment_method}<br />
-                        <strong>Tổng tiền:</strong> {new Intl.NumberFormat('vi-VN', { 
-                            style: 'currency', 
-                            currency: 'VND' 
+                        <strong>Tổng tiền:</strong> {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
                         }).format(selectedPayment.amount)}
                     </div>
                     <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -181,9 +190,9 @@ const PaymentReport = () => {
                                         <td>{ticket.ticket_name}</td>
                                         <td>{ticket.direction}</td>
                                         <td className="text-end">
-                                            {new Intl.NumberFormat('vi-VN', { 
-                                                style: 'currency', 
-                                                currency: 'VND' 
+                                            {new Intl.NumberFormat('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND'
                                             }).format(ticket.commission)}
                                         </td>
                                     </tr>
@@ -194,9 +203,9 @@ const PaymentReport = () => {
                     <div className="mt-3 text-end">
                         <strong>Tổng hoa hồng: </strong>
                         <span>
-                            {new Intl.NumberFormat('vi-VN', { 
-                                style: 'currency', 
-                                currency: 'VND' 
+                            {new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
                             }).format(selectedPayment.total_commission)}
                         </span>
                     </div>
@@ -226,10 +235,10 @@ const PaymentReport = () => {
 
     const renderPaginationItems = () => {
         let items = [];
-        
+
         // Nút Previous
         items.push(
-            <Pagination.Prev 
+            <Pagination.Prev
                 key="prev"
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -309,10 +318,10 @@ const PaymentReport = () => {
                                     <Col md={3}>
                                         <Form.Group>
                                             <Form.Label>Từ ngày</Form.Label>
-                                            <Form.Control 
+                                            <Form.Control
                                                 type="date"
                                                 value={filters.from_date}
-                                                onChange={(e) => setFilters({...filters, from_date: e.target.value})}
+                                                onChange={(e) => setFilters({ ...filters, from_date: e.target.value })}
                                                 max={filters.to_date}
                                             />
                                         </Form.Group>
@@ -320,10 +329,10 @@ const PaymentReport = () => {
                                     <Col md={3}>
                                         <Form.Group>
                                             <Form.Label>Đến ngày</Form.Label>
-                                            <Form.Control 
+                                            <Form.Control
                                                 type="date"
                                                 value={filters.to_date}
-                                                onChange={(e) => setFilters({...filters, to_date: e.target.value})}
+                                                onChange={(e) => setFilters({ ...filters, to_date: e.target.value })}
                                                 min={filters.from_date}
                                             />
                                         </Form.Group>
@@ -331,35 +340,35 @@ const PaymentReport = () => {
                                     <Col md={2}>
                                         <Form.Group>
                                             <Form.Label>Mã thanh toán</Form.Label>
-                                            <Form.Control 
+                                            <Form.Control
                                                 type="text"
                                                 placeholder="Nhập mã thanh toán"
                                                 value={filters.payment_code}
-                                                onChange={(e) => setFilters({...filters, payment_code: e.target.value})}
+                                                onChange={(e) => setFilters({ ...filters, payment_code: e.target.value })}
                                             />
                                         </Form.Group>
                                     </Col>
                                     <Col md={2}>
                                         <Form.Group>
                                             <Form.Label>Mã nhân viên</Form.Label>
-                                            <Form.Control 
+                                            <Form.Control
                                                 type="text"
                                                 placeholder="Nhập mã nhân viên"
                                                 value={filters.staff_code}
-                                                onChange={(e) => setFilters({...filters, staff_code: e.target.value})}
+                                                onChange={(e) => setFilters({ ...filters, staff_code: e.target.value })}
                                             />
                                         </Form.Group>
                                     </Col>
                                     <Col md={2} className="d-flex align-items-end">
-                                        <Button 
-                                            variant="primary" 
+                                        <Button
+                                            variant="primary"
                                             className="me-2"
                                             onClick={handleSearch}
                                         >
                                             Tìm kiếm
                                         </Button>
-                                        <Button 
-                                            variant="success" 
+                                        <Button
+                                            variant="success"
                                             onClick={handleExportExcel}
                                             disabled={data.length === 0}
                                         >
@@ -384,15 +393,15 @@ const PaymentReport = () => {
                                     <Table striped bordered hover className="rp-table mb-0">
                                         <thead>
                                             <tr>
-                                                <th className="text-center" style={{minWidth: '60px'}}>STT</th>
-                                                <th style={{minWidth: '150px'}}>Mã thanh toán</th>
-                                                <th style={{minWidth: '100px'}}>Ngày</th>
-                                                <th style={{minWidth: '100px'}}>Mã NV</th>
-                                                <th style={{minWidth: '200px'}}>Tên nhân viên</th>
-                                                <th className="text-end" style={{minWidth: '120px'}}>Số tiền</th>
-                                                <th style={{minWidth: '150px'}}>Hình thức thanh toán</th>
-                                                <th style={{minWidth: '120px'}}>Người tạo</th>
-                                                <th className="text-center" style={{minWidth: '80px'}}>Thao tác</th>
+                                                <th className="text-center" style={{ minWidth: '60px' }}>STT</th>
+                                                <th style={{ minWidth: '150px' }}>Mã thanh toán</th>
+                                                <th style={{ minWidth: '100px' }}>Ngày</th>
+                                                <th style={{ minWidth: '100px' }}>Mã NV</th>
+                                                <th style={{ minWidth: '200px' }}>Tên nhân viên</th>
+                                                <th className="text-end" style={{ minWidth: '120px' }}>Số tiền</th>
+                                                <th style={{ minWidth: '150px' }}>Hình thức thanh toán</th>
+                                                <th style={{ minWidth: '120px' }}>Người tạo</th>
+                                                <th className="text-center" style={{ minWidth: '80px' }}>Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -404,16 +413,16 @@ const PaymentReport = () => {
                                                     <td>{item.staff_code}</td>
                                                     <td>{item.staff_name}</td>
                                                     <td className="text-end">
-                                                        {new Intl.NumberFormat('vi-VN', { 
-                                                            style: 'currency', 
-                                                            currency: 'VND' 
+                                                        {new Intl.NumberFormat('vi-VN', {
+                                                            style: 'currency',
+                                                            currency: 'VND'
                                                         }).format(item.amount)}
                                                     </td>
                                                     <td>{item.payment_method}</td>
                                                     <td>{item.created_by}</td>
                                                     <td className="text-center">
-                                                        <Button 
-                                                            variant="link" 
+                                                        <Button
+                                                            variant="link"
                                                             onClick={() => handleShowTickets(item)}
                                                             title="Xem chi tiết"
                                                         >
@@ -425,13 +434,13 @@ const PaymentReport = () => {
                                         </tbody>
                                     </Table>
                                 </div>
-                                
+
                                 {data.length > 0 && (
                                     <div className="pagination-container p-3 bg-white border-top">
                                         <div className="d-flex align-items-center">
                                             <Form.Group className="rp-form-group d-flex align-items-center me-3">
                                                 <Form.Label className="me-2 mb-0">Hiển thị:</Form.Label>
-                                                <Form.Select 
+                                                <Form.Select
                                                     className="rp-form-select"
                                                     value={itemsPerPage}
                                                     onChange={handlePageSizeChange}
